@@ -1,0 +1,247 @@
+{
+    "navbar": {
+        "logout": {
+            "about": "About Us",
+            "research": "Research"
+        },
+        "admin": {
+            "dashboard": "Dashboard",
+            "data": "Data",
+            "show_data": "Publish Data",
+            "users": "Users"
+        }
+    },
+
+    "footer": {
+        "rights": "All rights reserved",
+        "about": "About",
+        "contact": "Contact us"
+    },
+
+    "login": {
+        "find_out_more": "Find out more",
+        "diference": "Start making a difference now.",
+        "difficult": "Having trouble logging in? Click 'Find out more' for assistance and guidance.",
+        "welcome": "Welcome",
+        "make_login": "Log in quickly and securely with your Facebook, GitHub, or Google credentials to start exploring all the possibilities that Save offers.",
+        "facebook": "Continue with Facebook",
+        "google": "Continue with Google",
+        "github": "Continue with GitHub",
+        "egress": "Egress",
+        "manager": "Manager"
+    },
+    "access": {
+        "request": "Request Access",
+        "request_text": "You currently do not have access to SAVE. Fill in your details to get access.",
+        "label": {
+            "name": "Full Name",
+            "institute": "Educational Institution",
+            "email": "Email",
+            "phone": "Phone"
+        },
+        "placeholder": {
+            "name": "Your full name",
+            "institute": "Educational Institution",
+            "email": "Your email, ex: johndoe@email.com",
+            "phone": "Your phone, ex: (XX) XXXXX-XXXX"
+        },
+        "success": "Request sent successfully!"
+    },
+    "admin": {
+        "dashboard": {
+            "filters": {
+                "draft": "Drafting",
+                "active": "Active",
+                "finished": "Finished",
+                "results": "View results",
+                "delete": "Delete"
+
+            },
+            "delete_error": "An error occurred while deleting the survey.",
+            "delete_success": "Survey deleted successfully.",
+            "create-button": "Create Survey",
+            "time_ago": "ago",
+            "edit": "Edit",
+            "delete": "Delete",
+            "duplicate": "Duplicate",
+            "title": "Welcome to SAVE!",
+            "subtitle": "Explore, manage, and track the progress of your open surveys and see those already completed. In addition, create new surveys, all in one place."
+        },
+        "groups": {
+            "header": {
+                "title": "manage participants",
+                "description": "Here, you can organize effectively to ensure your survey reaches the right people."
+            },
+            "placeholder": {
+                "button_text": "Add new group"
+            },
+            "body": {
+                "text": "Groups",
+                "searchbar_placeholder": "Search"
+            },
+            "dropdown": {
+                "view_participants": "View participants",
+                "edit": "Edit",
+                "duplicate": "Duplicate",
+                "delete": "Delete"
+            }
+        },
+        "create": {
+            "header": {
+                "title": "Manage participants",
+                "description": "Create custom groups based on specific criteria, such as interests, demographics, or any other relevant factor."
+            },
+            "section": {
+                "title": "Start Here: Fill in your group's initial details.",
+                "group_name": "Group name:",
+                "description": "Description:",
+                "continue": "continue",
+                "return": "return"
+            },
+            "second_section": {
+                "title": "Add participants to your group by importing from CSV or via email.",
+                "name": "Name",
+                "email": "Email",
+                "cpf": "Cpf",
+                "add_validation": "Add Validation",
+                "add_participants": "Add Participants",
+                "participants_list": "Participant List",
+                "import_participants": "Import Participants",
+                "added_participants": "Added Participants",
+                "search_users_placeholder": "No participants added"
+            },
+            "modal": {
+                "import_participants_csv": "Import participants via CSV.",
+                "description": "Each line of the CSV file must contain the information of a single participant, the first column being their full name followed by a semicolon (;) and the second column their email address. Access the example",
+                "description_here": "Here.",
+                "add_file": "Click to insert file (X MB max)",
+                "import": "Import", 
+                "cancel": "Cancel",
+                "uploading": "Uploading..."
+            },
+            "second_modal": {
+                "title": "Instructions for CSV format",
+                "description": "The CSV format for graduate prototypes must follow the structure below:",
+                "description_1": "-In the first column, enter the graduate's full name, followed by a semicolon (;).",
+                "description_2": "-In the second column, enter the graduate's email address.",
+                "example": "Example:",
+                "example_1": "Maria Helena Campos; mariaHelenaCampos@gmail.com",
+                "example_2": "Carla Lima Garcia; carlaLimaGarcia@gmail.com",
+                "example_3": "Luís Gomes da Silva; luisGomesSilva@gmail.com"
+            }
+        },
+        "survey": {
+            "create": {
+                "title": "Profile of Graduates of Computing Courses at Unipampa",
+                "description": {
+                    "max": "Maximum of 500 characters",
+                    "placeholder": "This questionnaire aims to collect information about the profile of..."
+                },
+                "finish": "Finish",
+                "preview": "Preview",
+                "add_page": "Add Page",
+                "config": {
+                    "title": "Configuration",
+                    "required": "Required",
+                    "dependet": "Dependent",
+                    "name_about": "Name is an attribute responsible for giving an identity to the question. Through it we can create and manage its interactions, with other questions, and graphs.",
+                    "name_title": "Name",
+                    "option_value": "Option Value"
+                }
+            },
+            "manage": {
+                "add_question": "Add Question",
+                "database_question": {
+                    "title": "Add from the question bank",
+                    "select_dimension": "Select a dimension",
+                    "add_questions": "Add questions to the questionnaire",
+                    "select_all": "Select all"
+                }
+            },
+            "user": {
+                "title": "Profile of Graduates from Unipampa's Computing Courses",
+                "description": "Stay informed about the progress of active surveys by viewing participants and the number of completions.",
+                "survey_status": "Open responses: accepting contributions",
+                "participants": "Participating in the survey",
+                "completed": "Completed so far"
+            },
+            "complete": {
+                "title": "New Survey",
+                "description": "Customize your survey by defining title, description and dates.",
+                "title_label": "Title",
+                "description_label": "Description",
+                "duration_label": "Duration",
+                "open_date_label": "Start",
+                "close_date_label": "End",
+                "complete_label": "When complete survey",
+                "finish": "Finish",
+                "users": "Import Users (csv)",
+                "date1": "The opening date cannot be earlier than the current date.",
+                "date2": "The closing date cannot be earlier than the opening date.",
+                "date3": "The closing date must be greater than or equal to the opening date."
+            }
+        },
+        "data_catalogue": {
+            "visualize_data": "View survey data",
+            "informations": "Discover a wealth of information about graduates' academic journeys and use these insights to strengthen the educational excellence of university courses",
+            "recently_open": "Recently opened reports",
+            "reports": "Available reports",
+            "click_reports": "Click 'View' to view informative graphical data.",
+            "view_button": "View"
+        }
+    },
+    "textarea": {
+        "characters": "characters"
+    },
+    "select": {
+        "placeholder": "Select an option"
+    },
+    "user" : {
+        "dashboard" : {
+            "welcome_name": "Hello, ",
+            "welcome_user": "Welcome to the Save platform! Share your knowledge and experience by answering the surveys available to you.",
+            "recently":"Recently open surveys",
+            "button_continue": "Continue",
+            "button_star": "Start",
+            "avaliable": "Avaliable surveys",
+            "click": "Click 'Start' to answer the survey",
+            "situation": "Situation: ",
+            "error": {
+                "available_date": "Date not available"     
+            }
+        },
+        "survey": {
+            "sidebar": {
+                "title": "Menu"
+            }
+        }
+    },
+  "about": {
+    "title": "Facilitate Academic Data Management",
+    "description": "Collecting, analyzing and presenting graduate data has never been so simple. Find out how to simplify and streamline this task now",
+    "button": "Start",
+    "connecting": "Connecting Graduates and Managers",
+    "connecting_text": "Enrich the academic experience and promote educational growth",
+    "university": "University Graduates",
+    "university_text": "Opportunity to share your academic and professional experiences through questionnaires",
+    "educational": "Educational institution managers",
+    "educational_results": "Managers of educational institutions can use the results and insights obtained by SAVE to make decisions related to improving courses.",
+    "explore": "Explore the research",
+    "clicking_view": "By clicking on the View button, you will be taken to the graphs generated by the questionnaires.",
+    "see": "See",
+    "academic_future": "Connect with the academic future, share insights and contribute to course improvement.",
+    "authentication": "We make it easy to access Save with authentication via Google, Facebook or GitHub. Choose your preferred platform and join our community. Let’s build a better educational future together!",
+    "learn_more": "Learn more"
+  },
+
+  "public_data": {
+    "title": "Making Information Available to the Public",
+    "customize": "Customize the visualization of data that will be accessible to the general public.",
+    "preview": "Preview",
+    "share": "Ready to share? Select the charts that will be displayed publicly."
+  },
+
+  "404": {
+    "error": "404 - Page not found"
+  }
+}

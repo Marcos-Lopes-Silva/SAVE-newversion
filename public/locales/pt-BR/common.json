@@ -1,0 +1,253 @@
+{
+    "navbar": {
+        "logout": {
+            "about": "Quem Somos",
+            "research": "Pesquisas"
+        },
+        "admin": {
+            "dashboard": "Gerenciar Questionários",
+            "data": "Visualizar Dados",
+            "show_data": "Publicar Dados",
+            "users": "Gerenciar Participantes"
+        }
+    },
+    "footer": {
+        "rights": "Todos os direitos reservados",
+        "about": "Sobre",
+        "contact": "Contate-nos"
+    },
+    "login": {
+        "find_out_more": "Saiba mais",
+        "diference": "Comece a fazer a diferença agora mesmo.",
+        "difficult": "Dificuldade para fazer login? Clique em 'Saiba Mais' para obter assistência e orientações.",
+        "welcome": "Bem-vindo",
+        "make_login": "Faça login de forma rápida e segura com suas credenciais do Facebook, GitHub ou Google para começar a explorar todas as possibilidades que o Save oferece.",
+        "facebook": "Continue com Facebook",
+        "google": "Continue com Google",
+        "github": "Continue com GitHub",
+        "egress": "Egresso",
+        "manager": "Gestor"
+    },
+    "access": {
+        "request": "Solicite Acesso",
+        "request_text": "No momento você não possui acesso ao SAVE. Preencha seus dados para obter o acesso.",
+        "label": {
+            "name": "Nome Completo",
+            "institute": "Instituição de Ensino",
+            "email": "E-mail",
+            "phone": "Telefone"
+        },
+        "placeholder": {
+            "name": "Seu nome completo",
+            "institute": "Instituição de Ensino",
+            "email": "Seu e-mail, ex: johndoe@email.com",
+            "phone": "Seu telefone, ex: (XX) XXXXX-XXXX"
+        },
+        "success": "Solicitação enviada com sucesso!"
+    },
+    "admin": {
+        "dashboard": {
+            "filters": {
+                "draft": "Em construção",
+                "active": "Ativo",
+                "finished": "Concluído",
+                "results": "Ver resultados",
+                "delete": "Excluir"
+            },
+            "delete_error": "Ocorreu um erro ao deletar o questionário.",
+            "delete_success": "Questionário deletado com sucesso.",
+            "create-button": "Criar Questionário",
+            "time_ago": "atrás",
+            "edit": "Editar",
+            "delete": "Deletar",
+            "duplicate": "Duplicar",
+            "title": "Bem vindo ao SAVE!",
+            "subtitle": "Explore e gerencie e acompanhe o progresso dos seus questionários abertos e veja os já concluídos. Além disso, crie novos questionários, tudo em um só lugar."
+        },
+        "groups": {
+            "header": {
+                "title": "Gerenciar participantes",
+                "description": "Aqui, você pode organizar de forma eficaz para garantir que seu questionário alcance as pessoas certas."
+            },
+            "placeholder": {
+                "button_text": "Adicionar novo grupo"
+            },
+            "body": {
+                "text": "Grupos",
+                "searchbar_placeholder": "Pesquisar"
+            },
+            "dropdown": {
+                "view_participants": "Visualizar participantes",
+                "edit": "Editar",
+                "duplicate": "Duplicar",
+                "delete": "Excluir"
+            }
+        },
+        "create": {
+            "header": {
+                "title": "Gerenciar participantes",
+                "description": "Crie grupos personalizados com base em critérios especificos, como interesses, demografia, ou qualquer outro fator relevante."
+            },
+            "section": {
+                "title": "Comece Aqui: Preencha os detalhes iniciais do seu grupo.",
+                "group_name": "Nome do grupo:",
+                "description": "Descrição:",
+                "continue": "continue",
+                "return": "voltar"
+            },
+            "second_section": {
+                "title": "Adicione participantes ao seu grupo importando vai CSV ou por e-mail.",
+                "name": "Nome",
+                "email": "Email",
+                "cpf": "Cpf",
+                "add_validation": "Adicionar Validação",
+                "add_participants": "Adicionar Participantes",
+                "participants_list": "Lista de Participantes",
+                "import_participants": "Importar Participantes",
+                "added_participants": "Participantes Adicionados",
+                "search_users_placeholder": "Nenhum participante adicionado"
+            },
+            "modal": {
+                "import_participants_csv": "Importe participantes via CSV.",
+                "description": "Cada linha do arquivo CSV deve conter a informação de um único participante, sendo a primeira coluna o seu nome completo seguido de ponto e vírgula (;) e na segunda coluna seu endereço de e-mail. Acesse o exemplo",
+                "description_here": "Aqui.",
+                "add_file": "Clique para inserir o arquivo (X MB máx)",
+                "import": "Importar",
+                "cancel": "Cancelar",
+                "uploading": "Carregando..."
+            },
+            "second_modal": {
+                "title": "Instruções para o formato CSV",
+                "description": "O formato CSV para o protótipos de egressos deve seguir a estrutura abaixo:",
+                "description_1": "-Na primeira coluna, insira o nome completo do egresso, seguido de ponto e vírgula (;).",
+                "description_2": "-Na segunda coluna, insira o endereço de e-mail do egresso.",
+                "example": "Exemplo:",
+                "example_1": "Maria Helena Campos; mariaHelenaCampos@gmail.com",
+                "example_2": "Carla Lima Garcia; carlaLimaGarcia@gmail.com",
+                "example_3": "Luís Gomes da Silva; luisGomesSilva@gmail.com"
+            }
+        },
+        "survey": {
+            "create": {
+                "title": "Perfil dos Egressos dos Cursos de Computação da Unipampa",
+                "description": {
+                    "max": "Máximo de 500 caracteres",
+                    "placeholder": "Este questionário tem como objetivo coletar informações sobre o perfil dos..."
+                },
+                "finish": "Finalizar",
+                "preview": "Visualizar",
+                "add_page": "Adicionar Página",
+                "config": {
+                    "title": "Configurações",
+                    "required": "Obrigatório",
+                    "dependent": "Questão dependente",
+                    "name_about": "Name é um atributo responsável por dar uma identidade a questão. Através dele podemos criar e gerenciar suas interações, com outras questões, e gráficos.",
+                    "name_title": "Sobre o nome",
+                    "option_value": "Valor das opções",
+                    "error": {
+                        "options": "São necessárias pelo menos uma opção.",
+                        "name": "O nome é obrigatório."
+                    }
+                }
+            },
+            "manage": {
+                "add_question": "Adicionar Questão",
+                "database_question": {
+                    "title": "Adicionar do banco de questões",
+                    "select_dimension": "Selecione uma dimensão",
+                    "add_questions": "Adicionar questões ao questionário",
+                    "select_all": "Selecionar todas"
+                }
+            },
+            "user": {
+                "title": "Perfil dos Egressos dos Cursos de Computação da Unipampa",
+                "description": "Mantenha-se informado sobre o progresso dos questionários ativos, visualizando os participantes e o número de conclusões.",
+                "survey_status": "Respostas abertas: aceitando contribuições",
+                "participants": "Participando do questionário",
+                "completed": "Concluiram até o momento"
+            },
+            "complete": {
+                "title": "Novo questionário",
+                "description": "Personalize seu questionário definindo título, descrição e datas.",
+                "title_label": "Título",
+                "description_label": "Descrição",
+                "duration_label": "Duração",
+                "open_date_label": "Data de abertura",
+                "close_date_label": "Data de fechamento",
+                "complete_label": "Ao completar o questionário",
+                "finish": "Concluído",
+                "users": "Importar Participantes (csv)",
+                "date1": "A data de abertura não pode ser anterior à data atual.",
+                "date2": "A data de fechamento não pode ser anterior à data atual.",
+                "date3": "A data de fechamento deve ser posterior ou igual à data de abertura."
+            },
+            "question": {
+                "city": "Cidade",
+                "state": "Estado",
+                "country": "País"
+            }
+        },
+        "data_catalogue": {
+            "visualize_data": "Visualize os dados dos questionários",
+            "informations": "Descubra uma riqueza de informações sobre as jornadas acadêmicas dos egressos e utilize esses insights para fortalecer a excelência educacional dos cursos universitários",
+            "recently_open": "Relatórios abertos recentemente",
+            "reports": "Relatórios disponíveis",
+            "click_reports": "Clique em 'ver' para visualizar os dados gráficos informativos.",
+            "view_button": "Ver"
+        }
+    },
+    "textarea": {
+        "characters": "caracteres"
+    },
+    "select": {
+        "placeholder": "Selecione...",
+        "no_options": "Nenhuma opção encontrada",
+        "loading": "Carregando..."
+    },
+    "user": {
+        "dashboard": {
+            "welcome_name": "Olá, ",
+            "welcome_user": "Bem-vindo à plataforma Save! Compartilhe seu conhecimento e experiência respondendo aos questionários disponíveis para você.",
+            "recently": "Questionários abertos recentemente",
+            "button_continue": "Continuar",
+            "button_start": "Começar",
+            "avaliable": "Questionários disponíveis",
+            "click": "Clique em 'Começar' para responder o questionário",
+            "situation": "Situação: ",
+            "error": {
+                "available_date": "Data não disponível"
+            }
+        },
+        "survey": {
+            "sidebar": {
+                "title": "Menu"
+            }
+        }
+    },
+    "about": {
+        "title": "Facilite a Gestão de Dados Acadêmicos.",
+        "description": "Coleta, análise e apresentação de dados de egressos nunca foram tão simples. Descubra como simplificar e agilizar essa tarefa agora.",
+        "button": "Iniciar",
+        "connecting": "Conectando Egressos e Gestores",
+        "connecting_text": "Enriqueça a experiência acadêmica e promova o crescimento educacional",
+        "university": "Egressos Universitários",
+        "university_text": "Oportunidade de compartilhar suas experiências acadêmicas e profissionais por meio de questionários.",
+        "educational": "Gestores de instituições de ensino",
+        "educational_results": "Os gestores das instituições de ensino podem utilizar os resultados e insights obtidos pelo SAVE para tomar decisões relacionadas à melhoria dos cursos.",
+        "explore": "Explore as pesquisas",
+        "clicking_view": "Ao clicar no botão Ver, você será conduzido aos gráficos gerados pelos questionários",
+        "see": "Ver",
+        "academic_future": "Conecte-se ao futuro acadêmico, compartilhe insights e contribua para o aprimoramento dos cursos",
+        "authentication": "Facilitamos o acesso ao Save com autenticação via Google, Facebook ou GitHub. Escolha a plataforma de sua preferência e junte-se à nossa comunidade. Vamos construir juntos um futuro educacional melhor!",
+        "learn_more": "Ver mais"
+    },
+    "public_data": {
+        "title": "Disponibilizando Informações ao Público",
+        "customize": "Personalize a visualização dos dados que serão acessíveis aopúblico em geral.",
+        "preview": "Preview",
+        "share": "Pronto para compartilhar? Selecione os gráficos que serão exibidos publicamente."
+    },
+    "404": {
+        "error": "404 - Página não encontrada"
+    }
+}
