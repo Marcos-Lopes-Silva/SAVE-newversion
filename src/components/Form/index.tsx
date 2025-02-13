@@ -5,6 +5,7 @@ import { Input } from "./Input"
 import { Label } from "./Label"
 import { TextArea } from "./TextArea"
 import { RatingScale } from "./RatingScale"
+import { MaskedInput } from "./MaskedInput"
 
 const Date = dynamic(
     () => import('./Date').then(mod => mod.Date),
@@ -18,5 +19,6 @@ export const Form = {
     TextArea,
     ErrorMessage,
     Date,
+    MaskedInput,
     RatingScale
 }

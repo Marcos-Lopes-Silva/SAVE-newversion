@@ -9,17 +9,17 @@ import { t } from "i18next"
 
 export default function About() {
   return (
-    <section className="px-20 flex flex-col items-center gap-20">
-      <div className="flex ">
-        <div className="px-7 py-36 flex flex-col gap-3">
+    <section className="px-5 lg:px-20 flex flex-col items-center gap-10 lg:gap-20">
+      <div className="flex flex-col lg:flex-row">
+        <div className="px-7 py-16 lg:py-36 flex flex-col gap-3">
           <div className="px-3">
             <div className="w-20 h-1 rounded-lg bg-zinc-800 "></div>
           </div>
           <div className="w-20 h-1 rounded-lg bg-zinc-800"></div>
-          <h2 className="font-semibold text-2xl">
+          <h2 className="font-semibold text-xl lg:text-2xl">
             {t('about.title')}
           </h2>
-          <p className="pr-10 text-zinc-700 text-lg">
+          <p className="pr-10 text-zinc-700 text-base lg:text-lg">
             {t('about.description')}
           </p>
           <div>
@@ -28,31 +28,31 @@ export default function About() {
             </button>
           </div>
         </div>
-        <Image className="px-12 py-5" src={ImageChart} alt="chart" />
+        <Image className="px-12 lg:py-12" src={ImageChart} alt="chart" />
       </div>
-      <div className="px-3">
-        <h2 className="font-semibold text-2xl text-center">
+      <div className="px-3 mt-10 -mb-10 lg:-mt-10">
+        <h2 className="font-semibold text-xl lg:text-2xl text-center">
           {t('about.connecting')}
         </h2>
-        <p className="text-zinc-700 text-lg text-center">
+        <p className="text-zinc-700 text-base lg:text-lg text-center">
           {t('about.connecting_text')}
         </p>
       </div>
-      <div className="flex items-center justify-center gap-14 py-10">
-        <div className="flex flex-col ">
-          <div className="rounded-lg shadow-md bg-[#ECEFF5] px-14 py-14 ">
-            <div className="rounded-lg shadow-md bg-white px-16 py-11 max-w-80 flex flex-col gap-7 items-center">
-              <Image className="px-3 " src={ImageEgresso} alt="egresso" />
-              <div className=" font-semibold">{t('about.university')}</div>
+      <div className="flex flex-col lg:flex-row items-center justify-center gap-10 lg:gap-14 py-10 lg:-mt-7">
+        <div className="flex flex-col">
+          <div className="rounded-lg shadow-md bg-[#ECEFF5] px-7 py-10 lg:px-14 lg:py-14">
+            <div className="rounded-lg shadow-md bg-white px-7 py-14 lg:px-16 lg:py-16 max-w-80 flex flex-col gap-8 items-center">
+              <Image className="px-3" src={ImageEgresso} alt="egresso" />
+              <div className="font-semibold">{t('about.university')}</div>
               <p className="text-center">
                 {t('about.university_text')}
               </p>
             </div>
           </div>
         </div>
-        <div className="rounded-lg shadow-md bg-[#ECEFF5] px-12 py-12 ">
-          <div className="rounded-lg shadow-md bg-white px-14 py-11 max-w-80 flex flex-col gap-3 items-center ">
-            <Image className="px-3 " src={ImageGestor} alt="gestor" />
+        <div className="rounded-lg shadow-md bg-[#ECEFF5] px-7 py-10 lg:px-12 lg:py-12">
+          <div className="rounded-lg shadow-md bg-white px-7 py-7 lg:px-16 lg:py-10 max-w-80 flex flex-col gap-4 items-center">
+            <Image className="px-3" src={ImageGestor} alt="gestor" />
             <div className="text-center font-semibold">
               {t('about.educational')}
             </div>
@@ -62,26 +62,26 @@ export default function About() {
           </div>
         </div>
       </div>
-      <div className="w-3/4 h-[250px] bg-[#ECEFF5] rounded-tr-lg rounded-bl-lg rounded-br-full rounded-tl-full shadow-lgl items-center flex">
-        <div className="z-10 relative bottom-11 ">
+      <div className="w-full lg:w-3/4 h-[185px] bg-[#ECEFF5] rounded-tr-lg rounded-bl-lg rounded-br-full rounded-tl-full shadow-lgl items-center flex lg:mt-10">
+        <div className="z-10 relative">
           <Image src={ImageGraphic} alt="graphic" />
         </div>
-        <div className="pr-20 pb-34 pl-20 justify-center flex gap-2 flex-col">
-          <h2 className="font-semibold text-2xl">{t('about.explore')}</h2>
-          <p className="text-lg  text-start">
+        <div className="pr-16 lg:pr-20 lg:pb-34 pl-10 lg:pl-20 justify-center flex gap-2 flex-col">
+          <h2 className="font-semibold text-xl lg:text-2xl">{t('about.explore')}</h2>
+          <p className="text-sm lg:text-lg text-start">
             {t('about.clicking_view')}
           </p>
-          <button className="bg-black text-white rounded-lg w-20   ">
+          <button className="bg-black text-white rounded-lg w-20 mb-2">
             {t('about.see')}
           </button>
         </div>
       </div>
-      <div className="flex pr-24 ">
-        <div className="px-7 py-5 flex flex-col gap-3 items-start">
-          <h2 className="font-semibold text-2xl text-start">
+      <div className="flex flex-col lg:flex-row pr-5 lg:pr-24">
+        <div className="px-7 py-5 flex flex-col gap-3 items-start lg:mt-16">
+          <h2 className="font-semibold text-xl lg:text-2xl text-start">
             {t('about.academic_future')}
           </h2>
-          <p className="pr-10 text-zinc-700 text-lg">
+          <p className="pr-10 text-zinc-700 text-base lg:text-lg">
             {t('about.authentication')}
           </p>
           <div>

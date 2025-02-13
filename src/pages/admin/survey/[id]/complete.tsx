@@ -7,7 +7,7 @@ import { z } from "zod";
 import Survey, { ISurveyDocument } from "../../../../../models/surveyModel";
 import Papa from 'papaparse';
 import { useEffect, useState } from "react";
-import { Button, getKeyValue, Pagination, Select, SelectItem, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@nextui-org/react";
+import { Button, getKeyValue, Pagination, Select, SelectItem, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip } from "@nextui-org/react";
 import { useTranslation } from "react-i18next";
 import mongoose from "mongoose";
 import Group, { IGroupDocument, IUsers } from "../../../../../models/groupModel";
@@ -16,7 +16,8 @@ import { toast } from "react-toastify";
 import { createGroup } from "@/lib/group";
 import Note from "@/components/layout/Note";
 import ImageExample from "@/static/images/exemple_list.webp";
-import { useRouter } from "next/router";
+import Image from "next/image";
+import { FaQuestionCircle } from "react-icons/fa";
 
 const currentDate = new Date().toISOString().split('T')[0];
 
@@ -59,7 +60,6 @@ interface IAdditionalColumns {
 export default function CompleteCreation({ survey, groups }: Props) {
 
     const { t } = useTranslation();
-    const { push } = useRouter();
 
     const [additionalColumn, setAdditionalColumns] = useState<IAdditionalColumns[]>([]);
     const [users, setUsers] = useState<IUsers[]>([]);
@@ -217,7 +217,18 @@ export default function CompleteCreation({ survey, groups }: Props) {
                         </Form.Field>
 
                         <Form.Field>
-                            <Form.Label htmlFor="csvUpload">{t('admin.survey.complete.users')} <Note title="Adicionando pessoas ao survey." message="Para você adicionar os respondentes siga o padrão abaixo." image={ImageExample} size={24} imageWidth={900} imageHeight={800} /></Form.Label>
+                            <Form.Label htmlFor="csvUpload">{t('admin.survey.complete.users')}
+                                <Tooltip
+                                    content={
+                                        <div className="flex flex-col gap-2 items-center">
+                                            <h4>Adicionando Egressos ao questionário.</h4>
+                                            <div className="flex flex-col gap-2">
+                                                <p>Para você adicionar os respondentes siga o padrão abaixo.</p>
+                                                <Image src={ImageExample} alt="Imagem de Exemplo" width={800} />
+                                            </div>
+                                        </div>
+                                    } title="Adicionando pessoas ao survey."><FaQuestionCircle size={20} /></Tooltip>
+                            </Form.Label>
                             <Form.Input
                                 variant="underlined"
                                 type="file"

@@ -1,4 +1,4 @@
-import { button, Button, Popover, PopoverContent, PopoverTrigger } from "@nextui-org/react";
+import { Button, Popover, PopoverContent, PopoverTrigger } from "@nextui-org/react";
 import { useState } from "react";
 import { MdMoreHoriz } from "react-icons/md";
 import { truncateText } from "@/lib/utils/truncate";
@@ -22,9 +22,6 @@ interface Item {
 
 export default function Item<T extends Item>({ options, item, icon, menu, buttonLabel, action, ...props }: Props<T>) {
     const [show, setShow] = useState<boolean>(false);
-
-
-
 
     return (
         <li className={`${props.className}`} {...props}>

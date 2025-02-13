@@ -13,27 +13,29 @@ export default function Footer() {
     };
 
     return (
-        <footer className="w-full static bottom-0 flex mt-14 gap-96 py-24 bg-zinc-900">
-            <div className="pl-24 flex flex-col gap-5">
-                <p className="text-sm text-white ">Copyright @ 2023 SAVE itd.</p>
-                <p className="text-sm text-white ">{t('footer.rights')}</p>
+        <footer className="w-full static bottom-0 flex flex-col mt-10 py-12 bg-zinc-900 text-white md:py-8 lg:flex-row lg:justify-between lg:py-24 lg:px-32 align-middle">
+            <div className="flex flex-col items-center gap-2 mb-4 md:mb-0 lg:items-start lg:mb-0">
+                <p className="text-xl font-semibold">SAVE</p>
+                <p className="text-sm text-center lg:text-left">{t('footer.about')}</p>
+                <p className="text-sm text-center lg:text-left" onClick={sendEmail}>{t('footer.contact')}</p>
             </div>
-            <div className="flex flex-col gap-5">
-                <p className="-mt-12 text-white text-xl font-semibold">SAVE</p>
-                <p className="text-sm text-white ">{t('footer.about')}</p>
-                <p className="text-sm text-white ">{t('footer.contact')}</p>
-            </div>
-            <div className="flex gap-4">
-                <div className="bg-white rounded-full py-2 px-2 h-10">
-                    <FaFacebook size={25} />
+
+            <div className="flex justify-center gap-4 mt-6 mb-4 md:mb-0 lg:mb-0">
+                <div className="rounded-full py-2 px-2 h-10">
+                    <FaFacebook color="white" size={25} />
                 </div>
-                <div className="bg-white rounded-full py-2 px-2 h-10">
+                <div className="rounded-full py-2 px-2 h-10">
                     <FaInstagram size={25} />
                 </div>
-                <div className="bg-white rounded-full py-2 px-2 h-10">
+                <div className="rounded-full py-2 px-2 h-10">
                     <FaTwitter size={25} />
                 </div>
             </div>
-        </footer >
+
+            <div className="flex flex-col items-center gap-2 text-sm md:flex-row md:justify-center lg:flex-col lg:items-end">
+                <p className="text-center lg:text-right">Copyright @ 2023 SAVE itd.</p>
+                <p className="text-center lg:text-right">{t('footer.rights')}</p>
+            </div>
+        </footer>
     )
 }

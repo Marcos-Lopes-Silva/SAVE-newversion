@@ -3,7 +3,6 @@ import { IUser, IUserDocument } from "./userModel";
 import { string } from "zod";
 
 export interface IOption {
-  id: number;
   value: string;
   label: string;
 }
@@ -14,21 +13,21 @@ export interface IRow {
 }
 
 export interface IQuestion {
-    id: number,
-    title: string,
-    name: string,
-    type: "text" | "radio" | "checkbox" | "date" | "number" | "select" | "textarea" | "dropdown" | "rating" | 'table',
-    options?: Array<IOption>, 
-    rows?: Array<IRow>,  // New property for table type
-    required: boolean,
-    placeholder?: string,
-    other?: boolean,
-    region?: boolean,
-    dependsOn?: string,
-    dependsValue?: string,
-    dependsOnOptions?: Array<IOption>,
-    dependsOnValue?: string,
-    dependsOnType?: "radio" | "checkbox" | "select",
+  id: number,
+  title: string,
+  name: string,
+  type: "text" | "radio" | "checkbox" | "date" | "number" | "select" | "textarea" | "dropdown" | "rating" | 'table',
+  options?: Array<IOption>,
+  rows?: Array<IRow>,  // New property for table type
+  required: boolean,
+  placeholder?: string,
+  other?: boolean,
+  region?: boolean,
+  dependsOn?: string,
+  dependsValue?: string,
+  dependsOnOptions?: Array<IOption>,
+  dependsOnValue?: string,
+  dependsOnType?: "radio" | "checkbox" | "select",
 }
 
 export interface IPages {
@@ -39,16 +38,16 @@ export interface IPages {
 }
 
 export interface ISurvey {
-    title: string | "",
-    description: string | "",
-    author: string | null,
-    pages: Array<IPages>,
-    openDate: string,
-    endDate: string,
-    status: "draft" | "active" | "finished",
-    responses: number,
-    users: number,
-    completeMessage: string,
+  title: string | "",
+  description: string | "",
+  author: string | null,
+  pages: Array<IPages>,
+  openDate: string,
+  endDate: string,
+  status: "draft" | "active" | "finished",
+  responses: number,
+  users: number,
+  completeMessage: string,
 }
 
 export interface ISurveyDocument extends ISurvey, Document {
@@ -68,36 +67,36 @@ const rowSchema = new mongoose.Schema({
 });
 
 const questionSchema = new mongoose.Schema({
-    id: { type: Number, required: true },
-    title: { type: String, default: "" },
-    type: { type: String, enum: ["text", "radio", "checkbox", "date", "number", "select", "textarea", "rating", "dropdown", "table"], required: true },
-    name: { type: String, required: true },
-    options: [optionSchema],
-    rows: [rowSchema],  // New field for table type
-    required: { type: Boolean, required: true, default: false },
-    dependsOn: { type: String },
-    dependsValue: { type: String },
-    dependsOnOptions: [optionSchema],
-    dependsOnValue: { type: String },
-    dependsOnType: { type: String, enum: ["radio", "checkbox", "select"] },
+  id: { type: Number, required: true },
+  title: { type: String, default: "" },
+  type: { type: String, enum: ["text", "radio", "checkbox", "date", "number", "select", "textarea", "rating", "dropdown", "table"], required: true },
+  name: { type: String, required: true },
+  options: [optionSchema],
+  rows: [rowSchema],  // New field for table type
+  required: { type: Boolean, required: true, default: false },
+  dependsOn: { type: String },
+  dependsValue: { type: String },
+  dependsOnOptions: [optionSchema],
+  dependsOnValue: { type: String },
+  dependsOnType: { type: String, enum: ["radio", "checkbox", "select"] },
 });
 
 const pageSchema = new mongoose.Schema({
-    id: { type: Number, required: true },
-    title: { type: String, default: "" },
-    description: { type: String, default: "" },
-    questions: [questionSchema],
+  id: { type: Number, required: true },
+  title: { type: String, default: "" },
+  description: { type: String, default: "" },
+  questions: [questionSchema],
 });
 
 const surveySchema: mongoose.Schema = new mongoose.Schema<ISurveyDocument>(
   {
     title: {
-        type: String,
-        default: "",
+      type: String,
+      default: "",
     },
     description: {
-        type: String,
-        default: "",        
+      type: String,
+      default: "",
     },
     author: {
       type: String,
@@ -105,16 +104,16 @@ const surveySchema: mongoose.Schema = new mongoose.Schema<ISurveyDocument>(
       required: true,
     },
     pages: {
-        type: [pageSchema],
-        required: true,
+      type: [pageSchema],
+      required: true,
     },
     openDate: {
-        type: String,
-        default: new Date().toISOString(),
+      type: String,
+      default: new Date().toISOString(),
     },
     endDate: {
-        type: String,
-        default: new Date().toISOString(),
+      type: String,
+      default: new Date().toISOString(),
     },
     status: {
       type: String,
@@ -132,12 +131,12 @@ const surveySchema: mongoose.Schema = new mongoose.Schema<ISurveyDocument>(
       default: 0,
     },
     completeMessage: {
-        type: String,
-        default: "",
+      type: String,
+      default: "",
     },
-}, {
-    timestamps: true,
-  }
+  }, {
+  timestamps: true,
+}
 );
 
 const Survey: Model<ISurveyDocument> =

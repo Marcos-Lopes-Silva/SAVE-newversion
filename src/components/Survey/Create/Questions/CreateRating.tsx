@@ -18,13 +18,10 @@ export function CreateRating({ question, updateProp, syncSurvey }: QuestionProps
 
         if (options === undefined) return;
 
-        const sortedOptions = options.map(option => option.id).sort((a, b) => a - b);
-        const id = sortedOptions[sortedOptions.length - 1] > 0 ? sortedOptions[sortedOptions.length - 1] + 1 : 1;
-
         const updatedQuestion = {
             ...question, options: [
                 ...question.options === undefined ? [] : question.options,
-                { id: id, label: `Option ${id}`, value: id.toString() }]
+                { label: `Option ${question.options?.length!! + 1}`, value: `Option ${question.options?.length!! + 1}` }]
         };
 
         updateProp(updatedQuestion);
@@ -35,10 +32,7 @@ export function CreateRating({ question, updateProp, syncSurvey }: QuestionProps
 
         if (question.options === undefined || question.options?.length < 2) return;
 
-        const sortedOptions = question.options!!.map(option => option.id).sort((a, b) => a - b);
-        const id = sortedOptions[sortedOptions.length - 1] > 0 ? sortedOptions[sortedOptions.length - 1] + 1 : 1;
-
-        const updatedQuestion = { ...question, options: [...question.options?.filter(op => op.id != id - 1)] };
+        const updatedQuestion = { ...question, options: [...question.options?.filter((op, i) => i != question.options?.length)] };
         updateProp(updatedQuestion);
         syncSurvey(question);
     }
