@@ -1,4 +1,4 @@
-import mongoose, { Document, Model, ObjectId } from "mongoose";
+import mongoose, { Document, Model } from "mongoose";
 
 export interface ISurveyResult {
     surveyId: string,

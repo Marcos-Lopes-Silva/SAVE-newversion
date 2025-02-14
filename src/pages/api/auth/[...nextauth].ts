@@ -26,6 +26,7 @@ export default NextAuth({
 
         }),
     ],
+    secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
         async signIn({ user, account, profile, email, credentials }) {
             await connectToMongoDB();
@@ -70,19 +71,24 @@ export default NextAuth({
 
             return session;
         },
-        async jwt({ token, account }) {
+        async jwt({ token, user, account }) {
+            if (user) {
+                token.id = user.id;
+                token.email = user.email;
+                token.name = user.name;
+                token.picture = user.image;
+            }
 
             if (account?.provider === "google") {
                 const profileResponse = await fetch(
                     `https://people.googleapis.com/v1/people/me?personFields=birthdays`,
                     {
                         headers: {
-                            Authorization: `Bearer ${token.access_token}`,
+                            Authorization: `Bearer ${account.access_token}`,
                         },
                     }
                 );
                 const profileData = await profileResponse.json();
-                console.log(profileData);
                 const birthday = profileData.birthdays?.[0]?.date;
                 if (birthday) {
                     token.birthday = `${birthday.year}-${birthday.month}-${birthday.day}`;
@@ -90,6 +96,10 @@ export default NextAuth({
             }
 
             return token;
-        }
+        },
+    },
+    pages: {
+        signIn: '/',
+        signOut: '/'
     }
 })

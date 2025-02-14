@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import React, { useEffect } from "react"
 import { IPages, IQuestion, ISurvey } from "../../../../../models/surveyModel"
 import { updatePage } from "../../../../../redux/reducers";
 import { useAppDispatch } from "@/lib/hooks";
@@ -8,6 +8,8 @@ import { updatePageAndSync } from "../../../../../redux/thunk";
 import { setQuestionId } from "../../../../../redux/reducers/loading";
 import { useTranslation } from "react-i18next";
 import { getAllCountries } from "@/lib/utils/external";
+import { DndContext, closestCorners, DragEndEvent } from '@dnd-kit/core'
+import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
 
 interface Props {
     id: number,
@@ -15,9 +17,10 @@ interface Props {
     dispatch: ReturnType<typeof useAppDispatch>,
     data: ISurvey,
     surveyId?: string,
+    removePage: (id: number) => void
 }
 
-export default function Page({ id, page, dispatch, surveyId }: Props) {
+export default function Page({ id, page, dispatch, surveyId, removePage }: Props) {
 
     const { t } = useTranslation();
 
@@ -70,8 +73,23 @@ export default function Page({ id, page, dispatch, surveyId }: Props) {
         dispatch(updatePageAndSync(updatedPage, id, surveyId!!));
     }
 
-
     const updateProp = async (question: IQuestion) => {
+        if (question.options) {
+            question.options = question.options.map(option => {
+                const outroRegex = /^outro[:\s]*|outra[:\s]*|outro\s*\(.*\)$/i;
+                if (outroRegex.test(option.label)) {
+                    return { ...option, value: "outro" };
+                }
+                if (option.value === "outro") {
+                    return option;
+                }
+                return {
+                    ...option,
+                    value: option.label
+                    // .toLowerCase().replace(/ /g, '_').replace(/[^a-z0-9_]/g, ''),
+                };
+            });
+        }
         dispatch(setQuestionId(question.id));
         if (question.region) {
             const questionCountry: IQuestion = { title: t('admin.survey.question.country'), name: 'country', type: 'select', required: true, options: await getAllCountries(), id: question.id };
@@ -87,6 +105,8 @@ export default function Page({ id, page, dispatch, surveyId }: Props) {
         }
     }
 
+    
+
     const syncSurvey = (question: IQuestion) => {
         const updatedQuestions = page.questions.map(q => q.id === question.id ? question : q);
         dispatch(setQuestionId(question.id));
@@ -99,21 +119,65 @@ export default function Page({ id, page, dispatch, surveyId }: Props) {
         return dispatch(updatePageAndSync(updatedPage, id, surveyId!!));
     }
 
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (active.id !== over?.id) {
+            const oldIndex = page.questions.findIndex(q => q.id === active.id);
+            const newIndex = page.questions.findIndex(q => q.id === over?.id);
+
+            const newQuestions = arrayMove(page.questions, oldIndex, newIndex);
+            
+            const updatedQuestions = newQuestions.map((question, index) => ({
+                ...question,
+                id: index + 1,
+            }));
+
+            const updatedPage: IPages = { ...page, questions: updatedQuestions };
+            dispatch(updatePageAndSync(updatedPage, id, surveyId!!));
+        }
+    }
+
     useEffect(() => {
     }, [dispatch, page]);
 
     return (
         <section className="p-20 flex flex-col gap-6">
             <div className="flex flex-col gap-3 w-full">
-                <input type="text" value={page.title} className="w-2/3 px-3 py-1 outline-none rounded-lg border-2" placeholder={`Title ${id}`} onBlur={syncTitle}
-                    onChange={(e) => updatePageProps(e.target.value, 'title')} />
-                <input type="text" value={page.description} className="w-2/3 px-3 py-1 focus:outline-1 focus:outline-zinc-400  rounded-lg border-2" onBlur={syncTitle}
-                    onChange={(e) => updatePageProps(e.target.value, 'description')} />
+                <input 
+                    type="text" 
+                    value={page.title} 
+                    className="w-2/3 px-3 py-1 outline-none rounded-lg border-2" 
+                    placeholder={`Title ${id}`} 
+                    onBlur={syncTitle}
+                    onChange={(e) => updatePageProps(e.target.value, 'title')} 
+                />
+                <input 
+                    type="text" 
+                    value={page.description} 
+                    className="w-2/3 px-3 py-1 focus:outline-1 focus:outline-zinc-400 rounded-lg border-2" 
+                    onBlur={syncTitle}
+                    onChange={(e) => updatePageProps(e.target.value, 'description')} 
+                />
             </div>
-            {page.questions.map((question, index) => (
-                <Question key={index} idPage={id} question={question} deleteProp={deleteProp} questions={page.questions} duplicateProp={duplicateProp} updateProp={updateProp} syncSurvey={syncSurvey} />
-            ))}
+            <DndContext collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
+                <SortableContext items={page.questions} strategy={verticalListSortingStrategy}>
+                    {page.questions.map((question) => (
+                        <Question 
+                            key={question.name} 
+                            idPage={id} 
+                            question={question} 
+                            deleteProp={deleteProp} 
+                            questions={page.questions} 
+                            duplicateProp={duplicateProp} 
+                            updateProp={updateProp} 
+                            syncSurvey={syncSurvey} 
+                        />
+                    ))}
+                </SortableContext>
+            </DndContext>
             <Button className="w-1/6 border-2 rounded-3xl" variant="tertiary" onClick={handleAddQuestion}>+</Button>
+            <Button className="w-1/6 border-2 rounded-3xl" variant="tertiary" onClick={() => removePage(id)}>{t('admin.survey.page.delete')}</Button>
         </section>
     )
 }

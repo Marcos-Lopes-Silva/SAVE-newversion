@@ -16,35 +16,28 @@ export function CreateRadio({ question, updateProp, syncSurvey }: QuestionProps)
         updateProp(updatedQuestion);
     }
 
-    const handleBlur = () => {
-        syncSurvey(question);
-    }
-
     const add = () => {
         const options = question.options == undefined ? [] : question.options;
 
         if (options === undefined) return;
 
-        const sortedOptions = options!!.map(option => option.id).sort((a, b) => a - b);
-        const id = sortedOptions[sortedOptions.length - 1] > 0 ? sortedOptions[sortedOptions.length - 1] + 1 : 1;
-
         const updatedQuestion = {
             ...question, options: [
                 ...question.options === undefined ? [] : question.options,
-                { id: id, label: "Option", value: id.toString() }]
+                { label: `Option ${question.options?.length!! + 1}`, value: `Option ${question.options?.length!! + 1}` }]
         };
         updateProp(updatedQuestion);
         syncSurvey(updatedQuestion);
     }
 
-    const handleOptionChange = (value: string, id: number) => {
+    const handleOptionChange = (value: string, index: number) => {
 
         if (!question.options) return;
 
-        const option = question.options?.find(op => op.id === id)!!
+        const option = question.options?.find((op, i) => i === index)!!
 
-        const updatedOption = { id: option.id, label: value, value: option.value };
-        const newOptions = question.options.map((item) => item.id === id ? updatedOption : item);
+        const updatedOption = { label: value, value: option.value };
+        const newOptions = question.options.map((item, i) => i === index ? updatedOption : item);
 
         const updatedQuestion: IQuestion = {
             ...question,
@@ -54,10 +47,10 @@ export function CreateRadio({ question, updateProp, syncSurvey }: QuestionProps)
         updateProp(updatedQuestion);
     }
 
-    const remove = (id: number) => {
+    const remove = (index: number) => {
         if (!question.options) return;
 
-        const updatedQuestion = { ...question, options: question.options?.filter(op => op.id != id) };
+        const updatedQuestion = { ...question, options: question.options?.filter((op, i) => i != index) };
         updateProp(updatedQuestion);
         syncSurvey(updatedQuestion);
     }
@@ -70,8 +63,8 @@ export function CreateRadio({ question, updateProp, syncSurvey }: QuestionProps)
                     <div key={index} className="flex gap-2 items-center">
                         <Radio value={item.value}>
                         </Radio>
-                        <input className="border-1 rounded px-3" type="text" defaultValue={item.label} onBlur={(e) => handleOptionChange(e.target.value, item.id)} />
-                        <MdRemove className="cursor-pointer bg-zinc-50 hover:bg-zinc-100 shadow-md rounded-2xl p-3 w-auto h-auto" onClick={() => remove(item.id)} />
+                        <input className="border-1 rounded px-3" type="text" defaultValue={item.label} onBlur={(e) => handleOptionChange(e.target.value, index)} />
+                        <MdRemove className="cursor-pointer bg-zinc-50 hover:bg-zinc-100 shadow-md rounded-2xl p-3 w-auto h-auto" onClick={() => remove(index)} />
                     </div>
                 ))}
             </RadioGroup>

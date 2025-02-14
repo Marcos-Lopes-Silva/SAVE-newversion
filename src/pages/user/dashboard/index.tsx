@@ -10,13 +10,16 @@ import { GetServerSideProps } from "next";
 import { connectToMongoDB } from "@/lib/db";
 import { GiBackwardTime } from "react-icons/gi";
 import { PiCalendarDotsLight } from "react-icons/pi";
-import { timeAgoInHours } from "@/lib/utils/date";
 import { MdMenuBook } from "react-icons/md";
 import Item from "@/components/Item";
 import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Pagination, useDisclosure } from "@nextui-org/react";
 import { toast } from "react-toastify";
 import { Session } from "next-auth";
 import { truncateText } from "@/lib/utils/truncate";
+import { FormProvider, useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Form } from "@/components/Form";
 
 interface Props {
     surveys: ISurveyDocument[]
@@ -27,7 +30,6 @@ const PageSize = 8;
 export default function Dashboard({ surveys }: Props) {
     const { push } = useRouter();
     const { data: session } = useSession();
-    const [lastSurveyCalendar, setLastSurveyCalendar] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [recentSurvey, setRecentSurvey] = useState<ISurveyDocument | null>(null);
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -92,13 +94,13 @@ export default function Dashboard({ surveys }: Props) {
                                 <div className="flex mt-4 -mb-4">
                                     <GiBackwardTime size={20} />
                                     <p className="text-sm ml-1 font-semibold">
-                                        {lastSurveyCalendar ? timeAgoInHours(lastSurveyCalendar) : t('user.dashboard.error.available_date')}
+                                        {t('user.dashboard.error.available_date')}
                                     </p>
                                 </div>
                             }
                             buttonLabel={t('user.dashboard.button_continue')}
                             action={() => openSurvey(recentSurvey._id as string)}
-                            className={"flex gap-12 dark:bg-zinc-800 shadow-2xl w-11/12 min-h-36 rounded-3xl p-9"}
+                            className={"flex gap-12 dark:bg-zinc-800 shadow-2xl border-[0.5px] w-11/12 min-h-36 rounded-3xl p-9"}
                             item={recentSurvey}
                         />
                     </div>
@@ -187,17 +189,33 @@ interface ValidateModelProps {
     session: Session | null
 }
 
-const ValidateModel = ({ isOpen, onOpenChange, session }: ValidateModelProps) => {
-    const [cpf, setCPF] = useState<string | null>(null);
 
-    const updateCPF = async () => {
-        if ((cpf && cpf.length < 9) || !cpf) {
+const cpfSchema = z.object({
+    cpf: z
+        .string()
+        .min(11, "O CPF deve conter 11 caracteres.")
+        .max(14, "O CPF deve conter no máximo 14 caracteres.")
+        .refine(value => /^\d{11}$/.test(value.replace(/\D/g, '')), {
+            message: "CPF inválido",
+        }),
+});
+
+type CPF = z.infer<typeof cpfSchema>;
+
+const ValidateModel = ({ isOpen, onOpenChange, session }: ValidateModelProps) => {
+
+
+
+    const updateCPF = async (data: CPF) => {
+        console.log(data);
+
+        if ((data.cpf && data.cpf.length < 9) || !data.cpf) {
             toast.error("CPF inválido");
             return;
         }
 
         toast.loading("Atualizando CPF...", { toastId: "loader-cpf" });
-        const normalizedCpf = cpf.replace(/\D/g, '');
+        const normalizedCpf = data.cpf.replace(/\D/g, '');
 
         try {
             const response = await api.get<{ cpf: string }>(`user/verify-cpf/${normalizedCpf}`);
@@ -216,8 +234,17 @@ const ValidateModel = ({ isOpen, onOpenChange, session }: ValidateModelProps) =>
             toast.error("Erro ao atualizar CPF, CPF não encontrado!");
             toast.done("loader-cpf")
         }
-
     }
+
+    const cpfForm = useForm<CPF>({
+        resolver: zodResolver(cpfSchema)
+    });
+
+    const {
+        handleSubmit,
+        control,
+        formState: { isSubmitting }
+    } = cpfForm;
 
     return (
         <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
@@ -225,20 +252,28 @@ const ValidateModel = ({ isOpen, onOpenChange, session }: ValidateModelProps) =>
                 {(onClose) => (
                     <>
                         <ModalHeader className="flex items-center justify-between pr-10">
-                            <p>Validação de Usuário</p>
+                            <p className="dark:text-white">Validação de Usuário</p>
                         </ModalHeader>
                         <ModalBody>
-                            <p>Para continuar, por favor, insira o seu CPF no campo abaixo. Usaremos essa informação para buscar questionários ativos associados ao seu perfil.</p>
-                            <InputMask mask="000.000.000-00" maskChar="" value={cpf || ""} required={true} onChange={(e) => setCPF(e.target.value)} />
+                            <FormProvider {...cpfForm}>
+                                <form onSubmit={handleSubmit(updateCPF)}>
+                                    <p className="dark:text-white">Para continuar, por favor, insira o seu CPF no campo abaixo. Usaremos essa informação para buscar questionários ativos associados ao seu perfil.</p>
+                                    <Form.Field>
+                                        <Form.Label>CPF</Form.Label>
+                                        <Form.MaskedInput mask="999.999.999-99" maskChar="" control={control} name="cpf" />
+                                        <Form.ErrorMessage field="cpf" />
+                                    </Form.Field>
+                                    <div className="flex gap-4 justify-end my-[4%]">
+                                        <Button color="danger" variant="light" onPress={onClose}>
+                                            Fechar
+                                        </Button>
+                                        <Button color="primary" type="submit" isLoading={isSubmitting}>
+                                            Confirmar
+                                        </Button>
+                                    </div>
+                                </form>
+                            </FormProvider>
                         </ModalBody>
-                        <ModalFooter>
-                            <Button color="danger" variant="light" onPress={onClose}>
-                                Fechar
-                            </Button>
-                            <Button color="primary" onPress={updateCPF}>
-                                Confirmar
-                            </Button>
-                        </ModalFooter>
                     </>
                 )}
             </ModalContent>

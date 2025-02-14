@@ -36,7 +36,7 @@ interface Props {
   progress: number;
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleBackStep: () => void;
-  handleNextStep: () => void;
+  handleNextStep: (users: ICreateUserData[]) => void;
   setUserData: React.Dispatch<React.SetStateAction<ICreateUserData[]>>;
 }
 
@@ -57,12 +57,12 @@ export const UserRegistration = ({
   handleFileChange,
   handleBackStep,
   handleNextStep,
+  setUserData,
 }: Props) => {
   const [showOptions, setShowOptions] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [filterValue, setFilterValue] = useState<string>("");
   const [users, setUsers] = useState<ICreateUserData[]>(JSON.parse(localStorage.getItem("users") || "[]"));
-  const [userData, setUserData] = useState<ICreateUserData[]>([]);
   const [editingUserIndex, setEditingUserIndex] = useState<number | null>(null);
   const [modalData, setModalData] = useState<ICreateUserData | null>(null);
 
@@ -99,10 +99,8 @@ export const UserRegistration = ({
   }, []);
 
   const sendUserData = () => {
-    setUserData(users);
-    console.log(users);
     localStorage.setItem("users", JSON.stringify(users));
-    handleNextStep();
+    handleNextStep(users);
   };
 
   const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -298,11 +296,11 @@ export const UserRegistration = ({
             </TableBody>
           </Table>
         </div>
-        <div className="flex items-center gap-2 mt-4">
+        <div className="flex justify-center gap-2 mt-4">
         <Button onClick={handleBackStep}>
           {t("admin.create.section.return")}
         </Button>
-        <Button onClick={handleSubmit(sendUserData)}>{t("admin.create.section.continue")}</Button>
+        <Button onClick={sendUserData}>{t("admin.create.section.continue")}</Button>
       </div>
       </div>
 
@@ -316,7 +314,7 @@ export const UserRegistration = ({
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader>Edit user</ModalHeader>
+              <ModalHeader>Editar Participante</ModalHeader>
               <ModalBody>
                 <FormProvider {...registerUserForm}>
                   <form onSubmit={handleSubmit(handleSaveUser)}>

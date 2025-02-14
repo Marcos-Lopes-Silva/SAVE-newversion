@@ -12,6 +12,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import store from "../../redux/store";
 import Footer from "@/components/layout/Footer";
+import { useEffect } from "react";
 
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -53,10 +54,16 @@ const Auth = ({ children, redirectUrl, role }: Props) => {
     const { push } = useRouter();
     const { data, status } = useSession();
 
-    const user = data?.user;
-    if (status === "loading") return <Loader />;
-    if (status !== "authenticated") return push('/');
-    if (user && user.role !== role && user.verified === true) return push(redirectUrl!!);
+    useEffect(() => {
+        if (status === "unauthenticated") push("/");
+        if (data?.user && data.user.role !== role && data.user.verified) push(redirectUrl ?? "/");
+    }, [status, data, push, redirectUrl, role]);
 
-    return children;
-}
+    if (status === "loading") return <Loader />;
+
+    if (status === "unauthenticated" || (data?.user && data.user.role !== role && data.user.verified)) {
+        return null;
+    }
+
+    return <>{children}</>;
+};

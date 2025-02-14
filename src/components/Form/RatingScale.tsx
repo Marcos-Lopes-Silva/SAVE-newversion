@@ -13,7 +13,7 @@ export function RatingScale({ name, options }: RatingScaleProps) {
     return (
         <div className="flex flex-col gap-4">
             {options.map((value) => (
-                <label key={value.id} className="flex items-center">
+                <label key={value.value} className="flex items-center">
                     <Radio
                         {...register(name)}
                         value={String(value.value)}

@@ -9,6 +9,11 @@
             "data": "Visualizar Dados",
             "show_data": "Publicar Dados",
             "users": "Gerenciar Participantes"
+        },
+        "user": {
+            "dashboard": "Questionários",
+            "report": "Visualizar Dados",
+            "about": "Sobre"
         }
     },
     "footer": {
@@ -47,6 +52,7 @@
     },
     "admin": {
         "dashboard": {
+            "results": "Ver resultados",
             "filters": {
                 "draft": "Em construção",
                 "active": "Ativo",
@@ -167,11 +173,13 @@
                 "completed": "Concluiram até o momento"
             },
             "complete": {
+                "group": "Grupo de participantes",
                 "title": "Novo questionário",
                 "description": "Personalize seu questionário definindo título, descrição e datas.",
                 "title_label": "Título",
                 "description_label": "Descrição",
                 "duration_label": "Duração",
+                "send_button": "Enviar",
                 "open_date_label": "Data de abertura",
                 "close_date_label": "Data de fechamento",
                 "complete_label": "Ao completar o questionário",
@@ -249,5 +257,43 @@
     },
     "404": {
         "error": "404 - Página não encontrada"
+    },
+    "policy": {
+        "title": "Termo de Política e Privacidade",
+        "last_update": "Última atualização:",
+        "welcome": "Bem-vindo ao Sistema de Acompanhamento de Egressos - SAVE, que tem como objetivo coletar dados e disponibilizar estatísticas a respeito da trajetória dos egressos, bem como fornecer uma ferramenta para avaliar cursos acadêmicos por meio da aplicação de questionários com seus ex-alunos, possibilitando a investigação de possíveis melhorias.",
+        "commitment": "Nosso compromisso é proteger sua privacidade e garantir que suas informações pessoais sejam tratadas de forma segura e responsável. Esta Política de Privacidade descreve como coletamos, usamos e compartilhamos as informações pessoais dos usuários de nosso sistema",
+        "1": "1) Dados Pessoais Coletados",
+        "collect": "Coletaremos as seguintes informações pessoais para atender aos nossos objetivos e proporcionar a melhor experiência para os nossos usuários:",
+        "name": "- Nome Completo",
+        "email": "- Endereço de E-mail",
+        "cpf": "- CPF",
+        "data": "Esses dados serão fornecidos diretamente por você ao se cadastrar em nosso sistema. Adicionalmente, iremos coletar as informações fornecidas a partir do preenchimento voluntário dos questionários de acompanhamento de egressos que você será convidado(a) a responder.",
+        "2": "2) Dados Disponibilizados Pela Instituição de Ensino",
+        "database": "Nosso banco de dados é inicialmente preenchido com dados disponibilizados pela Instituições de Ensino Superior, permitindo a validação do cadastro do usuário, a fim de averiguar sua conexão prévia com a instituição.",
+        "3": "3) Utilização de Cookies",
+        "cookies": "Nosso sistema utiliza cookies para melhorar a experiência do usuário. Cookies são pequenos arquivos de texto armazenados no seu navegador que nos permitem personalizar sua experiência no sistema e nos fornecem informações sobre como ele é usado. Os tipos de cookies que utilizamos incluem:",
+        "cookies1": "- Cookies Essenciais: Necessários para o funcionamento do sistema.",
+        "4": "4) Finalidade do Tratamento dos Dados",
+        "personal_data": "Os dados pessoais coletados são utilizados para:",
+        "validation": "- Validar a identidade do usuário;",
+        "send": "- Enviar os questionários para seus respondentes.",
+        "5": "5) Compartilhamento de Dados",
+        "share": "Não compartilhamos suas informações pessoais com terceiros, exceto em casos necessários para cumprimento de obrigações legais, regulatórias ou em resposta a solicitações de autoridades públicas. Alguns dados não sensíveis coletados, por meio dos questionários, serão compartilhados para fins de estudo e análise.",
+        "6": "6) Segurança dos Dados",
+        "security": "Implementamos medidas de segurança criptográfica para proteger seus dados pessoais contra acesso não autorizado, alteração, divulgação ou destruição. No entanto, a segurança completa das informações transmitidas via internet não pode ser garantida, e o usuário deve estar ciente dos riscos inerentes.",
+        "7": "7) Retenção de Dados",
+        "stored_data": "Seus dados pessoais serão armazenados por tempo indefinido, porém será possível realizar a alteração dos mesmos pelo usuário ou sua exclusão mediante solicitação explícita.",
+        "8": "8) Seus Direitos",
+        "lgpd": "De acordo com a LGPD, você possui diversos direitos em relação aos seus dados pessoais, como:",
+        "access": "- Acesso aos dados pessoais;",
+        "correct": "- Correção de dados incompletos, inexatos ou desatualizados;",
+        "delete": "- Exclusão dos dados pessoais, mediante determinadas condições;",
+        "revogate": "- Revogação do consentimento para o uso de seus dados, quando aplicável.",
+        "rights": "Para exercer qualquer um desses direitos, entre em contato conosco por meio dos canais disponíveis no sistema.",
+        "9": "9) Alterações nesta Política",
+        "update": "Podemos atualizar esta Política de Privacidade periodicamente. As alterações serão publicadas nesta página, e a data de atualização será revisada no topo deste documento.",
+        "10": "10) Contato",
+        "contact": "Se tiver alguma dúvida sobre esta Política de Privacidade, ou sobre como tratamos seus dados pessoais, entre em contato conosco através do e-mail 'alinemello@unipampa.edu.br'"
     }
 }

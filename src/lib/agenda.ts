@@ -3,6 +3,7 @@ import { transporter } from './mailer';
 
 import mongoose from 'mongoose';
 import { connectToMongoDB } from './db';
+import { ReactNode } from 'react';
 
 const mongodb = process.env.MONGODB_URI;
 
@@ -21,7 +22,7 @@ agenda.define('send email', async (job: Job) => {
 
     console.log(`Enviando email para ${to}`);
 
-    await transporter.sendMail({ to, subject, text });
+    await transporter.sendMail({ to, subject, html: text });
     console.log('Email enviado com sucesso');
 });
 

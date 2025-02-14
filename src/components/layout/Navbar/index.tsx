@@ -1,5 +1,6 @@
 import { signOut, useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
+
 import {
   MdCircleNotifications,
   MdOutlineLogout,
@@ -14,18 +15,24 @@ import {
   NavbarBrand,
   NavbarContent,
   NavbarItem,
+  NavbarMenu,
+  NavbarMenuItem,
+  NavbarMenuToggle,
   Select,
   SelectItem,
+  useDisclosure,
 } from "@nextui-org/react";
 import i18n from "../../../../i18n";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 
 export default function NavbarLayout() {
+
   const { t } = useTranslation();
   const { data: session, status } = useSession();
   const { push } = useRouter();
   const { theme, setTheme } = useTheme();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const logout = [
     {
@@ -91,102 +98,101 @@ export default function NavbarLayout() {
     },
   ];
 
+  const navItems = status !== 'authenticated' ? logout : (session?.user && session.user.role === 'admin' ? (session.user.verified) === true ? admin : user : user);
+
   return (
-    <Navbar className="flex">
-      <NavbarBrand>
-        <p className="dark:text-white font-bold text-lg text-inherit">SAVE</p>
-      </NavbarBrand>
-      <NavbarContent className="hidden sm:flex gap-4" justify="center">
-        {status !== "authenticated"
-          ? logout.map((item, index) => (
-              <NavbarItem key={index}>
-                <Link
-                  className="dark:text-white dark:hover:text-zinc-200 hover:text-zinc-800 font-medium text-lg"
-                  href={item.href}
-                >
-                  {item.title}
-                </Link>
-              </NavbarItem>
-            ))
-          : (session.user && session.user.role === "admin"
-              ? session.user.verified === true
-                ? admin
-                : user
-              : user
-            ).map((item, index) => (
-              <NavbarItem key={index}>
-                <Link
-                  className="dark:text-white dark:hover:text-zinc-200 hover:text-zinc-800 font-medium text-lg"
-                  href={item.href}
-                >
-                  {item.title}
-                </Link>
-              </NavbarItem>
-            ))}
+    <Navbar
+      isMenuOpen={isOpen}
+      onMenuOpenChange={onOpenChange}
+    >
+      <NavbarContent>
+        <NavbarMenuToggle aria-label={isOpen ? "Close menu" : "Open menu"}
+          className="sm:hidden"></NavbarMenuToggle>
+        <NavbarBrand>
+          <p className="dark:text-white font-bold text-lg text-inherit">SAVE</p>
+        </NavbarBrand>
       </NavbarContent>
+
+      <NavbarContent className="hidden sm:flex gap-4" justify="center">
+        {navItems.map((item, index) => (
+          <NavbarItem key={index}>
+            <Link className="dark:text-white dark:hover:text-zinc-200 hover:text-zinc-800 font-medium text-lg" href={item.href}>{item.title}</Link>
+          </NavbarItem>
+        ))}
+      </NavbarContent>
+
       <NavbarContent justify="end">
-        <NavbarItem>
+        <NavbarItem className="hidden sm:flex">
           <Select
-            placeholder={t("language")}
-            fullWidth
+            placeholder={t('language')}
             className="min-w-40"
-            defaultSelectedKeys={
-              languages.find((lang) => lang.value === i18n.language)?.title
-            }
+            defaultSelectedKeys={languages.find(lang => lang.value === i18n.language)?.title}
             onChange={(e) => handleLanguageChange(e.target.value)}
           >
             {languages.map((language) => (
-              <SelectItem
-                key={language.value}
-                className="dark:text-white"
-                value={language.value}
-              >
+              <SelectItem key={language.value} className="dark:text-white" value={language.value}>
                 {language.title}
               </SelectItem>
             ))}
           </Select>
         </NavbarItem>
+
         <NavbarItem>
-          <MdSunny
-            size={25}
-            className={`cursor-pointer text-white hidden dark:block`}
-            onClick={() => setTheme("light")}
-          />
-          <MdBrightness2
-            size={25}
-            className={`cursor-pointer dark:text-black dark:hidden block`}
-            onClick={() => setTheme("dark")}
-          />
+          <MdSunny size={25} className={`cursor-pointer text-white hidden dark:block`} onClick={() => setTheme('light')} />
+          <MdBrightness2 size={25} className={`cursor-pointer dark:text-black dark:hidden block`} onClick={() => setTheme('dark')} />
         </NavbarItem>
-        {status === "authenticated" ? (
-          <>
-            <NavbarItem>
-              <MdCircleNotifications
-                className="dark:text-white dark:hover:text-zinc-200 cursor-pointer hover:text-zinc-800"
-                size={25}
-              />
-            </NavbarItem>
-            <NavbarItem>
-              <MdOutlineLogout
-                className="cursor-pointer hover:text-zinc-500 dark:text-white dark:hover:text-zinc-200"
-                onClick={() => signOut()}
-                size={25}
-              />
-            </NavbarItem>
-          </>
-        ) : (
-          <NavbarItem>
-            <Button
-              className={
-                "py-2 w-2/3 dark:text-white dark:hover:bg-zinc-200 bg-zinc-800 text-white"
-              }
-              onClick={() => push("/")}
-            >
-              Login
-            </Button>
-          </NavbarItem>
-        )}
+        {
+          status === 'authenticated' ? (
+            <>
+              <NavbarItem>
+                <MdCircleNotifications className="dark:text-white dark:hover:text-zinc-200 cursor-pointer hover:text-zinc-800" size={25} />
+              </NavbarItem>
+              <NavbarItem>
+                <MdOutlineLogout className="cursor-pointer hover:text-zinc-500 dark:text-white dark:hover:text-zinc-200" onClick={() => signOut()} size={25} />
+              </NavbarItem>
+            </>
+          )
+            : (
+              <NavbarItem>
+                <Button className={"py-2 w-full dark:text-white dark:hover:bg-zinc-200 bg-zinc-800 text-white"} onClick={() => push('/')}>
+                  Login
+                </Button>
+              </NavbarItem>
+            )
+        }
       </NavbarContent>
+
+      <NavbarMenu>
+        {navItems.map((item, index) => (
+          <NavbarMenuItem key={`${item.href}-${index}`}>
+            <Link
+              className="w-full dark:text-white dark:hover:text-zinc-200 hover:text-zinc-800 font-medium text-lg"
+              href={item.href}
+              onClick={() => onOpenChange()}
+            >
+              {item.title}
+            </Link>
+          </NavbarMenuItem>
+        ))}
+        <NavbarMenuItem>
+          <Select
+            placeholder={t('language')}
+            className="min-w-full"
+            defaultSelectedKeys={[languages.find(lang => lang.value === i18n.language)?.value || '']}
+            onChange={(e) => {
+              handleLanguageChange(e.target.value);
+              onOpenChange();
+            }}
+          >
+            {languages.map((language) => (
+              <SelectItem key={language.value} value={language.value}>
+                {language.title}
+              </SelectItem>
+            ))}
+          </Select>
+        </NavbarMenuItem>
+      </NavbarMenu>
     </Navbar>
   );
 }
+

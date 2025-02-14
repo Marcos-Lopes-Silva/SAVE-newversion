@@ -2,15 +2,14 @@ import { toast } from "react-toastify";
 import { IQuestion } from "../../../../../models/surveyModel";
 import { QuestionsBody } from "../Questions";
 import { useFormContext, useWatch } from "react-hook-form";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 
 interface Props {
     id: string;
     question: IQuestion;
 }
 
-export default function QuestionBody({ id, question }: Props) {
+const QuestionBody = React.memo(({ id, question }: Props) => {
     const { control } = useFormContext();
 
     const questionAnswer = useWatch({
@@ -19,18 +18,16 @@ export default function QuestionBody({ id, question }: Props) {
     });
 
     const shouldShowQuestion = question.dependsOn
-        ? question.dependsOnValue
+        ? question.dependsOnValue !== undefined
             ? questionAnswer === question.dependsOnValue
-            : questionAnswer !== "" && questionAnswer !== null && questionAnswer !== undefined
+            : Boolean(questionAnswer) &&
+            (Array.isArray(questionAnswer) ? questionAnswer.length > 0 : true)
         : true;
 
-
-
-
     useEffect(() => {
-    }, [questionAnswer, control]);
+        console.log('Dependency Answer:', questionAnswer, 'Should Show:', shouldShowQuestion);
+    }, [questionAnswer, shouldShowQuestion]);
 
-    if (!shouldShowQuestion) return null;
 
     function handleType(type: IQuestion["type"]) {
         switch (type) {
@@ -43,7 +40,7 @@ export default function QuestionBody({ id, question }: Props) {
             case "dropdown":
                 return <QuestionsBody.Dropdown question={question} />;
             case "date":
-                return <QuestionsBody.Date question={question} />;
+                return <QuestionsBody.DateQuestion question={question} />;
             case "number":
                 return <QuestionsBody.Number question={question} />;
             case "textarea":
@@ -59,9 +56,15 @@ export default function QuestionBody({ id, question }: Props) {
         }
     }
 
+    if (!shouldShowQuestion) return null;
+
     return (
-        <div id={id} className="bg-zinc-100 p-10 rounded-2xl shadow-lg">
+        <div id={id} className="bg-zinc-100 dark:bg-zinc-800 p-10 rounded-2xl shadow-lg">
             {handleType(question.type)}
         </div>
     );
-}
+});
+
+QuestionBody.displayName = "QuestionBody";
+
+export default QuestionBody;

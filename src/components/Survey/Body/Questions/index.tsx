@@ -2,7 +2,7 @@ import { IQuestion } from "../../../../../models/surveyModel";
 import { Checkbox } from "./Checkbox";
 import { Text } from "./Text";
 import { Radio } from "./Radio";
-import { Date } from "./Date";
+import { DateQuestion } from "./DateQuestion";
 import { Dropdown } from "./Dropdown";
 import { Number } from "./Number";
 import { TextArea } from "./TextArea";
@@ -18,7 +18,7 @@ export const QuestionsBody = {
     Text,
     Checkbox,
     Radio,
-    Date,
+    DateQuestion,
     Dropdown,
     Number,
     TextArea,

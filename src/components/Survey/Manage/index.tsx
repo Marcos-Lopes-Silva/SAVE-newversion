@@ -22,22 +22,12 @@ import { useRouter } from "next/router";
 import DatabaseQuestion from "./DatabaseQuestion";
 import { ISurveyQuestions, IPage } from "../../../../models/surveyQuestionsModel";
 import { BiX } from "react-icons/bi";
-
-
-const createSurveySchema = z.object({});
-
-interface ICreateSurveyData {
-    title: string;
-    description: string;
-}
+import Link from "next/link";
 
 
 interface Props {
     survey?: ISurveyDocument
 }
-
-
-type CreateSurveyData = z.infer<typeof createSurveySchema>;
 
 export default function Manage({ survey }: Props) {
 
@@ -48,35 +38,15 @@ export default function Manage({ survey }: Props) {
     const [viewSurvey, setViewSurvey] = useState<boolean>(false);
     const [showDatabase, setShowDatabase] = useState<boolean>(false);
     const [selectedQuestionsByDimension, setSelectedQuestionsByDimension] = useState<{ SurveyQuestions: ISurveyQuestions }>({ SurveyQuestions: { pages: [] } });
+    const [value, setTextAreaValue] = useState<string>(survey?.description ?? "");
 
     const dispatch = useAppDispatch();
     const data = useAppSelector((state) => state.survey);
     const loader = useAppSelector((state) => state.loading);
     const surveyId = useAppSelector((state) => state.surveyId);
 
-    const createSurveyForm = useForm<ICreateSurveyData>({
-        resolver: zodResolver(createSurveySchema),
-    });
 
-    const {
-        handleSubmit,
-        formState: { isSubmitting },
-        control,
-    } = createSurveyForm;
-
-    const saveSurveyState = async (data: CreateSurveyData) => {
-        try {
-            const response = await api.post<ISurveyDocument>('/survey/create', {
-                ...data
-            });
-            return response;
-        } catch (error) {
-            toast.error(error as string);
-            return null;
-        }
-    }
-
-    async function next(data: CreateSurveyData) {
+    async function next() {
         // const response = await saveSurveyState(data);
         push(`/admin/survey/${surveyId.value}/complete`);
         // if (!response) return;
@@ -162,6 +132,12 @@ export default function Manage({ survey }: Props) {
         setViewSurvey(!viewSurvey);
     }
 
+    const removePage = (id: number) => {
+        const updatedPages = data.pages.filter(page => page.id !== id);
+        const updatedSurvey = { ...data, pages: updatedPages };
+        dispatch(updateSurveyAndSync(updatedSurvey, surveyId.value!!));
+    }
+
     useEffect(() => {
         if (!data.author && session && session.user._id) dispatch(updateAuthor(session?.user._id));
 
@@ -173,7 +149,7 @@ export default function Manage({ survey }: Props) {
 
             const timeout = setTimeout(() => {
                 setStyle("hidden");
-            }, 2000);
+            }, loader.success ? 2000 : 10000);
 
             return () => clearTimeout(timeout);
         }
@@ -196,46 +172,49 @@ export default function Manage({ survey }: Props) {
                                 : (
                                     <>
                                         <header className="w-full gap-5">
-                                            <FormProvider {...createSurveyForm} >
-                                                <form onSubmit={handleSubmit(next)}>
-                                                    <div className="flex gap-4 justify-end px-6">
-                                                        <Button className="bg-zinc-800 px-2 rounded-2xl py-3 text-white justify-center flex items-center gap-3 group/preview w-36" onClick={showSurvey}>{t('admin.survey.create.preview')} <IoMdEye className="group-hover/preview:size-6 size-5" /></Button>
-                                                        <Button className="bg-zinc-800 px-2 rounded-2xl py-3 text-white justify-center flex items-center gap-3 group/finish w-32" type="submit"><p className="group-hover/finish:translate-x-0.5">{t('admin.survey.create.finish')}</p> <IoIosArrowDroprightCircle className="group-hover/finish:translate-x-1 group-hover/finish:size-6 size-5" /></Button>
-                                                    </div>
-                                                    <div className="mt-4 flex justify-end pr-12">
-                                                        <Button variant="primary" onClick={() => setShowDatabase(!showDatabase)}>{t('admin.survey.manage.add_question')}</Button>
-                                                    </div>
-                                                    <div className="rounded-3xl dark:bg-zinc-900 shadow-xl w-3/4 px-20 py-16 flex justify-between items-end gap-5">
-                                                        <div className="flex flex-col w-full">
-                                                            <Form.Field>
-                                                                <input id="title" value={data.title} onBlur={(e) => updateProp(e.target.value, "title")} name="title" placeholder={t('admin.survey.create.title')} />
-                                                                <Form.ErrorMessage field="title" />
-                                                            </Form.Field>
-                                                            <Form.Field>
-                                                                <Form.TextArea value={data.description} onBlur={(e) => updateProp(e.target.value, "description")} placeholder={t('admin.survey.create.description.placeholder')} id="description" className="focus:outline focus:outline-2 focus:outline-zinc-500 border-none px-5 shadow-xl rounded-b-2xl h-52 resize-none overflow-auto w-full" name="description" />
-                                                                <Form.ErrorMessage field="description" />
-                                                            </Form.Field>
+                                            <div className="flex gap-4 justify-end px-6">
+                                                <Button className="bg-zinc-800 px-2 rounded-2xl py-3 text-white justify-center flex items-center gap-3 group/preview w-36" onClick={showSurvey}>{t('admin.survey.create.preview')} <IoMdEye className="group-hover/preview:size-6 size-5" /></Button>
+                                                <Link href={`/admin/survey/${surveyId.value}/complete`}><Button className="bg-zinc-800 px-2 rounded-2xl py-3 text-white justify-center flex items-center gap-3 group/finish w-32" type="submit"><p className="group-hover/finish:translate-x-0.5">{t('admin.survey.create.finish')}</p> <IoIosArrowDroprightCircle className="group-hover/finish:translate-x-1 group-hover/finish:size-6 size-5" /></Button></Link>
+                                            </div>
+                                            <div className="mt-4 flex justify-end pr-12">
+                                                <Button variant="primary" onClick={() => setShowDatabase(!showDatabase)}>{t('admin.survey.manage.add_question')}</Button>
+                                            </div>
+                                            <div className="rounded-3xl dark:bg-zinc-900 shadow-xl w-3/4 px-20 py-16 flex justify-between items-end gap-5">
+                                                <div className="flex flex-col w-full">
+                                                    <Form.Field>
+                                                        <input className="" defaultValue={data.title} onBlur={(e) => updateProp((e.target as HTMLInputElement).value, "title")} name="title" placeholder={t('admin.survey.create.title')} />
+                                                    </Form.Field>
+                                                    <Form.Field>
+                                                        <div className={`group rounded-2xl flex flex-col items-end border-b border-zinc-500 shadow-sm px-1   py-2 text-zinc-800 focus:outline-none focus:ring-2 focus:ring-violet-500`}>
+                                                            <textarea
+                                                                className={`w-full resize-none h-full outline-none dark:text-white p-3 dark:bg-transparent border-0 rounded-2xl`}
+                                                                onChange={(e) => setTextAreaValue(e.target.value)}
+                                                                onBlur={(e) => updateProp((e.target as HTMLTextAreaElement).value, "description")}
+                                                                value={value}
+                                                                placeholder={t('admin.survey.create.description')}
+                                                            />
+                                                            <p className="text-zinc-500 dark:text-white opacity-80">{`${value.length} / ${2500}`} {t('textarea.characters')}</p>
                                                         </div>
+                                                    </Form.Field>
+                                                </div>
 
-                                                        {(loader.isLoading && loader.questionId === 0) ? (
-                                                            <Spinner size="sm" aria-label="Gray spinner medium sized" color="default" />
+                                                {(loader.isLoading && loader.questionId === 0) ? (
+                                                    <Spinner size="sm" aria-label="Gray spinner medium sized" color="default" />
+                                                ) : (
+                                                    <div className={`${style} ${loader.success ? 'text-green-600' : 'text-red-700'}`}>
+                                                        {loader.success ? (
+                                                            <MdDone size={20} />
                                                         ) : (
-                                                            <div className={`${style} ${loader.success ? 'text-green-600' : 'text-red-700'}`}>
-                                                                {loader.success ? (
-                                                                    <MdDone size={20} />
-                                                                ) : (
-                                                                    <MdOutlineCancel size={20} className="cursor-pointer" onClick={resendDataSync} />
-                                                                )}
-                                                            </div>
+                                                            <MdOutlineCancel size={20} className="cursor-pointer" onClick={resendDataSync} />
                                                         )}
                                                     </div>
-                                                </form>
-                                            </FormProvider>
+                                                )}
+                                            </div>
                                         </header>
                                         <div className="flex flex-col gap-5 mt-8">
                                             {data.pages.map((page, index) => (
                                                 <div key={index} className={`shadow-2xl dark:bg-zinc-900 rounded-2xl w-3/5 ${page.id === selectedPage ? "border-zinc-300 border-2" : "border-zinc-100"}`} onClick={() => setSelectedPage(page.id)}>
-                                                    <Page id={page.id} page={page} data={data} dispatch={dispatch} surveyId={surveyId.value} />
+                                                    <Page id={page.id} page={page} data={data} dispatch={dispatch} surveyId={surveyId.value} removePage={removePage} />
                                                 </div>
                                             ))}
                                             <Button className="border-zinc-300 border-2 px-2 w-1/6 py-1 text-zinc-500 hover:shadow-lg rounded-xl mt-2 font-medium" variant="tertiary" onClick={handleAddPage}>{t('admin.survey.create.add_page')}</Button>
