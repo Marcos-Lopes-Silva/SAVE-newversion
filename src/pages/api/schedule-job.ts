@@ -1,6 +1,12 @@
 import agenda from "@/lib/agenda";
 import { connectToMongoDB } from "@/lib/db";
 import { NextApiRequest, NextApiResponse } from "next";
+import SurveyAnalytics from "../../../models/surveyAnalytics";
+import Survey from "../../../models/surveyModel";
+import SurveyResult from "../../../models/surveyResults";
+import { processResults } from "../../lib/processresults"; // Movemos a função para um arquivo separado
+import { SurveyResultDocument } from "../../../types/survey";
+import mongoose from "mongoose";
 
 interface ScheduleJob {
     job: 'send emails survey' | 'send emails results' | 'update database field',
@@ -33,12 +39,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             break;
         }
         case 'send emails results': {
-
-            if (!emails) return res.status(400).json({ message: 'Email are required' });
-
-            await agenda.schedule(date, 'send email', { to: emails[0], subject: 'Resultados da pesquisa', text: 'Resultados da pesquisa' });
-            break;
-        }
+            if (!emails || !id) return res.status(400).json({ message: 'Email and survey ID are required' });
+          
+            try {
+              const surveyId = new mongoose.Types.ObjectId(id);
+              const survey = await Survey.findById(surveyId);
+              if (!survey) return res.status(404).json({ message: 'Survey not found' });
+          
+              const surveyResults = await SurveyResult.find({ surveyId });
+              const dimensions = processResults(survey, surveyResults);
+          
+              await SurveyAnalytics.findOneAndUpdate(
+                { surveyId },
+                { 
+                  surveyTitle: survey.title,
+                  dimensions
+                },
+                { upsert: true, new: true }
+              );
+          
+              await agenda.schedule(date, 'send email', {
+                to: emails[0],
+                subject: 'Resultados da Pesquisa',
+                html: `<p>Resultados disponíveis em: ${process.env.NEXTAUTH_URL}/survey/${id}/results</p>`
+              });
+          
+              break;
+            } catch (error) {
+              console.error(error);
+              return res.status(500).json({ message: 'Error processing results' });
+            }
+          }
         case 'update database field' : {
             await agenda.schedule(date, 'update database field', { collection, id, field, value });
             break;
