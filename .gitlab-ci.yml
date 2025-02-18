@@ -5,7 +5,6 @@ deploy_to_github:
   tags:
     - egressas
   stage: deploy
-  image: alpine
   before_script:
     - apk add git
     - git config --global user.email "2110103006"
