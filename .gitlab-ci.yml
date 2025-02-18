@@ -2,6 +2,8 @@ stages:
   - deploy
 
 deploy_to_github:
+  tags:
+    - egressas
   stage: deploy
   image: alpine
   before_script:
