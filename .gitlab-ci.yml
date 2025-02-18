@@ -6,7 +6,6 @@ deploy_to_github:
     - egressas
   stage: deploy
   before_script:
-    - apk add git
     - git config --global user.email "2110103006"
     - git config --global user.name "Marcos Eduardo Lopes Silva"
   script:
