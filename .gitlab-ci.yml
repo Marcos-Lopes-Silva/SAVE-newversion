@@ -6,12 +6,12 @@ deploy_to_github:
   image: alpine
   before_script:
     - apk add git
-    - git config --global user.email "seu-email@example.com"
-    - git config --global user.name "Seu Nome"
+    - git config --global user.email "2110103006"
+    - git config --global user.name "Marcos Eduardo Lopes Silva"
   script:
-    - git clone --depth 1 --branch main https://oauth2:${GITHUB_TOKEN}@gitlab.com/seu-usuario/seu-repo.git repo
+    - git clone --depth 1 --branch main https://oauth2:${GITHUB_TOKEN}@gitlab.com/egressas/save.git repo
     - cd repo
-    - git remote add github https://oauth2:${GITHUB_TOKEN}@github.com/seu-usuario/seu-repo-github.git
+    - git remote add github https://oauth2:${GITHUB_TOKEN}@github.com/Marcos-Lopes-Silva/SAVE.git
     - git push --force github main
   only:
     - main
