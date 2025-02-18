@@ -9,7 +9,7 @@ deploy_to_github:
     - git config --global user.email "2110103006"
     - git config --global user.name "Marcos Eduardo Lopes Silva"
   script:
-    - git clone --depth 1 --branch main https://oauth2:${GITHUB_TOKEN}@gitlab.com/egressas/save.git repo
+    - git clone --depth 1 --branch main https://oauth2:${GITLAB_TOKEN}@gitlab.com/egressas/save.git repo
     - cd repo
     - git remote add github https://oauth2:${GITHUB_TOKEN}@github.com/Marcos-Lopes-Silva/SAVE.git
     - git push --force github main
