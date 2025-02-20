@@ -8,9 +8,9 @@ export function processResults(
   results: SurveyResultDocument[]
 ): ISurveyAnalytics {
   return {
-    surveyId: survey._id, 
+    surveyId: new mongoose.Types.ObjectId(String(survey._id)),
     surveyTitle: survey.title,
-    dimensions: survey.pages
+    pages: survey.pages
       .filter(page => 
         page.questions.some(q => 
           ["radio", "checkbox", "select"].includes(q.type)
@@ -49,5 +49,5 @@ function processQuestion(question: IQuestion, results: SurveyResultDocument[]) {
     }
   });
 
-  return { type: question.type, data };
+  return { data };
 }

@@ -1,7 +1,6 @@
 import mongoose, { type Document, type Model, Schema } from "mongoose"
 
 export interface ProcessedQuestionData {
-  type: string
   data: Array<{ name: string; value: number }>
 }
 
@@ -12,7 +11,7 @@ export interface SurveyQuestion {
   processedData: ProcessedQuestionData
 }
 
-export interface SurveyDimension {
+export interface SurveyPage {
   title: string
   questions: Array<SurveyQuestion>
 }
@@ -20,14 +19,13 @@ export interface SurveyDimension {
 export interface ISurveyAnalytics {
   surveyId: mongoose.Types.ObjectId;
   surveyTitle: string;
-  dimensions: Array<SurveyDimension>;
+  pages: Array<SurveyPage>;
 }
 
 export interface ISurveyAnalyticsDocument extends ISurveyAnalytics, Document {}
 
 const processedQuestionDataSchema = new Schema(
   {
-    type: { type: String, required: true },
     data: [
       {
         name: { type: String, required: true },
@@ -48,7 +46,7 @@ const surveyQuestionSchema = new Schema(
   { _id: false },
 )
 
-const surveyDimensionSchema = new Schema(
+const surveyPageSchema = new Schema(
   {
     title: { type: String, required: true },
     questions: [surveyQuestionSchema],
@@ -65,7 +63,7 @@ const surveyAnalyticsSchema = new Schema<ISurveyAnalyticsDocument>(
       ref: 'Survey'
     },
     surveyTitle: { type: String, required: true },
-    dimensions: [surveyDimensionSchema],
+    pages: [surveyPageSchema],
   },
   { timestamps: true },
 )
@@ -74,4 +72,3 @@ const SurveyAnalytics: Model<ISurveyAnalyticsDocument> =
   mongoose.models.SurveyAnalytics || mongoose.model("SurveyAnalytics", surveyAnalyticsSchema)
 
 export default SurveyAnalytics
-

@@ -43,11 +43,11 @@ const TestSurveyResults = () => {
     <div className="p-4">
       <h1 className="text-2xl mb-6">Resultados da Pesquisa - {data.surveyTitle}</h1>
 
-      {data.dimensions.map((dimension, dimensionIndex) => (
-        <div key={dimensionIndex} className="mb-8">
-          <h2 className="text-xl mb-4">{dimension.title}</h2>
+      {data.pages.map((page, pageIndex) => (
+        <div key={pageIndex} className="mb-8">
+          <h2 className="text-xl mb-4">{page.title}</h2>
 
-          {dimension.questions.map((question, questionIndex) => (
+          {page.questions.map((question, questionIndex) => (
             <div key={questionIndex} className="mb-8 p-4 bg-gray-50 rounded-lg">
               <h3 className="text-lg mb-4">{question.title}</h3>
 
