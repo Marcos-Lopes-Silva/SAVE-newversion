@@ -36,7 +36,7 @@ const inputTypes: IIcon[] = [
   {
     "type": "checkbox",
     "title": "Checkbox",
-    "options": [{ id: 1, label: "Option 1", value: "Option 1" }, { id: 2, label: "Option 2", value: "Option 2" }],
+    "options": [{ label: "Option 1", value: "Option 1" }, { label: "Option 2", value: "Option 2" }],
     "icon": <IoIosCheckboxOutline size={size} color={color} />
   },
   {
@@ -48,7 +48,7 @@ const inputTypes: IIcon[] = [
   {
     "type": "select",
     "title": "Select",
-    "options": [{ id: 1, label: "Option 1", value: "Option 1" }, { id: 2, label: "Option 2", value: "Option 2" }],
+    "options": [{ label: "Option 1", value: "Option 1" }, { label: "Option 2", value: "Option 2" }],
     "icon": <RxDropdownMenu size={size} color={color} />
   },
   {

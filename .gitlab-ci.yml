@@ -1,0 +1,17 @@
+stages:
+  - deploy
+
+deploy_to_github:
+  tags:
+    - egressas
+  stage: deploy
+  before_script:
+    - git config --global user.email " marcoseduardo_lopes_@hotmail.com"
+    - git config --global user.name "Marcos Lopes"
+  script:
+    - git clone --depth 1 --branch main https://oauth2:${GITLAB_TOKEN}@gitlab.unipampa.edu.br/egressas/save.git repo
+    - cd repo
+    - git remote add github https://oauth2:${GITHUB_TOKEN}@github.com/Marcos-Lopes-Silva/SAVE.git
+    - git push --force github main
+  only:
+    - main

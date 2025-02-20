@@ -9,6 +9,9 @@ import {
 } from "@nextui-org/react";
 import { Key, useState } from "react";
 import { IQuestion } from "../../../../../models/surveyModel";
+import { LuAsterisk } from "react-icons/lu";
+import { Form } from "@/components/Form";
+import { Controller, useFormContext } from "react-hook-form";
 
 export interface IQuestionProp {
   question: IQuestion;
@@ -23,6 +26,10 @@ export function TableSurvey({ question }: IQuestionProp) {
   const [selectedValues, setSelectedValues] = useState<{
     [key: number]: string;
   }>({});
+  const [keys, setKeys] = useState<string[]>([]);
+  const [indexes, setIndexes] = useState<number>(0);
+
+  const { control, register } = useFormContext();
 
   const [backendResponses, setBackendResponses] = useState<IBackendTable[]>([]);
 
@@ -41,8 +48,7 @@ export function TableSurvey({ question }: IQuestionProp) {
     question.options &&
     question.rows && (
       <>
-        <p className="font-bold px-3 mb-5">{question.id}. {question.title}</p>
-
+        <Form.Label className="py-2 px-2 font-bold flex gap-2 dark:text-white">{`${question.id}. ${question.title}`}{question.required ? <LuAsterisk size={10} /> : ""}</Form.Label>
         <Table aria-label="Example table with dynamic content">
           <TableHeader>
             {question.options.map((column) => (
@@ -53,19 +59,27 @@ export function TableSurvey({ question }: IQuestionProp) {
             {question.rows.map((row) => (
               <TableRow key={row.id}>
                 {(columnKey) => {
-                  const value = getKeyValue(row, columnKey);
 
                   if (columnKey === "perguntas") {
-                    return <TableCell>{row.text}</TableCell>;
+                    return <TableCell className="dark:text-white">{row.text}</TableCell>;
                   }
 
                   return (
                     <TableCell>
-                      <input
-                        type="radio"
-                        checked={selectedValues[row.id] === columnKey}
-                        className=""
-                        onChange={() => addResponse(row.id, columnKey, row.text)}
+                      <Controller
+                        name={`${question.name}-${row.text.toLowerCase()}`}
+                        control={control}
+                        rules={{ required: question.required && "Essa questão é obrigatória." }}
+                        defaultValue=""
+                        render={({ field }) => (
+                          <input
+                            type="radio"
+                            value={columnKey}
+                            required={question.required}
+                            checked={field.value === columnKey}
+                            onChange={field.onChange}
+                          />
+                        )}
                       />
                     </TableCell>
                   );
@@ -74,6 +88,7 @@ export function TableSurvey({ question }: IQuestionProp) {
             ))}
           </TableBody>
         </Table>
+        <Form.ErrorMessage field={question.name} />
       </>
     )
   );

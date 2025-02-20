@@ -1,4 +1,4 @@
-import { Checkbox, Modal, ModalBody, ModalContent, ModalFooter } from "@nextui-org/react";
+import { Checkbox, Modal, ModalBody, ModalContent, ModalFooter, Select as NextUISelect, SelectItem } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { t } from "i18next";
 import Note from "@/components/layout/Note";
@@ -25,7 +25,7 @@ const Configurations = ({ isOpen, onOpenChange, question, updateProp, questions,
     const [dependsSetted, setDependsSetted] = useState<boolean>(false);
     const [depends, setDepends] = useState<IQuestion>();
     const [optionsText, setOptionsText] = useState<string>("");
-    const [expectedResponses, setExpectedResponses] = useState<IOption[]>([]);
+    const [expectedResponses, setExpectedResponses] = useState<IOption[]>(Array.isArray(question.dependsOnOptions) ? question.dependsOnOptions : []);
 
     const handleUpdateRequiredProp = (value: boolean) => {
         const updatedQuestion: IQuestion = { ...question, required: value };
@@ -46,13 +46,13 @@ const Configurations = ({ isOpen, onOpenChange, question, updateProp, questions,
         updateProp(updatedQuestion);
     }
 
-    const handleUpdateValueOptionProp = (value: string, id: number) => {
+    const handleUpdateValueOptionProp = (value: string) => {
         if (!question.options || !value) return;
 
-        const option = question.options?.find(op => op.id === id)!!
+        const option = question.options?.find(op => op.value === value)!!
 
-        const updatedOption = { id: option.id, label: option.label, value: value };
-        const newOptions = question.options.map((item) => item.id === id ? updatedOption : item);
+        const updatedOption = { label: option.label, value: value };
+        const newOptions = question.options.map((item) => item.value === value ? updatedOption : item);
 
         const updatedQuestion: IQuestion = {
             ...question,
@@ -68,8 +68,8 @@ const Configurations = ({ isOpen, onOpenChange, question, updateProp, questions,
         setExpectedResponses(question.dependsOnOptions || []);
     }, [isOpen, question]);
 
-    const removeOptionProp = (id: number) => {
-        const options = question.options?.filter(op => op.id != id);
+    const removeOptionProp = (value: string) => {
+        const options = question.options?.filter(op => op.value != value);
         const updatedQuestion = { ...question, options: options }
         updateProp(updatedQuestion);
     }
@@ -80,19 +80,16 @@ const Configurations = ({ isOpen, onOpenChange, question, updateProp, questions,
         const options = question.options || [];
         if (options === undefined) return;
 
-        const sortedOptions = options!!.map(option => option.id).sort((a, b) => a - b);
-        const id = sortedOptions[sortedOptions.length - 1] > 0 ? sortedOptions[sortedOptions.length - 1] + 1 : 1;
-
         const updatedQuestion = {
             ...question, options: [
                 ...question.options === undefined ? [] : question.options,
-                { id: id, label: "Option", value: id.toString() }]
+                { label: "Option", value: "Option" }]
         };
         updateProp(updatedQuestion);
     }
 
-    const addExpectedResponses = (option: IOption) => {
-        setExpectedResponses([...expectedResponses, option])
+    const addExpectedResponses = (option: string) => {
+        setExpectedResponses([...expectedResponses, { label: option, value: option }]);
 
         const updatedQuestion: IQuestion = { ...question, dependsOnOptions: expectedResponses }
         updateProp(updatedQuestion);
@@ -112,15 +109,11 @@ const Configurations = ({ isOpen, onOpenChange, question, updateProp, questions,
         if (!optionsText) return toast.error(t('admin.survey.create.config.error.options'));
 
         const options = question.options || [];
-        const sortedOptions = options.map(option => option.id).sort((a, b) => a - b);
-        const id = sortedOptions.length > 0 ? sortedOptions[sortedOptions.length - 1] + 1 : 1;
-
         const newOptions = optionsText.split(',');
 
         const updatedOptions = [
             ...options,
-            ...newOptions.map((option, index) => ({
-                id: id + index,
+            ...newOptions.map((option) => ({
                 label: option.trim(),
                 value: option.trim()
             }))
@@ -149,8 +142,8 @@ const Configurations = ({ isOpen, onOpenChange, question, updateProp, questions,
                                         {haveOptions && <label className="text-lg">{t('admin.survey.create.config.option_value')}</label>}
                                         {haveOptions && question.options?.map((option: IOption, index: number) => (
                                             <div key={index} className="flex items-center gap-5">
-                                                <input className="border-1 h-10 border-zinc-300 px-2 rounded-xl w-2/3" type="text" defaultValue={option.value} onBlur={(e) => handleUpdateValueOptionProp(e.target.value, option.id)} />
-                                                <button className="size-12 items-center justify-center rounded-3xl border-2 flex hover:bg-zinc-100" onClick={() => removeOptionProp(option.id)}><MdDelete /></button>
+                                                <input className="border-1 h-10 border-zinc-300 px-2 rounded-xl w-2/3" type="text" defaultValue={option.value} onBlur={(e) => handleUpdateValueOptionProp(e.target.value)} />
+                                                <button className="size-12 items-center justify-center rounded-3xl border-2 flex hover:bg-zinc-100" onClick={() => removeOptionProp(option.value)}><MdDelete /></button>
                                             </div>
                                         ))}
                                         {haveOptions &&
@@ -183,22 +176,34 @@ const Configurations = ({ isOpen, onOpenChange, question, updateProp, questions,
 
                                     {depends && depends.options && depends.type === 'checkbox' ? (
                                         <div className="animation-reveal">
-                                            <Select<IOption> className="w-40" defaultSelected={question.dependsOnOptions?.map((option) => option.label)} onChange={(value: IOption) => addExpectedResponses(value)} options={depends.options?.filter(op => !expectedResponses.find((eR) => op.id === eR.id))!!} getLabel={(option) => "Selecione..."} />
-                                            {expectedResponses.map((option: IOption, index: number) => (
-                                                <li key={index} className="">
-                                                    {option.label}
-                                                </li>
-                                            ))}
+                                            <NextUISelect
+                                                className="max-w-xs"
+                                                label="Valores de dependência"
+                                                placeholder="Select an animal"
+                                                selectedKeys={expectedResponses.map((option) => option.label)}
+                                                selectionMode="multiple"
+                                                onSelectionChange={(e) => addExpectedResponses(e.toString())}
+                                            >
+                                                {expectedResponses.map((response) => (
+                                                    <SelectItem key={response.value}>{response.label}</SelectItem>
+                                                ))}
+                                            </NextUISelect>
                                         </div>
                                     ) :
                                         depends && depends.options && depends?.type === 'radio' ? (
                                             <div className="animation-reveal">
-                                                <Select<IOption> className="w-40" onChange={(value: IOption) => addExpectedResponse(value)} options={questions.find(q => q.name === question.dependsOn)?.options!!} getLabel={(option) => option.label} />
-                                                {expectedResponses.map((option: IOption, index: number) => (
-                                                    <li key={index} className="">
-                                                        {option.label}
-                                                    </li>
-                                                ))}
+                                                <NextUISelect
+                                                    className="max-w-xs"
+                                                    label="Valores de dependência"
+                                                    placeholder="Select an animal"
+                                                    selectedKeys={expectedResponses.map((option) => option.label)}
+                                                    selectionMode="multiple"
+                                                    onSelectionChange={(e) => addExpectedResponses(e.toString())}
+                                                >
+                                                    {expectedResponses.map((response) => (
+                                                        <SelectItem key={response.value}>{response.label}</SelectItem>
+                                                    ))}
+                                                </NextUISelect>
                                             </div>
                                         ) : null
                                     }

@@ -21,8 +21,8 @@ interface ScheduleJob {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     await connectToMongoDB();
 
-    if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' }); 
-    
+    if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });
+
     const { scheduleDate, job, emails, collection, field, value, id } = req.body as ScheduleJob;
 
     const date = new Date(scheduleDate);
@@ -31,9 +31,79 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         case 'send emails survey': {
 
             if (!emails) return res.status(400).json({ message: 'Emails are required' });
-            
+
+            const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+                .container { max-width: 600px; margin: auto; background: #ffffff; }
+                .header { background: #27272a; padding: 2rem; text-align: center; }
+                .logo { max-width: 120px; height: auto; }
+                .content { padding: 2rem; color: #27272a; font-family: 'Inter', sans-serif; }
+                .divider { height: 2px; background: #e4e4e7; margin: 2rem 0; }
+                .cta-button { display: inline-block; padding: 0.75rem 2rem; 
+                            background: #27272a; color: white !important; text-decoration: none; 
+                            border-radius: 6px; font-weight: 600; transition: opacity 0.3s; }
+                .cta-button:hover { opacity: 0.9; }
+                .footer { padding: 1.5rem; text-align: center; background: #fafafa; 
+                        color: #71717a; font-size: 0.875rem; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <img src="https://save-ten.vercel.app/favicon.ico" class="logo" alt="SAVE">
+                </div>
+                
+                <div class="content">
+                    <h1 style="margin: 0 0 1.5rem 0; font-weight: 600;">🎓 Sua Opinião Faz a Diferença</h1>
+                    
+                    <p>Prezado Egresso,</p>
+                    
+                    <p>Como parte de nossa comunidade acadêmica, seu feedback é essencial para:</p>
+                    
+                    <ul style="margin: 1rem 0; padding-left: 1.5rem;">
+                        <li>Melhorar a qualidade dos nossos cursos</li>
+                        <li>Otimizar o acompanhamento de egressos</li>
+                        <li>Desenvolver novos programas acadêmicos</li>
+                    </ul>
+
+                    <div class="divider"></div>
+
+                    <p style="font-weight: 500;">Convite para Participação:</p>
+                    <p>Dedique alguns minutos para responder nossa pesquisa de acompanhamento:</p>
+                    
+                    <div style="margin: 2rem 0;">
+                        <a href="https://save-ten.vercel.app/" class="cta-button">▶ Acessar Pesquisa</a>
+                    </div>
+
+                    <div style="background: #fafafa; padding: 1rem; border-radius: 6px;">
+                        <p style="margin: 0; font-size: 0.875rem;">
+                            📋 Pesquisa totalmente anônima<br>
+                            ⏱ Tempo estimado: 15-30 minutos<br>
+                            🔐 Acesso seguro através do sistema SAVE
+                        </p>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    Sistema de Acompanhamento da Vida do Egresso - SAVE</p>
+                    <p>Dúvidas? <a href="mailto:egressas4@gmail.com" 
+                               style="color: #27272a; text-decoration: underline;">egressas4@gmail.com</a></p>
+                    <p style="margin-top: 1rem; font-size: 0.75rem;">
+                        Esta mensagem é destinada exclusivamente ao destinatário acima
+                    </p>
+                </div>
+            </div>
+        </body>
+        </html>
+        `;
+
             emails.forEach(async (email) => {
-                await agenda.schedule(date, 'send email', {to: email, subject: 'Olá, ', text: `Você está sendo convidado para responder uma pesquisa. Acessa ela em ${process.env.NEXTAUTH_URL}, realize o login e responda a pesquisa.`});
+                await agenda.schedule(date, 'send email', { to: email, subject: `Olá, Egresso`, text: htmlContent });
             });
 
             break;

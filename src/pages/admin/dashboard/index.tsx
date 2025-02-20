@@ -161,7 +161,7 @@ const Menu = ({ survey, deleteSurvey }: IMenu) => {
         </div>
         :
         <div className="flex gap-5 flex-col">
-            <Button className="dark:bg-white bg-zinc-800 dark:text-black text-white"><MdInsights size={20} className="dark:text-black text-white" /> {t('t.admin.dashboard.results')}</Button>
+            <Button className="dark:bg-white bg-zinc-800 dark:text-black text-white"><MdInsights size={20} className="dark:text-black text-white" /> {t('admin.dashboard.results')}</Button>
             <Button className="dark:bg-white bg-zinc-800 dark:text-black text-white" onClick={() => deleteSurvey(survey._id as string)}>{t('admin.dashboard.delete')}</Button>
         </div>
 }
