@@ -2,7 +2,9 @@ import mongoose, { type Document, type Model, Schema } from "mongoose"
 
 export interface ProcessedQuestionData {
   data: Array<{ name: string; value: number }>
+  otherTexts?: string[] // Novo campo opcional
 }
+
 
 export interface SurveyQuestion {
   title: string
@@ -32,6 +34,7 @@ const processedQuestionDataSchema = new Schema(
         value: { type: Number, required: true },
       },
     ],
+    otherTexts: { type: [String], default: [] }
   },
   { _id: false },
 )

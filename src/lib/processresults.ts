@@ -34,20 +34,38 @@ function processQuestion(question: IQuestion, results: SurveyResultDocument[]) {
   const data = (question.options || []).map((opt: IOption) => ({
     name: opt.label,
     value: 0,
-  }));
+  }))
 
-  results.forEach((result) => {
-    const answer = (result.surveyResult as Record<string, unknown>)[question.name];
-    if (Array.isArray(answer)) {
-      answer.forEach((value) => {
-        const option = data.find((d) => d.name === value);
-        if (option) option.value++;
-      });
-    } else if (answer) {
-      const option = data.find((d) => d.name === answer);
-      if (option) option.value++;
+  const otherTexts: string[] = []
+
+  const processarResposta = (answer: string) => {
+    if (answer.startsWith('Outro:')) {
+      const outroOption = data.find(d => d.name === 'Outro:')
+      if (outroOption) {
+        outroOption.value++
+        const texto = (answer.split('Outro:')[1]).trim()
+        if (texto) otherTexts.push(texto)
+      }
+    } else {
+      const option = data.find(d => d.name === answer)
+      if (option) option.value++
     }
-  });
+  }
 
-  return { data };
+  results.forEach(result => {
+    const answer = (result.surveyResult as Record<string, unknown>)[question.name]
+    
+    if (Array.isArray(answer)) {
+      answer.forEach((value: string) => {
+        if (typeof value === 'string') processarResposta(value)
+      })
+    } else if (typeof answer === 'string') {
+      processarResposta(answer)
+    }
+  })
+
+  return { 
+    data,
+    ...(otherTexts.length > 0 && { otherTexts })
+  }
 }

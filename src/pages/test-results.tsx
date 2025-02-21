@@ -12,7 +12,7 @@ const TestSurveyResults = () => {
   const [error, setError] = useState<string | null>(null)
 
   // ID fixo para teste - substitua pelo seu ID real
-  const testSurveyId = "67af87d4e70e3997d690d91f"
+  const testSurveyId = "67a1160e60cd46b1c1fc4e4f"
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -51,7 +51,7 @@ const TestSurveyResults = () => {
             <div key={questionIndex} className="mb-8 p-4 bg-gray-50 rounded-lg">
               <h3 className="text-lg mb-4">{question.title}</h3>
 
-              {(question.type === "radio" || question.type === "select") && question.processedData.data ? (
+              {(question.type === "radio" || question.type === "select" || question.type === "checkbox") && question.processedData.data ? (
                 <div className="mb-6">
                   <PieChart width={400} height={400}>
                     <Pie
@@ -66,12 +66,23 @@ const TestSurveyResults = () => {
                       {question.processedData.data.map((_entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
+                      
                     </Pie>
                     <Tooltip />
                     <Legend />
                   </PieChart>
-                </div>
-              ) : question.processedData.data ? (
+                {question.processedData.otherTexts && (
+      <div className="mt-4 p-3 bg-white rounded-lg shadow">
+        <h4 className="font-semibold mb-2">Respostas "Outro":</h4>
+        <ul className="list-disc pl-5">
+          {question.processedData.otherTexts.map((texto, idx) => (
+            <li key={idx} className="text-sm text-gray-600">{texto}</li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </div>
+) :  question.processedData.data ? (
                 <div className="mb-6">
                   <BarChart
                     width={500}
