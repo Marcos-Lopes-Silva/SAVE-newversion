@@ -1,8 +1,13 @@
 import mongoose, { type Document, type Model, Schema } from "mongoose"
 
 export interface ProcessedQuestionData {
-  data: Array<{ name: string; value: number }>
-  otherTexts?: string[] // Novo campo opcional
+  data: Array<{
+    name?: string;
+    value?: number;
+    row?: string;
+    options?: Array<{ name: string; value: number }>;
+  }>;
+  otherTexts?: string[];
 }
 
 
@@ -30,14 +35,21 @@ const processedQuestionDataSchema = new Schema(
   {
     data: [
       {
-        name: { type: String, required: true },
-        value: { type: Number, required: true },
+        name: { type: String },
+        value: { type: Number },
+        row: { type: String },
+        options: [
+          {
+            name: { type: String, required: true },
+            value: { type: Number, required: true }
+          }
+        ]
       },
     ],
     otherTexts: { type: [String], default: [] }
   },
   { _id: false },
-)
+);
 
 const surveyQuestionSchema = new Schema(
   {

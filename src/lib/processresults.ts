@@ -13,13 +13,13 @@ export function processResults(
     pages: survey.pages
       .filter(page => 
         page.questions.some(q => 
-          ["radio", "checkbox", "select"].includes(q.type)
+          ["radio", "checkbox", "select", "table"].includes(q.type) // Adicionado table
         )
       )
       .map(page => ({
         title: page.title,
         questions: page.questions
-          .filter(q => ["radio", "checkbox", "select"].includes(q.type))
+          .filter(q => ["radio", "checkbox", "select", "table"].includes(q.type)) // Adicionado table
           .map(question => ({
             title: question.title,
             name: question.name,
@@ -30,7 +30,54 @@ export function processResults(
   };
 }
 
+function processTableQuestion(question: IQuestion, results: SurveyResultDocument[]) {
+  const tableData: Record<string, Record<string, number>> = {};
+  const otherTexts: string[] = [];
+  question.rows?.forEach(row => {
+    tableData[row.text] = {};
+    question.options?.forEach(option => {
+      tableData[row.text][option.label] = 0;
+    });
+  });
+
+  results.forEach(result => {
+    const tableAnswers = (result.surveyResult as Record<string, Record<string, string>>)[question.name];
+    
+    if (tableAnswers && typeof tableAnswers === 'object') {
+      Object.entries(tableAnswers).forEach(([rowName, selectedOption]) => {
+        const cleanRowName = rowName.trim();
+        if (selectedOption.startsWith('Outro:')) {
+          const optionLabel = 'Outro';
+          const texto = selectedOption.split('Outro:')[1].trim();
+          
+          if (texto) {
+            otherTexts.push(`${cleanRowName}: ${texto}`);
+            tableData[cleanRowName][optionLabel] = (tableData[cleanRowName][optionLabel] || 0) + 1;
+          }
+        } else {
+          tableData[cleanRowName][selectedOption] = (tableData[cleanRowName][selectedOption] || 0) + 1;
+        }
+      });
+    }
+  });
+  const data = Object.entries(tableData).map(([rowName, options]) => ({
+    row: rowName,
+    options: Object.entries(options).map(([optionName, count]) => ({
+      name: optionName,
+      value: count
+    }))
+  }));
+
+  return { 
+    data,
+    ...(otherTexts.length > 0 && { otherTexts })
+  };
+}
+
 function processQuestion(question: IQuestion, results: SurveyResultDocument[]) {
+  if (question.type === 'table') {
+    return processTableQuestion(question, results);
+  }
   const data = (question.options || []).map((opt: IOption) => ({
     name: opt.label,
     value: 0,

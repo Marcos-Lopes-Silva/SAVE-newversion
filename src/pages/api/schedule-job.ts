@@ -117,17 +117,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               if (!survey) return res.status(404).json({ message: 'Survey not found' });
           
               const surveyResults = await SurveyResult.find({ surveyId });
-              const dimensions = processResults(survey, surveyResults);
+              const processedData = processResults(survey, surveyResults);
           
-              await SurveyAnalytics.findOneAndUpdate(
+              const analytics = await SurveyAnalytics.findOneAndUpdate(
                 { surveyId },
                 { 
                   surveyTitle: survey.title,
-                  dimensions
+                  pages: processedData.pages 
                 },
-                { upsert: true, new: true }
+                { 
+                  upsert: true, 
+                  new: true,
+                  setDefaultsOnInsert: true
+                }
               );
-          
               await agenda.schedule(date, 'send email', {
                 to: emails[0],
                 subject: 'Resultados da Pesquisa',
