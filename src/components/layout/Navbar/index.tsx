@@ -75,11 +75,11 @@ export default function NavbarLayout() {
     },
     {
       title: t("navbar.user.report"),
-      href: "/user/reports",
+      href: "/research",
     },
     {
       title: t("navbar.user.about"),
-      href: "/user/about",
+      href: "/about",
     },
   ];
 
@@ -145,7 +145,7 @@ export default function NavbarLayout() {
           status === 'authenticated' ? (
             <>
               <NavbarItem>
-                <MdCircleNotifications className="dark:text-white dark:hover:text-zinc-200 cursor-pointer hover:text-zinc-800" size={25} />
+                <NotificationDropdown />
               </NavbarItem>
               <NavbarItem>
                 <MdOutlineLogout className="cursor-pointer hover:text-zinc-500 dark:text-white dark:hover:text-zinc-200" onClick={() => signOut()} size={25} />
@@ -196,3 +196,32 @@ export default function NavbarLayout() {
   );
 }
 
+
+
+import { useState } from "react";
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
+
+function NotificationDropdown() {
+  const [notifications, setNotifications] = useState([]);
+
+  return (
+    <Dropdown>
+      <DropdownTrigger>
+        <Button isIconOnly variant="light">
+          <MdCircleNotifications className="text-black dark:text-white cursor-pointer" size={25} />
+        </Button>
+      </DropdownTrigger>
+      <DropdownMenu aria-label="Notifications">
+        {notifications.length === 0 ? (
+          <DropdownItem key="empty" className="text-center text-gray-500">
+            Sua caixa de entrada está vazia.
+          </DropdownItem>
+        ) : (
+          notifications.map((notification, index) => (
+            <DropdownItem key={index}>{notification}</DropdownItem>
+          ))
+        )}
+      </DropdownMenu>
+    </Dropdown>
+  );
+}

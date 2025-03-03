@@ -5,7 +5,7 @@ import SurveyResult from "../../../../../models/surveyResults";
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
 
-        const hasSurvey = await SurveyResult.findOne({ surveyId: req.body.surveyId });
+        const hasSurvey = await SurveyResult.findOne({ surveyId: req.body.surveyId, userId: req.body.userId });
 
         if (hasSurvey) {
             const updatedSurveyResult = await SurveyResult.findOneAndUpdate({ _id: hasSurvey._id }, req.body, { new: true });

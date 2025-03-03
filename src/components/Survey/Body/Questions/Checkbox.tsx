@@ -1,12 +1,57 @@
 import { Form } from "@/components/Form";
 import { IQuestionProp } from ".";
 import { LuAsterisk } from "react-icons/lu";
-import { useFormContext, Controller } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import { useState } from "react";
+import { Input } from "@nextui-org/react";
 
 export function Checkbox({ question }: IQuestionProp) {
-    const { control } = useFormContext();
-    const [showOtherInput, setShowOtherInput] = useState(false);
+    const { setValue, getValues } = useFormContext();
+
+    const handleCheckboxChange = (name: string, value: string, checked: boolean, isOtherOption: boolean) => {
+        const currentValues = getValues(name) || [];
+
+        if (isOtherOption) {
+            const newValues = checked
+                ? [...currentValues, value]
+                : currentValues.filter((v: string) => !v.includes("Outro:"));
+
+            const cleanedNewValues = new Set(newValues);
+
+            setValue(name, Array.from(cleanedNewValues));
+        } else {
+            const newValues = checked
+                ? [...currentValues, value]
+                : currentValues.filter((v: string) => v !== value);
+
+            const cleanedNewValues = new Set(newValues);
+
+            setValue(name, Array.from(cleanedNewValues));
+        }
+    };
+
+    const handleCheckboxOtherChange = (name: string, value: string) => {
+        const currentValues = getValues(name) || [];
+
+        const existingOther = currentValues.find((v: string) =>
+            v.toLowerCase().startsWith("outro:")
+        );
+
+        let newValues;
+
+        if (existingOther) {
+            newValues = currentValues.map((v: string) =>
+                v.toLowerCase().startsWith("outro:") ? `Outro: ${value}` : v
+            );
+        } else {
+            newValues = [...currentValues, `Outro: ${value}`];
+        }
+
+        const cleanedNewValues = new Set(newValues);
+        console.log(Array.from(cleanedNewValues));
+        console.log(newValues);
+        setValue(name, Array.from(cleanedNewValues));
+    };
 
     return (
         <Form.Field>
@@ -14,88 +59,48 @@ export function Checkbox({ question }: IQuestionProp) {
                 {`${question.id}. ${question.title}`}
                 {question.required ? <LuAsterisk size={10} /> : ""}
             </Form.Label>
-            <Controller
-                name={question.name}
-                control={control}
-                rules={{
-                    validate: (value: string[] = []) => {
-                        // Validação de campo obrigatório
-                        if (question.required && value.length === 0) {
-                            return "Por favor, selecione ao menos uma opção.";
-                        }
+            {question.options &&
+                question.options.map((option, index) => {
+                    const checkboxId = `${question.name}-${index}`;
+                    const watchedValue = getValues(question.name);
+                    const isOtherOption = ["outro", "outra", "outro:", "outros", "other"].includes(
+                        option.value.toLowerCase());
+                    const isOtherSelected = watchedValue ? watchedValue.find((v: string) => v.toLowerCase().startsWith(`outro:`)) : false;
 
-                        // Validação do campo "Outro"
-                        const otherValue = value.find(v => /^outro[s]?[:]?|^outra[s]?[:]?/i.test(v));
-                        if (otherValue && otherValue.length <= 7) {
-                            return "Por favor, preencha o campo 'Outros'.";
-                        }
+                    return (
+                        <>
+                            <Form.Field key={index} className="flex items-center gap-3">
+                                <Input
+                                    id={checkboxId}
+                                    className="w-10 h-10 flex-shrink-0"
+                                    type="checkbox"
+                                    value={option.value}
+                                    checked={isOtherOption ? isOtherSelected : getValues(question.name)?.includes(option.value)}
+                                    name={question.name}
+                                    onChange={(e) =>
+                                        handleCheckboxChange(question.name, option.value, e.target.checked, isOtherOption)
+                                    }
+                                />
+                                <Form.Label htmlFor={checkboxId} className="flex-1 font-bold text-sm">{option.label}</Form.Label>
+                            </Form.Field>
 
-                        return true;
-                    }
-                }}
-                render={({ field }) => (
-                    <>
-                        {question.options?.map((option, index) => {
-                            const checkboxId = `${question.name}-${index}`;
-                            const isOtherOption = /^outro[s]?[:]?|^outra[s]?[:]?/i.test(option.value);
-
-                            return (
-                                <div key={index} className="flex flex-col gap-3">
-                                    <Form.Field className="flex gap-3">
-                                        <input
-                                            type="checkbox"
-                                            id={checkboxId}
-                                            checked={field.value?.some((v: string) =>
-                                                isOtherOption
-                                                    ? /^outro[s]?[:]?|^outra[s]?[:]?/i.test(v)
-                                                    : v === option.value
-                                            )}
-                                            onChange={(e) => {
-                                                let newValues = [...(field.value || [])];
-
-                                                if (e.target.checked) {
-                                                    newValues.push(isOtherOption ? "Outro" : option.value);
-                                                } else {
-                                                    newValues = newValues.filter(v =>
-                                                        v !== option.value &&
-                                                        !/^outro[s]?[:]?|^outra[s]?[:]?/i.test(v)
-                                                    );
-                                                }
-
-                                                field.onChange(newValues);
-                                                setShowOtherInput(
-                                                    newValues.some(v => /^outro[s]?[:]?|^outra[s]?[:]?/i.test(v))
-                                                );
-                                            }}
-                                        />
-                                        <Form.Label htmlFor={checkboxId}>
-                                            {option.label}
+                            {
+                                isOtherOption && isOtherSelected && (
+                                    <Form.Field className="mt-4">
+                                        <Form.Label htmlFor={`${question.name}`} className="py-2 px-2 dark:text-white">
+                                            Especifique:
                                         </Form.Label>
+                                        <Input
+                                            id={`${question.name}`}
+                                            variant="underlined"
+                                            placeholder="Digite aqui..."
+                                            onChange={(e) => handleCheckboxOtherChange(question.name, e.target.value)}
+                                        />
                                     </Form.Field>
-
-                                    {/* Campo "Outro" condicional */}
-                                    {isOtherOption && showOtherInput && (
-                                        <Form.Field className="mt-2">
-                                            <Form.Input
-                                                placeholder="Digite aqui..."
-                                                name={`${question.name}[other]`}
-                                                value={(field.value?.find((v: string) => /^outro[s]?[:]?|^outra[s]?[:]?/i.test(v))?.split(":"))[1]?.trim() || ""}
-                                                onChange={(e) => {
-                                                    const newValue = `Outro: ${e.target.value}`;
-                                                    const newValues = field.value?.map((v: string) =>
-                                                        /^outro[s]?[:]?|^outra[s]?[:]?/i.test(v) ? newValue : v
-                                                    ) || [newValue];
-                                                    field.onChange(newValues);
-                                                }}
-                                            />
-                                        </Form.Field>
-                                    )}
-                                </div>
-                            )
-                        })}
-                    </>
-                )}
-            />
+                                )}
+                        </>
+                    );
+                })}
             <Form.ErrorMessage field={question.name} />
         </Form.Field>
     );

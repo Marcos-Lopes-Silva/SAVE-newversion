@@ -24,7 +24,7 @@ export default function Login() {
         if (status === 'authenticated') push('/authenticate');
     }, [status])
 
-    return (  // flex flex-col min-h-screen p-4 w-full max-w-screen-lg mx-auto md:p-8 lg:p-16 md:flex-row md:items-start md:justify-between
+    return (
         <main className="flex flex-col gap-16 p-4 w-full min-h-screen  md:flex-row lg:p-20 justify-center lg:gap-20">
             <section className="flex flex-col gap-5">
                 <h2 className={"font-bold text-3xl pl-2 mb-3 dark:text-white"}>

@@ -18,7 +18,7 @@
     },
     "footer": {
         "rights": "Todos os direitos reservados",
-        "about": "Sobre",
+        "about": "Política de Privacidade",
         "contact": "Contate-nos"
     },
     "login": {
@@ -215,7 +215,7 @@
     "user": {
         "dashboard": {
             "welcome_name": "Olá, ",
-            "welcome_user": "Bem-vindo à plataforma Save! Compartilhe seu conhecimento e experiência respondendo aos questionários disponíveis para você.",
+            "welcome_user": "Bem-vindo à plataforma Save! \n Compartilhe seu conhecimento e experiência respondendo aos questionários disponíveis para você.",
             "recently": "Questionários abertos recentemente",
             "button_continue": "Continuar",
             "button_start": "Começar",

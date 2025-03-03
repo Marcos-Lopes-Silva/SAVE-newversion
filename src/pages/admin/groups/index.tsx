@@ -29,7 +29,7 @@ export default function Groups(survey: ISurveyDocument[]) {
     }, [groups, search])
 
 
-    const Menu = ({ group }: { group : IGroupDocument }) => {
+    const Menu = ({ group }: { group: IGroupDocument }) => {
         const duplicateGroup = async () => {
             const newGroup = { ...group };
             delete newGroup._id;
@@ -136,4 +136,10 @@ export default function Groups(survey: ISurveyDocument[]) {
             </section>
         </main>
     )
+}
+
+Groups.auth = {
+    role: 'admin',
+    verified: true,
+    unauthorized: '/'
 }

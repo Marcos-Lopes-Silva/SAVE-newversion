@@ -27,14 +27,18 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const responses = await SurveyResult.findOne({ surveyId: id as string, userId: session?.user?._id });
 
     if (!responses) {
-        const responses = await SurveyResult.findOne({ userId: session?.user?._id });
+        const responses = await SurveyResult.find({ userId: session?.user?._id });
+
+
         return {
             props: {
                 survey: JSON.parse(JSON.stringify(survey)),
-                responses: JSON.parse(JSON.stringify(responses?.surveyResult ?? {}))
+                responses: JSON.parse(JSON.stringify(responses[responses.length - 1]?.surveyResult ?? {}))
             }
         }
     }
+
+    console.log(responses);
 
     return {
         props: {
@@ -43,3 +47,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         }
     }
 }
+
+
+SurveyUser.auth = {
+    role: 'user',
+    unauthorized: '/'
+};
