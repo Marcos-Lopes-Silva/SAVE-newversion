@@ -1,9 +1,14 @@
 import React from 'react';
 import Manage from '../../../../components/Survey/Manage';
 
-export default function SurveyQuestions(){
+export default function SurveyQuestions() {
     return (
         <Manage />
     );
 };
 
+SurveyQuestions.auth = {
+    role: 'admin',
+    verified: true,
+    unauthorized: '/'
+}

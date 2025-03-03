@@ -20,7 +20,6 @@
     "@reduxjs/toolkit": "^2.2.7",
     "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
-    "flowbite-react": "^0.10.2",
     "framer-motion": "^11.5.4",
     "i18next": "^23.14.0",
     "mongoose": "^8.6.1",

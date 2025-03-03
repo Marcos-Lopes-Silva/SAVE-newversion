@@ -377,3 +377,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         }
     )
 }
+
+CompleteCreation.auth = {
+    role: 'admin',
+    verified: true,
+    unauthorized: '/'
+}

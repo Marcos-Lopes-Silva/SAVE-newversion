@@ -27,9 +27,9 @@ export default function Item<T extends Item>({ options, item, icon, menu, button
         <li className={`${props.className}`} {...props}>
             {icon}
             <div className="w-full gap-3 flex-col">
-                <div className="flex justify-between w-full pt-3 items-end">
-                    <h2 className="block lg:hidden  text-lg font-medium dark:text-white">{truncateText(item.title ?? '', 7)}</h2>
-                    <h2 className="hidden lg:block text-lg font-medium dark:text-white">{truncateText(item.title ?? '', 50)}</h2>
+                <div className="flex items-center justify-between w-full pt-3">
+                    <h2 className="block lg:hidden text-md sm:text-lg font-medium dark:text-white">{truncateText(item.title ?? '', 17)}</h2>
+                    <h2 className="hidden lg:block text-md sm:text-lg font-medium dark:text-white">{truncateText(item.title ?? '', 50)}</h2>
                     {
                         !menu && buttonLabel
                             ? <Button className="bg-zinc-900 text-white" onClick={action}>{buttonLabel}</Button>

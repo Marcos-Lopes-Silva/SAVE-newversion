@@ -4,10 +4,8 @@ import {
   TableCell,
   TableColumn,
   TableHeader,
-  TableRow,
-  getKeyValue,
+  TableRow
 } from "@nextui-org/react";
-import { Key, useState } from "react";
 import { IQuestion } from "../../../../../models/surveyModel";
 import { LuAsterisk } from "react-icons/lu";
 import { Form } from "@/components/Form";
@@ -23,26 +21,17 @@ export interface IBackendTable {
 }
 
 export function TableSurvey({ question }: IQuestionProp) {
-  const [selectedValues, setSelectedValues] = useState<{
-    [key: number]: string;
-  }>({});
-  const [keys, setKeys] = useState<string[]>([]);
-  const [indexes, setIndexes] = useState<number>(0);
 
-  const { control, register } = useFormContext();
+  const { control, setValue, getValues } = useFormContext();
 
-  const [backendResponses, setBackendResponses] = useState<IBackendTable[]>([]);
-
-  const addResponse = (rowId: number, columnKey: Key, rowText: string) => {
+  const handleAddResponse = (rowText: string, columnKey: string) => {
     if (!question.options) return;
 
-    question.options.map((option) => {
-      if (option.value === columnKey) {
-        setBackendResponses([...backendResponses, { questionText: rowText, response: option.label }]);
-        setSelectedValues({ ...selectedValues, [rowId]: columnKey });
-      }
-    });
-  };
+    const selectedOption = question.options.find(option => option.value === columnKey);
+    if (selectedOption) {
+      setValue(question.name, { ...getValues(question.name), [rowText]: selectedOption.label });
+    }
+  }
 
   return (
     question.options &&
@@ -67,7 +56,7 @@ export function TableSurvey({ question }: IQuestionProp) {
                   return (
                     <TableCell>
                       <Controller
-                        name={`${question.name}-${row.text.toLowerCase()}`}
+                        name={`${question.name}`}
                         control={control}
                         rules={{ required: question.required && "Essa questão é obrigatória." }}
                         defaultValue=""
@@ -76,8 +65,8 @@ export function TableSurvey({ question }: IQuestionProp) {
                             type="radio"
                             value={columnKey}
                             required={question.required}
-                            checked={field.value === columnKey}
-                            onChange={field.onChange}
+                            checked={question.options ? field.value[row.text] === question.options?.find(opt => opt.value === columnKey)?.label : false}
+                            onChange={(e) => handleAddResponse(row.text, columnKey.toString())}
                           />
                         )}
                       />

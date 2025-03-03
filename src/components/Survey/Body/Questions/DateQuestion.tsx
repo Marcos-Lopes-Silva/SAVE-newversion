@@ -9,6 +9,17 @@ import { CalendarDateTime, parseDate, ZonedDateTime } from "@internationalized/d
 export function DateQuestion({ question }: IQuestionProp) {
     const { control } = useFormContext();
 
+    const normalizeDate = (value?: string) => {
+        if (!value) return "2024-09-01"; // Data padrão
+        if (value.includes("T")) return value.split("T")[0]; // Já está em formato ISO
+        const parts = value.split(/[/\s:]/); // Quebra pelo "/" ou espaço
+        if (parts.length >= 3) {
+            // Converte para YYYY-MM-DD
+            const [day, month, year] = parts.map(Number);
+            return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        }
+        return "2024-09-01";
+    };
 
     const handleChangeDate = (e: CalendarDate | CalendarDateTime | ZonedDateTime, onChange: (...event: any[]) => void) => {
         const value = e.toString();
@@ -26,7 +37,7 @@ export function DateQuestion({ question }: IQuestionProp) {
                 rules={{ required: question.required ? true : false }}
                 render={({ field: { onChange, onBlur, value, ref } }) => (
                     <I18nProvider locale="en-GB">
-                        <DatePicker onChange={(e) => handleChangeDate(e, onChange)} onBlur={onBlur} value={parseDate(value ? value.split("T")[0] : "2024-09-01")} ref={ref} />
+                        <DatePicker onChange={(e) => handleChangeDate(e, onChange)} onBlur={onBlur} value={parseDate(normalizeDate(value))} ref={ref} />
                     </I18nProvider>
                 )}
             />

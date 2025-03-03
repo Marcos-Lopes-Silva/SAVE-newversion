@@ -11,39 +11,44 @@ import { t } from "i18next";
 import { Control, FormProvider, useForm, UseFormWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Button, ButtonGroup } from "@nextui-org/react";
+import { Button, ButtonGroup, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@nextui-org/react";
 import { RiSideBarFill } from "react-icons/ri";
 import { api } from "@/lib/api";
 import { toast } from "react-toastify";
 import { ISurveyResult } from "../../../../models/surveyResults";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+
 interface Props {
     survey: ISurveyDocument;
     responses: Object;
 }
 
-export const createSurveySchema = (survey: ISurvey) => {
+const createSurveySchema = (survey: ISurvey) => {
     const schema = z.object(
         survey.pages.reduce((acc, page) => {
             page.questions.forEach((question) => {
                 let fieldSchema: z.ZodTypeAny;
 
                 switch (question.type) {
+                    case 'number':
                     case 'text':
                     case 'textarea':
-                        fieldSchema = z.string().optional();
+                        fieldSchema = z.string({ invalid_type_error: "Digite aqui" }).optional();
                         break;
                     case 'radio':
-                        fieldSchema = z.string().optional();
+                        fieldSchema = z.string().optional().nullable();
                         break;
                     case 'checkbox':
-                        fieldSchema = z.array(z.string()).optional();
+                        fieldSchema = z.array(z.string({ invalid_type_error: "Selecione no mínimo uma opção." })).optional().nullable();
                         break;
                     case 'table':
                         fieldSchema = z.object(
-                            question.rows!.reduce((acc, row) => {
-                                acc[row.id] = z.array(z.string()).min(1, `Selecione pelo menos uma opção na pergunta ${question.id}, linha ${row.id}`);
-                                return acc;
+                            question.rows!.reduce((rowAcc, row) => {
+                                rowAcc[row.text] = z
+                                    .string({ required_error: `Selecione uma opção para ${row.text}` })
+                                    .min(1, `Selecione uma opção para ${row.text}`);
+                                return rowAcc;
                             }, {} as Record<string, z.ZodTypeAny>)
                         ).optional();
                         break;
@@ -57,10 +62,11 @@ export const createSurveySchema = (survey: ISurvey) => {
 
                 if (!question.dependsOn && question.required) {
                     switch (question.type) {
+                        case 'number':
                         case 'text':
                         case 'textarea':
                             fieldSchema = fieldSchema.refine(val => !!val && val.trim() !== '', {
-                                message: `Pergunta ${question.id} é obrigatória`,
+                                message: `A pergunta ${question.id} é obrigatória`,
                             });
                             break;
                         case 'radio':
@@ -72,6 +78,12 @@ export const createSurveySchema = (survey: ISurvey) => {
                             fieldSchema = fieldSchema.refine(val => !!val && val.length > 0, {
                                 message: `Selecione pelo menos uma opção na pergunta ${question.id}`,
                             });
+                            break;
+                        case 'table':
+                            fieldSchema = fieldSchema.refine(
+                                val => val && Object.values(val).every(v => !!v),
+                                { message: `Todas as linhas da pergunta ${question.id} são obrigatórias.` }
+                            );
                             break;
                     }
                 }
@@ -85,22 +97,21 @@ export const createSurveySchema = (survey: ISurvey) => {
                     }, "Preencha o campo 'Outro'");
                 }
 
-
-
                 acc[question.name] = fieldSchema;
             });
 
             return acc;
         }, {} as Record<string, z.ZodTypeAny>)
     ).superRefine((data, ctx) => {
+
         survey.pages.flatMap(page => page.questions).forEach(question => {
             if (!question.dependsOn) return;
+
             if (data[question.dependsOn] !== question.dependsOnValue) return;
 
             const val = data[question.name];
 
             if (question.required) {
-
                 switch (question.type) {
                     case 'text':
                     case 'textarea':
@@ -132,6 +143,15 @@ export const createSurveySchema = (survey: ISurvey) => {
                             });
                         }
                         break;
+                    case 'table':
+                        if (!val || Object.values(val).every(v => !!v)) {
+                            ctx.addIssue({
+                                code: z.ZodIssueCode.custom,
+                                path: [question.name],
+                                message: `Preencha todas as opções na pergunta ${question.id}`,
+                            });
+                        }
+                        break;
                 }
             }
         });
@@ -140,23 +160,24 @@ export const createSurveySchema = (survey: ISurvey) => {
     return schema;
 };
 
-
-
 export default function SurveyBody({ survey, responses }: Props) {
 
     const [showSidebar, setShowSidebar] = useState<boolean>(true);
     const [showProgress, setShowProgress] = useState<boolean>(true);
     const [currentPage, setCurrentPage] = useState<number>(1);
+    const [allowedToSend, setAllowedToSend] = useState<boolean>(false);
+    const { onOpen, onOpenChange, isOpen } = useDisclosure();
+    const router = useRouter();
+    const { onOpen: onOpen2, onOpenChange: onOpenChange2, isOpen: isOpen2 } = useDisclosure();
     const questionRefs = useRef<(HTMLDivElement | null)[]>([]);
     const [loaded, setLoaded] = useState<boolean>(false);
     const { data: session } = useSession();
 
     const createSurveyForm = useForm<Record<string, any>>({
         defaultValues: responses,
-        mode: "onBlur",
+        mode: "all",
         resolver: zodResolver(createSurveySchema(survey)),
     });
-
 
     const {
         handleSubmit,
@@ -165,15 +186,26 @@ export default function SurveyBody({ survey, responses }: Props) {
         control
     } = createSurveyForm;
 
-
     const scrollToQuestion = (questionId: number) => {
         const questionElement = questionRefs.current[questionId - 1];
         if (questionElement) {
-            questionElement.scrollIntoView({ behavior: "smooth" });
+            const elementRect = questionElement.getBoundingClientRect();
+            const absoluteElementTop = elementRect.top + window.scrollY;
+            const middleOfScreen = window.innerHeight / 2;
+
+            window.scrollTo({
+                top: absoluteElementTop - middleOfScreen + (elementRect.height / 2),
+                behavior: "smooth",
+            });
         }
     };
 
     const submitSurvey = async (data: any) => {
+
+        if (!allowedToSend) {
+            onOpen();
+            return;
+        }
 
         const surveyResult: ISurveyResult = {
             currentPage: currentPage,
@@ -182,8 +214,9 @@ export default function SurveyBody({ survey, responses }: Props) {
             surveyResult: data,
         }
         try {
-            toast.success('Questionário enviado com sucesso!');
             await api.post("/user/survey/submit", surveyResult);
+            toast.success('Questionário enviado com sucesso!');
+            onOpen2();
 
         } catch (error) {
             console.error(error);
@@ -199,8 +232,29 @@ export default function SurveyBody({ survey, responses }: Props) {
     useEffect(() => {
         if (Object.keys(errors).length > 0) {
             const firstError = Object.keys(errors)[0];
-            const questionId = survey.pages.flatMap(page => page.questions).map(q => q.name).map(q => q).indexOf(firstError);
-            scrollToQuestion(questionId!);
+
+            let pageIdWithError: number | null = null;
+            let questionIndexWithError: number | null = null;
+            console.log(errors);
+            survey.pages.forEach((page) => {
+                page.questions.forEach((question, index) => {
+                    if (question.name === firstError) {
+                        pageIdWithError = page.id;
+                        questionIndexWithError = index;
+                    }
+                });
+            });
+
+            if (pageIdWithError !== null && questionIndexWithError !== null) {
+
+                setCurrentPage(pageIdWithError);
+
+                setTimeout(() => {
+                    scrollToQuestion(questionIndexWithError!);
+                }, 100);
+            }
+
+            toast.error('Por favor, verifique se você respondeu todas as perguntas.');
         }
     }, [errors]);
 
@@ -212,10 +266,35 @@ export default function SurveyBody({ survey, responses }: Props) {
         });
 
         setLoaded(true);
+    }, []);
 
-        console.log(errors);
-    }, [errors]);
+    useEffect(() => {
+        const handleResize = () => {
+            const isMobile = window.innerWidth <= 768;
+            setShowSidebar(!isMobile);
+            setShowProgress(!isMobile);
+        };
 
+        if (typeof window !== "undefined") {
+            handleResize();
+            window.addEventListener('resize', handleResize);
+
+            return () => {
+                window.removeEventListener('resize', handleResize);
+            };
+        }
+    }, []);
+
+    const handleAllowedToSend = () => {
+        setAllowedToSend(true);
+        onOpenChange();
+        handleSubmit(submitSurvey)();
+    }
+
+    const handleInitialPage = () => {
+        onOpenChange2();
+        router.push('/user/dashboard');
+    }
 
     return loaded && (
         <main className="w-full flex">
@@ -224,13 +303,17 @@ export default function SurveyBody({ survey, responses }: Props) {
                 <Button variant="bordered" className="bg-zinc-600 text-white" onClick={() => setShowProgress(!showProgress)}></Button>
             </ButtonGroup>
             <Sidebar pages={survey.pages} currentPage={currentPage} setCurrentPage={setCurrentPage} show={showSidebar} />
-            <section className="p-20 w-full flex items-center flex-col gap-10">
-                <header className="flex flex-col p-10 gap-4 w-4/6 bg-zinc-100 dark:bg-zinc-800 rounded-2xl">
-                    <h1 className="font-bold text-lg px-14 dark:text-white">{survey.title}</h1>
-                    <p className="px-14 dark:text-white">{survey.pages.find(page => page.id === currentPage)!.description}</p>
+            <section className="sm:p-20 w-full px-3 flex items-center flex-col gap-10">
+                <header className="flex flex-col p-10 gap-4 sm:w-4/6 w-full bg-zinc-100 dark:bg-zinc-800 rounded-2xl">
+                    <h1 className="font-bold text-medium sm:text-lg sm:px-14 dark:text-white">{survey.title}</h1>
+                    <p className="sm:px-14 dark:text-white">{survey.pages.find(page => page.id === currentPage)!.description}</p>
                 </header>
                 <FormProvider {...createSurveyForm}>
-                    <form onSubmit={handleSubmit(submitSurvey)} className="w-1/2 flex flex-col gap-3">
+                    <form onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                            e.preventDefault();
+                        }
+                    }} onSubmit={handleSubmit(submitSurvey)} className="sm:w-1/2 flex flex-col gap-3">
                         {survey.pages && survey.pages.find(page => page.id === currentPage)!.questions.map((question, index) => {
 
                             return (
@@ -250,6 +333,43 @@ export default function SurveyBody({ survey, responses }: Props) {
                 </FormProvider>
             </section>
             <QuestionsProgress control={control} show={showProgress} scroll={scrollToQuestion} watch={watch} questions={survey.pages.find(page => page.id === currentPage)!.questions} />
+            <Modal isOpen={isOpen} placement={'auto'} onOpenChange={onOpenChange}>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">Verificação de Envio</ModalHeader>
+                            <ModalBody>
+                                <p className="sm:text-lg text-medium dark:text-white">Tem certeza que deseja enviar o questionário?</p>
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="danger" variant="light" onPress={onClose}>
+                                    Fechar
+                                </Button>
+                                <Button className="bg-zinc-900 text-white" onPress={handleAllowedToSend}>
+                                    Enviar
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+            <Modal isOpen={isOpen2} placement={'auto'} onOpenChange={onOpenChange2}>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">Mensagem de Finalização</ModalHeader>
+                            <ModalBody>
+                                <p className="sm:text-lg text-medium dark:text-white">{survey.completeMessage ? survey.completeMessage : "Obrigado por responder o questionário! Sua resposta foi enviada com sucesso."}</p>
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button className="bg-zinc-900 text-white" onPress={handleInitialPage}>
+                                    Voltar a Página Inicial
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
         </main>
     )
 }
@@ -265,34 +385,30 @@ interface IQuestionsProgress {
 const QuestionsProgress = ({ questions, scroll, show, watch }: IQuestionsProgress) => {
     const [visibleQuestions, setVisibleQuestions] = useState<number[]>([]);
 
-    // Função para verificar dependências de questões
     const checkDependencies = (question: IQuestion, answeredValues: Record<string, any>) => {
         if (!question.dependsOn || !question.dependsOnValue) return true;
 
         const dependentValue = answeredValues[question.dependsOn];
+
         return Array.isArray(dependentValue)
             ? dependentValue.includes(question.dependsOnValue)
-            : dependentValue === question.dependsOnValue;
+            : dependentValue === question.dependsOnValue ? true : question.dependsOnValue.includes("Outro") && typeof dependentValue === "string" ? dependentValue.includes("Outro") : false;
     };
 
-    // Verifica se uma questão está completamente respondida
     const isQuestionAnswered = (question: IQuestion, currentValue: any) => {
-        if (question.type === 'table') {
-            return question.rows?.every(row =>
-                currentValue?.[row.id] !== undefined &&
-                currentValue[row.id] !== null &&
-                currentValue[row.id] !== ''
-            );
+        if (question.type === 'table' && question.rows) {
+            return question.rows.every(row => currentValue[row.text] && currentValue[row.text].length > 0);
         }
-        return currentValue !== undefined && currentValue !== null && currentValue !== '';
+
+        return currentValue !== undefined && currentValue !== null && currentValue !== '' && currentValue !== false;
     };
 
-    // Atualiza a lista de questões visíveis
     const updateVisibleQuestions = useCallback(() => {
         const answeredValues = questions.reduce((acc, question) => ({
             ...acc,
             [question.name]: watch(question.name as keyof Object)
         }), {});
+
 
         const filteredQuestions = questions
             .filter(question => checkDependencies(question, answeredValues))
@@ -301,14 +417,12 @@ const QuestionsProgress = ({ questions, scroll, show, watch }: IQuestionsProgres
         setVisibleQuestions(filteredQuestions);
     }, [questions, watch]);
 
-    // Efeitos para atualizar quando valores mudam
     useEffect(() => {
         updateVisibleQuestions();
         const subscription = watch(() => updateVisibleQuestions());
         return () => subscription.unsubscribe();
     }, [updateVisibleQuestions, watch]);
 
-    // Componente de item de progresso individual
     const ProgressItem = ({ question }: { question: IQuestion }) => {
         const currentValue = watch(question.name as keyof Object);
         const answered = isQuestionAnswered(question, currentValue);
@@ -320,12 +434,11 @@ const QuestionsProgress = ({ questions, scroll, show, watch }: IQuestionsProgres
                     ${answered ? 'bg-lime-600 text-white' :
                         question.required ? 'bg-slate-200' : 'bg-slate-50'}`}
             >
-                {question.type === 'table' ? `T${question.id}` : `Q${question.id}`}
+                {`Q${question.id}`}
             </li>
         );
     };
 
-    // Agrupa questões em linhas de 3 itens
     const chunkedQuestions = useMemo(() => {
         const chunk = (arr: number[], size: number) =>
             Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
@@ -358,6 +471,7 @@ const QuestionsProgress = ({ questions, scroll, show, watch }: IQuestionsProgres
 
 
 
+
 interface ISidebar {
     currentPage: number,
     setCurrentPage: (page: number) => void,
@@ -371,13 +485,17 @@ const Sidebar = ({ currentPage, setCurrentPage, pages, show }: ISidebar) => {
 
 
     return (
-        <aside className={`${show ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}  transform transition-all duration-700 w-1/6 fixed bg-gradient-black p-10 pb-36 rounded-r-2xl`}>
+        <aside className={`${show ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}  transform transition-all duration-700 z-50 sm:w-1/6 fixed bg-gradient-black p-10 pb-36 rounded-r-2xl`}>
             <div className="flex justify-between py-5 h-auto">
                 <h2 className="font-bold text-lg items-center text-white">{t('user.survey.sidebar.title')}</h2>
             </div>
             <ul className="flex flex-col gap-5 mt-5">
                 {pages.map((page, index) => (
-                    <li className={`${page.id === currentPage ? 'bg-gradient-gray text-white' : 'hover:bg-zinc-700 text-white'} px-8 py-4 rounded-lg cursor-pointer`} onClick={() => setCurrentPage(page.id)} key={index}>
+                    <li className={`${page.id === currentPage ? 'bg-gradient-gray text-white' : 'hover:bg-zinc-700 text-white'} px-8 py-4 rounded-lg cursor-pointer`}
+                        onClick={() => {
+                            setCurrentPage(page.id)
+                            window.scrollTo(0, 0);
+                        }} key={index}>
                         <span className="text-sm font-bold cursor-pointer" >{`${page.id} - ${page.title}`}</span>
                     </li>
                 ))}
