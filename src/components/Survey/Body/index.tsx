@@ -485,7 +485,7 @@ const Sidebar = ({ currentPage, setCurrentPage, pages, show }: ISidebar) => {
 
 
     return (
-        <aside className={`${show ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}  transform transition-all duration-700 z-50 sm:w-1/6 fixed bg-gradient-black p-10 pb-36 rounded-r-2xl`}>
+        <aside className={`${show ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'} max-h-[400px] sm:h-full transform transition-all duration-700 z-50 sm:w-1/6 fixed bg-gradient-black p-10 pb-36 rounded-r-2xl`}>
             <div className="flex justify-between py-5 h-auto">
                 <h2 className="font-bold text-lg items-center text-white">{t('user.survey.sidebar.title')}</h2>
             </div>
