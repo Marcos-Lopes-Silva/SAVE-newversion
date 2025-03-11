@@ -7,7 +7,8 @@ interface Props extends InputProps {
     max?: number | string
     valueAsNumber?: boolean
     rhfPattern?: any,
-    validate?: any
+    validate?: any,
+    dependsOn?: string
 }
 
 export function Input(props: Props) {
@@ -21,15 +22,7 @@ export function Input(props: Props) {
             }}
             variant="underlined"
             className="flex-1 focus:rounded-lg rounded-lg border-0 shadow-sm px-1 py-2 dark:text-zinc-800 focus:outline-none focus:ring-2 focus:ring-violet-500"
-            {...register(props.name,
-                {
-                    required: props.required && true,
-                    min: props.min && { value: props.min, message: `Valor mínimo é ${props.min}` },
-                    max: props.max && { value: props.max, message: `Valor máximo é ${props.max}` },
-                    pattern: props.rhfPattern && props.rhfPattern,
-                    validate: props.validate
-                }
-            )}
+            {...register(props.name)}
             {...props}
         />
     )

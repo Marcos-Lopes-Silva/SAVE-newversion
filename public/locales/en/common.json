@@ -18,13 +18,13 @@
     },
     "footer": {
         "rights": "All rights reserved",
-        "about": "About",
+        "about": "Policy and Privacy",
         "contact": "Contact us"
     },
     "login": {
-        "find_out_more": "Find out more",
+        "find_out_more": "Learn more",
         "diference": "Start making a difference now.",
-        "difficult": "Having trouble logging in? Click 'Find out more' for assistance and guidance.",
+        "difficult": "Having trouble logging in? Click 'Learn more' for assistance and guidance.",
         "welcome": "Welcome",
         "make_login": "Log in quickly and securely with your Facebook, GitHub, or Google credentials to start exploring all the possibilities that Save offers.",
         "facebook": "Continue with Facebook",
@@ -204,7 +204,7 @@
     "user": {
         "dashboard": {
             "welcome_name": "Hello, ",
-            "welcome_user": "Welcome to the Save platform! Share your knowledge and experience by answering the surveys available to you.",
+            "welcome_user": "Welcome to the Save platform! \n Share your knowledge and experience by answering the surveys available to you.",
             "recently": "Recently open surveys",
             "button_continue": "Continue",
             "button_star": "Start",

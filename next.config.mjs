@@ -6,6 +6,16 @@ export default {
     defaultLocale: 'en',
     localeDetection: false,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'media4.giphy.com',
+        pathname: '/media/**',
+        port: ''
+      }
+    ]
+  },
   trailingSlash: false,
   reactStrictMode: true,
 }

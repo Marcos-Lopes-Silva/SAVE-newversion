@@ -67,56 +67,35 @@ export default function Dashboard({ surveys }: Props) {
     }, []);
 
     return (
-        <main className="flex flex-col py-5 items-center gap-16">
-            <header className="flex flex-col bg-zinc-100 shadow-lg rounded-3xl gap-4 mt-3 ml-5 mr-5 p-4 lg:px-36 lg:py-12">
-                <h1 className={"font-semibold text-xl mt-5 text-center lg:text-left lg:py-1"}>
+        <main className="flex px-2 flex-col sm:py-5 items-center sm:px-5 justify-center gap-16">
+            <header className="flex flex-col bg-zinc-100 shadow-lg rounded-3xl gap-4 p-8 lg:px-36 lg:py-12">
+                <h1 className={"hidden sm:block font-semibold text-xl mt-5 text-left lg:py-1"}>
                     {t('user.dashboard.welcome_name')}
-                    {truncateText(session?.user.name + '!', 16)}
+                    {session?.user.name}
                 </h1>
 
-                <p className="text-md mb-8 mr-8 lg:ml-0 ml-8 text-justify">
+                <h1 className={"block sm:hidden font-semibold text-lg sm:text-xl mt-5 text-left lg:py-1"}>
+                    {t('user.dashboard.welcome_name')}
+                    {session?.user.name?.split(' ')[0]}
+                </h1>
+
+                <p className="text-sm sm:text-md lg:ml-0 text-justify">
                     {t('user.dashboard.welcome_user')}
                 </p>
             </header>
             <section className="flex flex-col w-full items-center lg:px-20">
-                {recentSurvey && (
-                    <div className="flex flex-col gap-8 lg:w-4/5 lg:px-28 w-full ml-10">
-                        <label className="text-sm">
-                            {t('user.dashboard.recently')}
-                        </label>
-                        <Item<ISurveyDocument>
-                            icon={
-                                <div className="p-7 dark:bg-zinc-950 bg-zinc-800 flex items-center justify-center rounded-2xl text-white">
-                                    <HiOutlineUserGroup size={20} />
-                                </div>
-                            }
-                            options={
-                                <div className="flex mt-4 -mb-4">
-                                    <GiBackwardTime size={20} />
-                                    <p className="text-sm ml-1 font-semibold">
-                                        {t('user.dashboard.error.available_date')}
-                                    </p>
-                                </div>
-                            }
-                            buttonLabel={t('user.dashboard.button_continue')}
-                            action={() => openSurvey(recentSurvey._id as string)}
-                            className={"flex gap-12 dark:bg-zinc-800 shadow-2xl border-[0.5px] w-11/12 min-h-36 rounded-3xl p-9"}
-                            item={recentSurvey}
-                        />
-                    </div>
-                )}
-                <div className="flex flex-col gap-8 lg:w-4/5 lg:px-28 w-full ml-10 mt-10">
-                    <label className="text-sm">
+                <div className="flex flex-col gap-8 lg:w-4/5 lg:px-28 w-full ">
+                    <label className="text-xs sm:text-sm">
                         {t('user.dashboard.avaliable')}
                         <br />
                         {t('user.dashboard.click')}
                     </label>
-                    <ul className="flex flex-col gap-14 w-full">
+                    <ul className="flex flex-col items-center gap-2 sm:gap-7 w-full">
                         {filteredListP.map((survey, index) => survey.status === "active" && (
                             <Item<ISurveyDocument>
                                 icon={
-                                    <div className="p-7 dark:bg-zinc-950 bg-zinc-800 flex items-center justify-center rounded-2xl text-white">
-                                        <MdMenuBook size={20} />
+                                    <div className="sm:p-7 p-4 -py-2 dark:bg-zinc-950 bg-zinc-800 flex items-center justify-center rounded-2xl text-white">
+                                        <MdMenuBook className="size-5 sm:size-7" />
                                     </div>
                                 }
                                 options={
@@ -127,7 +106,7 @@ export default function Dashboard({ surveys }: Props) {
                                 buttonLabel="Começar"
                                 action={() => openSurvey(survey._id as string)}
                                 key={index}
-                                className={"flex gap-12 dark:bg-zinc-800 shadow-2xl w-11/12 min-h-36 rounded-3xl p-9"}
+                                className={"flex gap-3 sm:gap-12 border border-zinc-200 dark:bg-zinc-800 shadow-lg sm:shadow-xl w-full items-center sm:w-11/12 min-h-36 rounded-tr-3xl rounded-bl-3xl p-5 sm:p-9"}
                                 item={survey}
                             />
                         ))}

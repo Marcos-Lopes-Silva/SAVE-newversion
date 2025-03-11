@@ -9,24 +9,20 @@ interface Props {
     question: IQuestion;
 }
 
-const QuestionBody = React.memo(({ id, question }: Props) => {
-    const { control } = useFormContext();
+const QuestionBody = ({ id, question }: Props) => {
+    const { control, watch } = useFormContext();
 
     const questionAnswer = useWatch({
         control,
         name: question.dependsOn!,
     });
 
-    const shouldShowQuestion = question.dependsOn
-        ? question.dependsOnValue !== undefined
-            ? questionAnswer === question.dependsOnValue
-            : Boolean(questionAnswer) &&
-            (Array.isArray(questionAnswer) ? questionAnswer.length > 0 : true)
-        : true;
+    const questionAnswerWatch = watch(question.dependsOn!);
+
+
 
     useEffect(() => {
-        console.log('Dependency Answer:', questionAnswer, 'Should Show:', shouldShowQuestion);
-    }, [questionAnswer, shouldShowQuestion]);
+    }, [questionAnswer]);
 
 
     function handleType(type: IQuestion["type"]) {
@@ -56,14 +52,30 @@ const QuestionBody = React.memo(({ id, question }: Props) => {
         }
     }
 
-    if (!shouldShowQuestion) return null;
+    if (question.dependsOn) {
+        const shouldShowQuestion = question.dependsOn
+            ? question.dependsOnValue !== undefined
+                ? questionAnswerWatch && questionAnswerWatch[question.dependsOn] === question.dependsOnValue
+                    ? true
+                    : typeof questionAnswerWatch === "string"
+                        ? (question.dependsOnValue.includes("Outro") && questionAnswerWatch.includes("Outro"))
+                            ? true
+                            : questionAnswerWatch === question.dependsOnValue
+                        : false
+                : Boolean(questionAnswerWatch) &&
+                (Array.isArray(questionAnswerWatch) ? questionAnswerWatch.length > 0 : true)
+            : true;
+
+        if (!shouldShowQuestion) return null;
+    }
+
 
     return (
         <div id={id} className="bg-zinc-100 dark:bg-zinc-800 p-10 rounded-2xl shadow-lg">
             {handleType(question.type)}
         </div>
     );
-});
+};
 
 QuestionBody.displayName = "QuestionBody";
 

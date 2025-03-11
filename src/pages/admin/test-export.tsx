@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ISurveyDocument } from "../../models/surveyModel"
+import { ISurveyDocument } from "../../../models/surveyModel"
 
 type SurveyListItem = Pick<ISurveyDocument, '_id' | 'title' | 'status' | 'openDate' | 'endDate'> & {
   _id: string
@@ -134,7 +134,6 @@ export default function ExportacaoDados() {
           <ul className="list-disc pl-5 mt-2 space-y-2">
             <li>O arquivo CSV conterá todas as respostas da pesquisa selecionada</li>
             <li>Questões complexas (como tabelas) serão formatadas adequadamente</li>
-            <li>Respostas de 'Outro' serão incluídas em colunas separadas</li>
             <li>O nome do arquivo conterá o ID único da pesquisa</li>
           </ul>
         </div>
