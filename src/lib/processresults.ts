@@ -13,6 +13,7 @@ export function processResults(
     surveyDescription: survey.description,
     openDate: survey.openDate,
     endDate: survey.endDate,
+    hasPublic: false,
     pages: survey.pages
       .filter(page => 
         page.questions.some(q => 

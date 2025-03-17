@@ -27,6 +27,7 @@ export interface SurveyPage {
 export interface ISurveyAnalytics {
   surveyId: mongoose.Types.ObjectId;
   surveyTitle: string;
+  hasPublic: boolean;
   surveyDescription: string;
   pages: Array<SurveyPage>;
   openDate: String;
@@ -87,6 +88,7 @@ const surveyAnalyticsSchema = new Schema<ISurveyAnalyticsDocument>(
     pages: [surveyPageSchema],
     openDate: { type: String, required: true },
     endDate: { type: String, required: true },
+    hasPublic: { type: Boolean, required: true },
   },
   { timestamps: true },
 )
