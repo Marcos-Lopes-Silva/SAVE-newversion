@@ -10,6 +10,10 @@ export function processResults(
   return {
     surveyId: new mongoose.Types.ObjectId(String(survey._id)),
     surveyTitle: survey.title,
+    surveyDescription: survey.description,
+    openDate: survey.openDate,
+    endDate: survey.endDate,
+    hasPublic: false,
     pages: survey.pages
       .filter(page => 
         page.questions.some(q => 
@@ -24,7 +28,8 @@ export function processResults(
             title: question.title,
             name: question.name,
             type: question.type,
-            processedData: processQuestion(question, results)
+            processedData: processQuestion(question, results),
+            isPublic: false
           }))
       }))
   };
