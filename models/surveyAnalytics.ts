@@ -32,7 +32,12 @@ export interface ISurveyAnalytics {
   pages: Array<SurveyPage>;
   openDate: String;
   endDate: String;
+  filter?: {
+    questionName: string;
+    answer: string;
+  }; 
 }
+
 
 export interface ISurveyAnalyticsDocument extends ISurveyAnalytics, Document {}
 
@@ -80,8 +85,14 @@ const surveyAnalyticsSchema = new Schema<ISurveyAnalyticsDocument>(
     surveyId: {
       type: Schema.Types.ObjectId,
       required: true,
-      unique: true,
       ref: 'Survey'
+    },
+    filter: {
+      type: new Schema({
+        questionName: { type: String, required: true },
+        answer: { type: String, required: true }
+      }, { _id: false }),
+      required: false, 
     },
     surveyTitle: { type: String, required: true },
     surveyDescription: { type: String, required: true },
@@ -91,7 +102,7 @@ const surveyAnalyticsSchema = new Schema<ISurveyAnalyticsDocument>(
     hasPublic: { type: Boolean, required: true },
   },
   { timestamps: true },
-)
+);
 
 const SurveyAnalytics: Model<ISurveyAnalyticsDocument> =
   mongoose.models.SurveyAnalytics || mongoose.model("SurveyAnalytics", surveyAnalyticsSchema)
