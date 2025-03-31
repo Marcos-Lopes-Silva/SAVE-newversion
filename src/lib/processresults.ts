@@ -1,14 +1,14 @@
 import type { ISurveyDocument, IQuestion, IOption, IPages } from "../../models/surveyModel"
 import type { SurveyResultDocument } from "../../types/survey"
-import type { ISurveyAnalytics } from "../../models/surveyAnalytics"
+import type { ISurveyAnalytics, FilterCondition} from "../../models/surveyAnalytics"
 import mongoose from "mongoose"
 
 export function processResults(
   survey: ISurveyDocument,
   results: SurveyResultDocument[],
-  filter?: { questionName: string; answer: string }
+  filters?: FilterCondition[]
 ): ISurveyAnalytics {
-  const filteredResults = filterResults(results, filter);
+  const filteredResults = filterResults(results, filters);
   
   return {
     surveyId: new mongoose.Types.ObjectId(String(survey._id)),
@@ -17,7 +17,7 @@ export function processResults(
     openDate: survey.openDate,
     endDate: survey.endDate,
     hasPublic: false,
-    filter,
+    filters, // armazena o(s) filtro(s) aplicado(s)
     pages: survey.pages
       .filter(page => 
         page.questions.some(q => 
@@ -39,23 +39,25 @@ export function processResults(
   };
 }
 
+
 function filterResults(
   results: SurveyResultDocument[],
-  filter?: { questionName: string; answer: string }
+  filters?: FilterCondition[]
 ): SurveyResultDocument[] {
-  if (!filter) return results;
+  if (!filters || filters.length === 0) return results;
 
-  return results.filter(result => {
-    const answer = (result.surveyResult as Record<string, unknown>)[filter.questionName];
-    
-    if (Array.isArray(answer)) {
-      return answer.some(a => a.trim().toLowerCase() === filter.answer.trim().toLowerCase());
-    }
-
-    return typeof answer === 'string' && 
-      answer.trim().toLowerCase() === filter.answer.trim().toLowerCase();
-  });
+  return results.filter(result =>
+    filters.every(filter => {
+      const answer = (result.surveyResult as Record<string, unknown>)[filter.questionName];
+      if (Array.isArray(answer)) {
+        return answer.some(a => a.trim().toLowerCase() === filter.answer.trim().toLowerCase());
+      }
+      return typeof answer === 'string' &&
+        answer.trim().toLowerCase() === filter.answer.trim().toLowerCase();
+    })
+  );
 }
+
 
 function processTableQuestion(question: IQuestion, results: SurveyResultDocument[]) {
   const tableData: Record<string, Record<string, number>> = {};

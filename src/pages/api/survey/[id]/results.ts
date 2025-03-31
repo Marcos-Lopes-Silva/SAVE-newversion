@@ -2,21 +2,11 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { connectToMongoDB } from "@/lib/db";
 import Survey from "../../../../../models/surveyModel";
 import SurveyResult from "../../../../../models/surveyResults";
-import SurveyAnalytics, { ISurveyAnalytics } from "../../../../../models/surveyAnalytics";
+import SurveyAnalytics, { ISurveyAnalytics, FilterCondition } from "../../../../../models/surveyAnalytics";
 import { ISurveyDocument, IQuestion } from "../../../../../models/surveyModel";
 import { SurveyResultDocument } from "../../../../../types/survey";
 import { processResults } from "../../../../lib/processresults";
 import { Types } from "mongoose";
-
-interface AnalyticsQueryWithFilter {
-  surveyId: Types.ObjectId;
-  "filter.questionName": string;
-  "filter.answer": string;
-}
-
-interface AnalyticsQueryWithoutFilter {
-  surveyId: Types.ObjectId;
-}
 
 export default async function handler(
   req: NextApiRequest,
@@ -30,51 +20,59 @@ export default async function handler(
   }
 
   try {
-    const objectId : Types.ObjectId = new Types.ObjectId(String(id));
+    const objectId = new Types.ObjectId(String(id));
 
-    const filterQuestion = req.query.filterQuestion as string | undefined;
-    const filterAnswer = req.query.filterAnswer as string | undefined;
-    const filter = filterQuestion && filterAnswer
-      ? { questionName: filterQuestion, answer: filterAnswer }
-      : undefined;
+    // Verifica tanto a chave sem colchetes quanto com colchetes
+    const filterQuestionParam = req.query.filterQuestion || req.query['filterQuestion[]'];
+    const filterAnswerParam = req.query.filterAnswer || req.query['filterAnswer[]'];
+    let filters: FilterCondition[] | undefined = undefined;
 
-    const survey: ISurveyDocument | null = await Survey.findById(new Types.ObjectId(objectId));
+    if (filterQuestionParam && filterAnswerParam) {
+      if (Array.isArray(filterQuestionParam) && Array.isArray(filterAnswerParam)) {
+        if (filterQuestionParam.length !== filterAnswerParam.length) {
+          return res.status(400).json({ message: "Quantidade de filtros inconsistentes" });
+        }
+        filters = filterQuestionParam.map((q, index) => ({
+          questionName: q,
+          answer: filterAnswerParam[index] as string,
+        }));
+      } else if (typeof filterQuestionParam === "string" && typeof filterAnswerParam === "string") {
+        filters = [{ questionName: filterQuestionParam, answer: filterAnswerParam }];
+      }
+    }
+
+    console.log("req.query:", req.query);
+    console.log("Filtros processados:", filters);
+
+    const survey: ISurveyDocument | null = await Survey.findById(objectId);
     if (!survey) {
       return res.status(404).json({ message: "Pesquisa não encontrada" });
     }
 
-    if (filter) {
-      const questionExists: boolean = survey.pages.some(page =>
-        page.questions.some((q: IQuestion) => q.name === filter.questionName)
+    // Verifica se todas as questões dos filtros existem na pesquisa
+    if (filters) {
+      const questionNotFound = filters.find(filter => 
+        !survey.pages.some(page =>
+          page.questions.some((q: IQuestion) => q.name === filter.questionName)
+        )
       );
-
-      if (!questionExists) {
-        return res.status(400).json({ message: "Questão de filtro não encontrada" });
+      if (questionNotFound) {
+        return res.status(400).json({ message: `Questão de filtro não encontrada: ${questionNotFound.questionName}` });
       }
     }
 
-    let query: AnalyticsQueryWithFilter | AnalyticsQueryWithoutFilter;
-    if (filter) {
-      query = {
-        surveyId: objectId,
-        "filter.questionName": filter.questionName,
-        "filter.answer": filter.answer,
-      };
-    } else {
-      query = { surveyId: objectId };
+    // Consulta se já existe um analytics salvo com esses filtros
+    let query: any = { surveyId: objectId };
+    if (filters) {
+      query.filters = filters;
     }
-
+    
     let savedAnalytics: ISurveyAnalytics | null = await SurveyAnalytics.findOne(query).exec();
 
     if (!savedAnalytics) {
       const surveyResults: SurveyResultDocument[] = await SurveyResult.find({ surveyId: objectId }).exec();
-      const processedData = processResults(survey, surveyResults, filter);
-
+      const processedData = processResults(survey, surveyResults, filters);
       processedData.surveyId = objectId;
-      if (filter) {
-        processedData.filter = filter;
-      }
-
       savedAnalytics = await SurveyAnalytics.create(processedData);
     }
 
