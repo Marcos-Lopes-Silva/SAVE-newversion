@@ -49,15 +49,23 @@ function filterResults(
   return results.filter(result =>
     filters.every(filter => {
       const answer = (result.surveyResult as Record<string, unknown>)[filter.questionName];
+      const filterAnswer = filter.answer.trim().toLowerCase();
+      const isOtherFilter = filterAnswer === 'outro:';
+
+      const matchAnswer = (a: string) => {
+        const answerLower = a.trim().toLowerCase();
+        return isOtherFilter 
+          ? answerLower.startsWith('outro:') // Verifica se começa com "outro:"
+          : answerLower === filterAnswer;    // Caso normal de match exato
+      };
+
       if (Array.isArray(answer)) {
-        return answer.some(a => a.trim().toLowerCase() === filter.answer.trim().toLowerCase());
+        return answer.some(a => typeof a === 'string' && matchAnswer(a));
       }
-      return typeof answer === 'string' &&
-        answer.trim().toLowerCase() === filter.answer.trim().toLowerCase();
+      return typeof answer === 'string' && matchAnswer(answer);
     })
   );
 }
-
 
 function processTableQuestion(question: IQuestion, results: SurveyResultDocument[]) {
   const tableData: Record<string, Record<string, number>> = {};
