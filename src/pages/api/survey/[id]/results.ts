@@ -7,6 +7,13 @@ import { ISurveyDocument, IQuestion } from "../../../../../models/surveyModel";
 import { SurveyResultDocument } from "../../../../../types/survey";
 import { processResults } from "../../../../lib/processresults";
 import { Types } from "mongoose";
+import mongoose from "mongoose";
+
+interface AnalyticsQuery {
+  surveyId: mongoose.Types.ObjectId;
+  filters?: FilterCondition[];
+}
+
 
 export default async function handler(
   req: NextApiRequest,
@@ -78,7 +85,7 @@ export default async function handler(
     }
 
     // Consulta se já existe um analytics salvo com esses filtros
-    let query: any = { surveyId: objectId };
+    let query: AnalyticsQuery = { surveyId: objectId };
     if (filters) {
       query.filters = filters;
     }
