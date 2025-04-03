@@ -2,6 +2,7 @@ import mongoose, { type Document, type Model, Schema } from "mongoose"
 
 export interface FilterCondition {
   questionName: string;
+  row?: string,
   answer: string;
 }
 
@@ -94,6 +95,7 @@ const surveyAnalyticsSchema = new Schema<ISurveyAnalytics>(
         new Schema(
           {
             questionName: { type: String, required: true },
+            row: { type: String, required: false },
             answer: { type: String, required: true }
           },
           { _id: false }

@@ -46,26 +46,42 @@ function filterResults(
 ): SurveyResultDocument[] {
   if (!filters || filters.length === 0) return results;
 
-  return results.filter(result =>
-    filters.every(filter => {
-      const answer = (result.surveyResult as Record<string, unknown>)[filter.questionName];
+  return results.filter(result => {
+    const surveyResult = result.surveyResult as Record<string, any>;
+    return filters.every(filter => {
+      const answer = surveyResult[filter.questionName];
       const filterAnswer = filter.answer.trim().toLowerCase();
       const isOtherFilter = filterAnswer === 'outro:';
 
+      // Se o filtro possui a propriedade "row", trata como pergunta do tipo table
+      if (filter.row) {
+        if (answer && typeof answer === 'object') {
+          const rowAnswer = answer[filter.row];
+          if (typeof rowAnswer === 'string') {
+            return isOtherFilter
+              ? rowAnswer.trim().toLowerCase().startsWith('outro:')
+              : rowAnswer.trim().toLowerCase() === filterAnswer;
+          }
+        }
+        return false;
+      }
+
+      // Para os demais tipos de pergunta
       const matchAnswer = (a: string) => {
         const answerLower = a.trim().toLowerCase();
         return isOtherFilter 
-          ? answerLower.startsWith('outro:') // Verifica se começa com "outro:"
-          : answerLower === filterAnswer;    // Caso normal de match exato
+          ? answerLower.startsWith('outro:')
+          : answerLower === filterAnswer;
       };
 
       if (Array.isArray(answer)) {
         return answer.some(a => typeof a === 'string' && matchAnswer(a));
       }
       return typeof answer === 'string' && matchAnswer(answer);
-    })
-  );
+    });
+  });
 }
+
 
 function processTableQuestion(question: IQuestion, results: SurveyResultDocument[]) {
   const tableData: Record<string, Record<string, number>> = {};

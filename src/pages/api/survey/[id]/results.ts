@@ -25,6 +25,7 @@ export default async function handler(
     // Verifica tanto a chave sem colchetes quanto com colchetes
     const filterQuestionParam = req.query.filterQuestion || req.query['filterQuestion[]'];
     const filterAnswerParam = req.query.filterAnswer || req.query['filterAnswer[]'];
+    const filterRowParam = req.query.filterRow || req.query['filterRow[]'];
     let filters: FilterCondition[] | undefined = undefined;
 
     if (filterQuestionParam && filterAnswerParam) {
@@ -32,12 +33,27 @@ export default async function handler(
         if (filterQuestionParam.length !== filterAnswerParam.length) {
           return res.status(400).json({ message: "Quantidade de filtros inconsistentes" });
         }
-        filters = filterQuestionParam.map((q, index) => ({
-          questionName: q,
-          answer: filterAnswerParam[index] as string,
-        }));
+        filters = filterQuestionParam.map((q, index) => {
+          const filter: FilterCondition = {
+            questionName: q,
+            answer: filterAnswerParam[index] as string,
+          };
+          // Se o parâmetro filterRow estiver presente, adiciona a propriedade "row"
+          if (filterRowParam) {
+            if (Array.isArray(filterRowParam)) {
+              filter.row = filterRowParam[index];
+            } else if (typeof filterRowParam === "string") {
+              filter.row = filterRowParam;
+            }
+          }
+          return filter;
+        });
       } else if (typeof filterQuestionParam === "string" && typeof filterAnswerParam === "string") {
-        filters = [{ questionName: filterQuestionParam, answer: filterAnswerParam }];
+        const filter: FilterCondition = { questionName: filterQuestionParam, answer: filterAnswerParam };
+        if (filterRowParam && typeof filterRowParam === "string") {
+          filter.row = filterRowParam;
+        }
+        filters = [filter];
       }
     }
 
@@ -51,7 +67,7 @@ export default async function handler(
 
     // Verifica se todas as questões dos filtros existem na pesquisa
     if (filters) {
-      const questionNotFound = filters.find(filter => 
+      const questionNotFound = filters.find(filter =>
         !survey.pages.some(page =>
           page.questions.some((q: IQuestion) => q.name === filter.questionName)
         )
