@@ -3,7 +3,6 @@ import { Button, Select, SelectItem, Modal, ModalHeader, ModalBody, useDisclosur
 import { IoMdDownload } from "react-icons/io";
 import { PiClockClockwiseFill } from "react-icons/pi";
 import { TbArrowsDiagonal } from "react-icons/tb";
-import axios from "axios";
 import Charts from "@/components/Charts";
 import { toPng } from "html-to-image";
 
@@ -16,7 +15,6 @@ interface GraphicsProps {
   selectCharts: boolean;
   defaultChart?: Record<string, string>;
   saveOnPublish?: boolean;
-  onSaveComplete?: (message: string) => void; // Adicionar callback para feedback
 }
 
 const hexChar = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "A", "B", "C", "D", "E", "F"];
@@ -27,40 +25,6 @@ const Graphics = ({ data, selectedPageIndex, lastUpdate, download, modal, select
   const [modalTitle, setModalTitle] = useState<string>('');
   const [selectedChartTypes, setSelectedChartTypes] = useState<Record<string, string>>({});
   const generatedColors = useRef<string[]>([]);
-
-  // salvar os gráficos quando saveOnPublish for acionado
-  useEffect(() => {
-    const saveChartConfigurations = async () => {
-      if (!saveOnPublish) return;
-
-      try {
-        const updates = Object.entries(selectedChartTypes).map(([id, chartType]) => {
-          const [pageIndex, questionIndex] = id.split("-");
-          const questionId = data.pages[pageIndex].questions[questionIndex]._id; // Obter o ID da pergunta
-
-          return axios.patch(
-            `/api/survey/${data.surveyId}/results`, 
-            { 
-              chartConfigurations: { 
-                id: questionId,  // Usar o ID correto da pergunta
-                chartType 
-              }
-            }
-          );
-        });
-
-        await Promise.all(updates);
-        console.log("Configurações dos gráficos salvas com sucesso!");
-        setSelectedChartTypes({});
-        onSaveComplete?.("Configurações dos gráficos salvas com sucesso!"); // Enviar mensagem de sucesso
-      } catch (error) {
-        console.error("Erro ao salvar configurações dos gráficos:", error);
-        onSaveComplete?.("Erro ao salvar configurações dos gráficos."); // Enviar mensagem de erro
-      }
-    };
-
-    saveChartConfigurations();
-  }, [saveOnPublish]); // Remover dependências desnecessárias
 
   const getChartColors = (dataLength: number) => {
     while (generatedColors.current.length < dataLength) {
@@ -122,7 +86,7 @@ const Graphics = ({ data, selectedPageIndex, lastUpdate, download, modal, select
   };
 
   return (
-    <div className="mx-auto max-w-5xl mt-20">
+    <div className="mx-auto max-w-6xl mt-20">
       <div className="flex flex-col gap-8">
         {data.pages
           .filter((_: unknown, pageIndex: number) => selectedPageIndex === -1 || pageIndex === selectedPageIndex)
@@ -141,7 +105,7 @@ const Graphics = ({ data, selectedPageIndex, lastUpdate, download, modal, select
               const chartContent = (
                 <div className="flex flex-row justify-between items-center p-6 w-full">
                   {filteredData.length > 0 ? (
-                    <div className="w-full h-[450px] flex items-center justify-center">
+                    <div className="w-full h-[520px] flex items-center justify-center">
                       <Charts
                         data={filteredData}
                         typeChart={chartType}
@@ -226,7 +190,6 @@ const Graphics = ({ data, selectedPageIndex, lastUpdate, download, modal, select
             })
           )}
       </div>
-
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent className="w-[85%] max-w-none">
           <ModalHeader className="px-12 py-5 text-xl bg-slate-950 text-white">
