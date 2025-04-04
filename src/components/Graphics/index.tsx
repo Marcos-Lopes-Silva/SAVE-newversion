@@ -19,7 +19,7 @@ interface GraphicsProps {
 
 const hexChar = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "A", "B", "C", "D", "E", "F"];
 
-const Graphics = ({ data, selectedPageIndex, lastUpdate, download, modal, selectCharts, defaultChart, saveOnPublish, onSaveComplete }: GraphicsProps) => {
+const Graphics = ({ data, selectedPageIndex, lastUpdate, download, modal, selectCharts, defaultChart, saveOnPublish }: GraphicsProps) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [modalContent, setModalContent] = useState<JSX.Element | null>(null);
   const [modalTitle, setModalTitle] = useState<string>('');
