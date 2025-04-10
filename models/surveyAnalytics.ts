@@ -1,11 +1,17 @@
 import mongoose, { type Document, type Model, Schema } from "mongoose"
 
+export interface FilterCondition {
+  questionName: string;
+  row?: string,
+  answer: string;
+}
+
 export interface ProcessedQuestionData {
   data: Array<{
     name?: string;
     value?: number;
     row?: string;
-    options?: Array<{ name: string; value: number }>;
+    options?: Array<{ name: string; value: number }>;   
   }>;
   otherTexts?: string[];
 }
@@ -16,6 +22,7 @@ export interface SurveyQuestion {
   name: string
   type: string
   processedData: ProcessedQuestionData
+  isPublic: boolean
 }
 
 export interface SurveyPage {
@@ -26,8 +33,14 @@ export interface SurveyPage {
 export interface ISurveyAnalytics {
   surveyId: mongoose.Types.ObjectId;
   surveyTitle: string;
+  hasPublic: boolean;
+  surveyDescription: string;
   pages: Array<SurveyPage>;
+  openDate: string;
+  endDate: string;
+  filters?: FilterCondition[];
 }
+
 
 export interface ISurveyAnalyticsDocument extends ISurveyAnalytics, Document {}
 
@@ -57,6 +70,7 @@ const surveyQuestionSchema = new Schema(
     name: { type: String, required: true },
     type: { type: String, required: true },
     processedData: { type: processedQuestionDataSchema, required: true },
+    isPublic: { type: Boolean, required: true },
   },
   { _id: false },
 )
@@ -69,19 +83,36 @@ const surveyPageSchema = new Schema(
   { _id: false },
 )
 
-const surveyAnalyticsSchema = new Schema<ISurveyAnalyticsDocument>(
+const surveyAnalyticsSchema = new Schema<ISurveyAnalytics>(
   {
     surveyId: {
       type: Schema.Types.ObjectId,
       required: true,
-      unique: true,
       ref: 'Survey'
     },
+    filters: {
+      type: [
+        new Schema(
+          {
+            questionName: { type: String, required: true },
+            row: { type: String, required: false },
+            answer: { type: String, required: true }
+          },
+          { _id: false }
+        )
+      ],
+      required: false
+    },
     surveyTitle: { type: String, required: true },
+    surveyDescription: { type: String, required: true },
     pages: [surveyPageSchema],
+    openDate: { type: String, required: true },
+    endDate: { type: String, required: true },
+    hasPublic: { type: Boolean, required: true },
   },
   { timestamps: true },
-)
+);
+
 
 const SurveyAnalytics: Model<ISurveyAnalyticsDocument> =
   mongoose.models.SurveyAnalytics || mongoose.model("SurveyAnalytics", surveyAnalyticsSchema)
