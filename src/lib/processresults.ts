@@ -29,7 +29,8 @@ export function processResults(
             name: question.name,
             type: question.type,
             processedData: processQuestion(question, results),
-            isPublic: false
+            isPublic: true,
+            chart: question.type === "checkbox" ? "bar" : question.type === "radio" ? "bar" : question.type === "table" ? "radar" : question.type === "select" ? "pie" : undefined,
           }))
       }))
   };

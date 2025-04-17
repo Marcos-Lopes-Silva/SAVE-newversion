@@ -67,7 +67,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           for (const q of questions) {
             await SurveyAnalytics.updateOne(
               { surveyId: objectId, "pages.questions.name": q.name },
-              { $set: { "pages.$[].questions.$[question].isPublic": q.isPublic } },
+              { $set: { 
+                "pages.$[].questions.$[question].isPublic": q.isPublic,
+                "pages.$[].questions.$[question].chart": q.chart
+              } },
               { arrayFilters: [{ "question.name": q.name }] }
             );
           }
@@ -81,8 +84,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     default:
       return res.status(405).json({ message: "Method not allowed" })
+  }
 }
-
-
-}
-

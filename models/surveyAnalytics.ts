@@ -10,13 +10,13 @@ export interface ProcessedQuestionData {
   otherTexts?: string[];
 }
 
-
 export interface SurveyQuestion {
   title: string
   name: string
   type: string
   processedData: ProcessedQuestionData
   isPublic: boolean
+  chart?: string
 }
 
 export interface SurveyPage {
@@ -63,6 +63,7 @@ const surveyQuestionSchema = new Schema(
     type: { type: String, required: true },
     processedData: { type: processedQuestionDataSchema, required: true },
     isPublic: { type: Boolean, required: true },
+    chart: { type: String, required: true },
   },
   { _id: false },
 )

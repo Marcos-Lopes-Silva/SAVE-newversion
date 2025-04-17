@@ -4,17 +4,21 @@ import { Accordion, AccordionItem, button, Checkbox, Modal, ModalBody, ModalCont
 import React, { useEffect, useState } from 'react';
 import { CiUnlock } from 'react-icons/ci';
 import { FaEye } from 'react-icons/fa';
-import { ISurveyAnalytics } from '../../../../models/surveyAnalytics';
+import SurveyAnalytics, { ISurveyAnalytics } from '../../../../models/surveyAnalytics';
 import { getSession, useSession } from 'next-auth/react';
 import { GetServerSideProps } from 'next';
 import { connectToMongoDB } from '@/lib/db';
 import Survey, { ISurveyDocument } from '../../../../models/surveyModel';
 import { toast } from 'react-toastify';
+import Graphics from '@/components/Graphics';
 
 export default function ShowData({ surveys }: { surveys: ISurveyDocument[] }) {
-    const [selectedQuestions, setSelectedQuestions] = useState<string[]>([]);
-    const [surveyAnalytics, setSurveyAnalytics] = useState<ISurveyAnalytics | null>(null);
-    const {isOpen, onOpen, onOpenChange} = useDisclosure();
+    const [ selectedQuestion, setSelectedQuestion ] = useState<any>(null);
+    const [ selectedQuestions, setSelectedQuestions ] = useState<string[]>([]);
+    const [ selectedChartTypes, setSelectedChartTypes ] = useState<Record<string, string>>({});
+    const [ surveyAnalytics, setSurveyAnalytics] = useState<ISurveyAnalytics | null>(null);
+    const [ managerPreview, setManagerPreview ] = useState(false);
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const { data: session } = useSession();
     const userId = session?.user?._id;
     
@@ -40,6 +44,18 @@ export default function ShowData({ surveys }: { surveys: ISurveyDocument[] }) {
         });
     };
 
+    const filteredAnalytics = {
+        ...surveyAnalytics,
+        pages: surveyAnalytics?.pages.map(page => ({
+            ...page,
+            questions: page.questions.filter(question => selectedQuestions.includes(question.name))
+        })).filter(page => page.questions.length > 0)
+    }
+
+    useEffect(() => {
+        console.log("selectedChartTypes atualizado:", selectedChartTypes);
+    }, [selectedChartTypes]);
+
     const handleConfirm = async () => {
         try {
             const surveyId = surveys.find(s => s.author === userId)?._id;
@@ -50,10 +66,14 @@ export default function ShowData({ surveys }: { surveys: ISurveyDocument[] }) {
                     .filter(q => ["checkbox", "radio", "table", "select"].includes(q.type))
                     .map(q => ({
                         name: q.name,
-                        isPublic: selectedQuestions.includes(q.name)
+                        isPublic: selectedQuestions.includes(q.name),
+                        chart: selectedChartTypes[q.name] || q.chart,
                     }))
             );
-            await api.patch(`survey/${surveyId}/results`, { questions: updatedQuestions, hasPublic: true });
+
+            console.log(updatedQuestions);
+
+            await api.patch(`survey/${surveyId}/results`, { questions: updatedQuestions, hasPublic: true});
 
             toast.success('Gráficos disponibilizados com sucesso!', {
                 position: 'top-right',
@@ -96,16 +116,54 @@ export default function ShowData({ surveys }: { surveys: ISurveyDocument[] }) {
         );
     }
 
+    if(managerPreview === true) {
+        return (
+            <main>
+                <header className='px-52 py-6'>
+                    <div className="px-12 py-6 flex items-start flex-col border-1 bg-gray-200 rounded-xl shadow-lg">
+                        <div className='flex items-center gap-96'>
+                            <h1 className='text-xl'>Preview</h1>
+                        </div>
+                        <h1 className='py-4 text-base'>Visualize os gráficos que serão disponibilizados ao público.</h1>
+                    </div>
+                    <div className='flex justify-end mt-4'>
+                        <Button variant='primary' onClick={() => setManagerPreview(false)}>
+                            Voltar
+                        </Button>
+                    </div>
+                </header>
+                <section>
+                    <Graphics
+                    data={filteredAnalytics}
+                    selectedPageIndex={0}
+                    lastUpdate={true}
+                    download={false}
+                    modal={true}
+                    selectCharts={true}
+                    selectedChartTypes={selectedChartTypes}
+                    setSelectedChartTypes={setSelectedChartTypes}
+                    />
+                </section>
+            </main>
+        );
+    }
+
     return (
         <main>
-            <header className='px-52 py-6'>
+            <header className='px-52 py-4'>
                 <div className="px-12 py-6 flex items-start flex-col border-1 bg-gray-200 rounded-xl shadow-lg">
                     <h1 className='text-xl'>Disponibilizando Informações ao Público</h1>
                     <h1 className='py-4 text-base'>Personalize a visualização dos dados que serão acessíveis ao público em geral.</h1>
                 </div>
+                <div className='items-end flex justify-end py-4'>
+                    <Button onClick={() => {setManagerPreview(true)}}>
+                        <FaEye className='size-4'/>
+                        Preview
+                    </Button>
+                </div>
             </header>
             <section>
-                <div className='text-center text-xl mb-8 mt-4'>
+                <div className='text-center text-xl mb-4'>
                     <h1>Pronto para compartilhar? Selecione os gráficos que serão exibidos publicamente</h1>
                 </div>
                 <div className='px-56 py-6 text-start flex flex-col items-start'>
@@ -171,7 +229,13 @@ export default function ShowData({ surveys }: { surveys: ISurveyDocument[] }) {
                                                                     </Checkbox>
                                                                 </div>
                                                                 <div>
-                                                                    <button className={'flex items-center gap-2 mr-2 rounded-lg px-4 py-1 bg-zinc-900 text-white'}>
+                                                                    <button 
+                                                                        onClick={() => {
+                                                                            setSelectedQuestion(question.name);
+                                                                            onOpen();
+                                                                        }}
+                                                                        className='flex items-center gap-2 mr-2 rounded-lg px-4 py-1 bg-zinc-900 text-white'
+                                                                        >
                                                                         <FaEye className='size-4'/>
                                                                     </button>
                                                                 </div>
@@ -197,28 +261,66 @@ export default function ShowData({ surveys }: { surveys: ISurveyDocument[] }) {
                 </div>
             </section>
 
-            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-                <ModalContent>
+            <Modal isOpen={isOpen} onOpenChange={() => {
+                onOpenChange();
+                setSelectedQuestion(null);
+            }}>
+                <ModalContent className={`${ selectedQuestion ? 'w-[80%] max-w-none': 'w-[40%] max-w-none'}`}>
                     {(onclose) => (
                         <>
                             <ModalHeader>
-                                Confirmar ação!
+                                {selectedQuestion ? (
+                                    <h1>
+                                        Vizualização do Gráfico:
+                                    </h1>
+                                ) : (
+                                    <h1>
+                                        Confirmar ação!
+                                    </h1>
+                                )}
                             </ModalHeader>
-                            <ModalBody>
-                                <p>Ao confirmar, os gráficos selecionados serão visíveis para o público em geral. Deseja prosseguir?</p>
+                            <ModalBody >
+                                {selectedQuestion ? (
+                                    <div className=''>
+                                        <div style={{maxHeight: '70vh', overflow: 'auto'}}>
+                                            <Graphics
+                                                data={surveyAnalytics}
+                                                selectedPageIndex={0}
+                                                lastUpdate={false}
+                                                download={false}
+                                                modal={false}
+                                                selectedQuestionName={selectedQuestion}
+                                                selectCharts={true}
+                                                selectedChartTypes={selectedChartTypes}
+                                                setSelectedChartTypes={setSelectedChartTypes}
+                                                />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <p>Ao confirmar, os gráficos selecionados serão visíveis para o público em geral. Deseja prosseguir? </p>
+                                    </div>
+                                )}
                             </ModalBody>
                             <ModalFooter className='flex justify-start'>
-                                <Button variant='secondary' onClick={onclose}>Cancelar</Button>
-                                <Button variant='primary' onClick={handleConfirm}>Continuar</Button>
+                                {selectedQuestion ? (
+                                    <div>
+                                        <Button variant='primary' onClick={onclose}>Fechar</Button>
+                                    </div>
+                                ) : (
+                                    <div className='flex justify-between'>
+                                        <Button variant='secondary' onClick={onclose}>Cancelar</Button>
+                                        <Button variant='primary' onClick={handleConfirm}>Continuar</Button>
+                                    </div>
+                                )}
                             </ModalFooter>
                         </>
                     )}
                 </ModalContent>
-            </Modal>
+            </Modal>  
         </main>
     );
 }
-
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
 
