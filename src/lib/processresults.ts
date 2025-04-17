@@ -17,7 +17,7 @@ export function processResults(
     openDate: survey.openDate,
     endDate: survey.endDate,
     hasPublic: false,
-    filters, // armazena o(s) filtro(s) aplicado(s)
+    filters,
     pages: survey.pages
       .filter(page => 
         page.questions.some(q => 
