@@ -32,8 +32,9 @@ export function processResults(
             title: question.title,
             name: question.name,
             type: question.type,
-            processedData: processQuestion(question, filteredResults),
-            isPublic: false
+            processedData: processQuestion(question, results),
+            isPublic: true,
+            chart: question.type === "checkbox" ? "bar" : question.type === "radio" ? "bar" : question.type === "table" ? "radar" : question.type === "select" ? "pie" : undefined,
           }))
       }))
   };

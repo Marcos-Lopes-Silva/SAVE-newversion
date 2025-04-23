@@ -121,7 +121,10 @@ export default async function handler(
           for (const q of questions) {
             await SurveyAnalytics.updateOne(
               { surveyId: objectId, "pages.questions.name": q.name },
-              { $set: { "pages.$[].questions.$[question].isPublic": q.isPublic } },
+              { $set: { 
+                "pages.$[].questions.$[question].isPublic": q.isPublic, 
+                "pages.$[].questions.$[question].chart": q.chart, 
+              } },
               { arrayFilters: [{ "question.name": q.name }] }
             );
           }
