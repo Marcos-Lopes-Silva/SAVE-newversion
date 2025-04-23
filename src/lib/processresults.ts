@@ -1,25 +1,33 @@
 import type { ISurveyDocument, IQuestion, IOption, IPages } from "../../models/surveyModel"
 import type { SurveyResultDocument } from "../../types/survey"
-import type { ISurveyAnalytics } from "../../models/surveyAnalytics"
+import type { ISurveyAnalytics, FilterCondition} from "../../models/surveyAnalytics"
 import mongoose from "mongoose"
 
 export function processResults(
   survey: ISurveyDocument,
-  results: SurveyResultDocument[]
+  results: SurveyResultDocument[],
+  filters?: FilterCondition[]
 ): ISurveyAnalytics {
+  const filteredResults = filterResults(results, filters);
+  
   return {
     surveyId: new mongoose.Types.ObjectId(String(survey._id)),
     surveyTitle: survey.title,
+    surveyDescription: survey.description,
+    openDate: survey.openDate,
+    endDate: survey.endDate,
+    hasPublic: false,
+    filters,
     pages: survey.pages
       .filter(page => 
         page.questions.some(q => 
-          ["radio", "checkbox", "select", "table"].includes(q.type) // Adicionado table
+          ["radio", "checkbox", "select", "table"].includes(q.type)
         )
       )
       .map(page => ({
         title: page.title,
         questions: page.questions
-          .filter(q => ["radio", "checkbox", "select", "table"].includes(q.type)) // Adicionado table
+          .filter(q => ["radio", "checkbox", "select", "table"].includes(q.type))
           .map(question => ({
             title: question.title,
             name: question.name,
@@ -32,9 +40,54 @@ export function processResults(
   };
 }
 
+
+function filterResults(
+  results: SurveyResultDocument[],
+  filters?: FilterCondition[]
+): SurveyResultDocument[] {
+  if (!filters || filters.length === 0) return results;
+
+  return results.filter(result => {
+    const surveyResult = result.surveyResult as Record<string, any>;
+    return filters.every(filter => {
+      const answer = surveyResult[filter.questionName];
+      const filterAnswer = filter.answer.trim().toLowerCase();
+      const isOtherFilter = filterAnswer === 'outro:';
+
+      // Se o filtro possui a propriedade "row", trata como pergunta do tipo table
+      if (filter.row) {
+        if (answer && typeof answer === 'object') {
+          const rowAnswer = answer[filter.row];
+          if (typeof rowAnswer === 'string') {
+            return isOtherFilter
+              ? rowAnswer.trim().toLowerCase().startsWith('outro:')
+              : rowAnswer.trim().toLowerCase() === filterAnswer;
+          }
+        }
+        return false;
+      }
+
+      // Para os demais tipos de pergunta
+      const matchAnswer = (a: string) => {
+        const answerLower = a.trim().toLowerCase();
+        return isOtherFilter 
+          ? answerLower.startsWith('outro:')
+          : answerLower === filterAnswer;
+      };
+
+      if (Array.isArray(answer)) {
+        return answer.some(a => typeof a === 'string' && matchAnswer(a));
+      }
+      return typeof answer === 'string' && matchAnswer(answer);
+    });
+  });
+}
+
+
 function processTableQuestion(question: IQuestion, results: SurveyResultDocument[]) {
   const tableData: Record<string, Record<string, number>> = {};
   const otherTexts: string[] = [];
+  
   question.rows?.forEach(row => {
     tableData[row.text] = {};
     question.options?.forEach(option => {
@@ -62,6 +115,7 @@ function processTableQuestion(question: IQuestion, results: SurveyResultDocument
       });
     }
   });
+
   const data = Object.entries(tableData).map(([rowName, options]) => ({
     row: rowName,
     options: Object.entries(options).map(([optionName, count]) => ({
@@ -80,41 +134,42 @@ function processQuestion(question: IQuestion, results: SurveyResultDocument[]) {
   if (question.type === 'table') {
     return processTableQuestion(question, results);
   }
+
   const data = (question.options || []).map((opt: IOption) => ({
     name: opt.label,
     value: 0,
-  }))
+  }));
 
-  const otherTexts: string[] = []
+  const otherTexts: string[] = [];
 
   const processarResposta = (answer: string) => {
     if (answer.startsWith('Outro:')) {
-      const outroOption = data.find(d => d.name === 'Outro:')
+      const outroOption = data.find(d => d.name === 'Outro:');
       if (outroOption) {
-        outroOption.value++
-        const texto = (answer.split('Outro:')[1]).trim()
-        if (texto) otherTexts.push(texto)
+        outroOption.value++;
+        const texto = answer.split('Outro:')[1].trim();
+        if (texto) otherTexts.push(texto);
       }
     } else {
-      const option = data.find(d => d.name === answer)
-      if (option) option.value++
+      const option = data.find(d => d.name === answer);
+      if (option) option.value++;
     }
-  }
+  };
 
   results.forEach(result => {
-    const answer = (result.surveyResult as Record<string, unknown>)[question.name]
+    const answer = (result.surveyResult as Record<string, unknown>)[question.name];
     
     if (Array.isArray(answer)) {
       answer.forEach((value: string) => {
-        if (typeof value === 'string') processarResposta(value)
-      })
+        if (typeof value === 'string') processarResposta(value);
+      });
     } else if (typeof answer === 'string') {
-      processarResposta(answer)
+      processarResposta(answer);
     }
-  })
+  });
 
   return { 
     data,
     ...(otherTexts.length > 0 && { otherTexts })
-  }
+  };
 }
