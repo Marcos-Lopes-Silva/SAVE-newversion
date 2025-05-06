@@ -37,7 +37,6 @@ export default function Researches({ surveys }: { surveys: ISurveyDocument[] }) 
   const [gender, setGender] = useState<string>("Gênero");
   const [entry, setEntry] = useState<string>("Ingresso");
   const [graduation, setGraduation] = useState<string>("Graduação");
-  const [saveOnPublish, setSaveOnPublish] = useState(false);
 
   useEffect(() => {
     if (!selectedOption) return;
@@ -113,10 +112,10 @@ export default function Researches({ surveys }: { surveys: ISurveyDocument[] }) 
       const baseChartHeight = (pageHeight - marginY * (chartsPerPage + 1)) / chartsPerPage;
       const chartHeight = baseChartHeight * 0.95; // Aumentar levemente a altura dos gráficos
 
-      pdf.setFillColor("#0F0F0F"); 
-      pdf.rect(0, 0, pageWidth, headerHeight, 'F'); 
+      pdf.setFillColor("#0F0F0F");
+      pdf.rect(0, 0, pageWidth, headerHeight, 'F');
 
-      pdf.setTextColor(255); 
+      pdf.setTextColor(255);
       pdf.setFontSize(16);
       pdf.text(selectedSurvey.title, marginX, 20);
 
@@ -130,9 +129,9 @@ export default function Researches({ surveys }: { surveys: ISurveyDocument[] }) 
       ].filter(Boolean);
 
       if (appliedFilters.length > 0) {
-        pdf.text(`Filtros Aplicados:`, marginX, 40); 
+        pdf.text(`Filtros Aplicados:`, marginX, 40);
         appliedFilters.forEach((filter, index) => {
-          pdf.text(filter, marginX, 60 + index * 10); 
+          pdf.text(filter, marginX, 60 + index * 10);
         });
       } else {
         pdf.text(`Filtros: Nenhum`, marginX, 35);
@@ -155,7 +154,7 @@ export default function Researches({ surveys }: { surveys: ISurveyDocument[] }) 
           const posX = (pageWidth - chartWidth) / 2; // Centralizar horizontalmente
           const posY = (i === 0 && j === 0 ? marginY : verticalSpacing + j * (chartHeight + verticalSpacing)); // Ajustar para não sobrepor o cabeçalho na 1ª página
 
-          
+
           pdf.setDrawColor(15); // Cor da borda (slate-950)
           pdf.setLineWidth(1);
           pdf.roundedRect(posX - 2, posY - 2, chartWidth + 4, chartHeight + 4, 5, 5, 'S'); // Ajustar borda proporcional
@@ -245,17 +244,6 @@ export default function Researches({ surveys }: { surveys: ISurveyDocument[] }) 
           Filtros
         </Button>
         <Button
-          variant="bordered"
-          style={{ paddingLeft: '60px', paddingRight: '60px' }}
-          onClick={() => {
-            setSaveOnPublish(true);
-            setTimeout(() => setSaveOnPublish(false), 100); // Resetar após breve intervalo
-          }}
-        >
-          Salvar
-        </Button>
-
-        <Button
           variant="solid"
           style={{ backgroundColor: 'black', color: 'white' }}
           isDisabled={!selectedSurvey}
@@ -275,7 +263,7 @@ export default function Researches({ surveys }: { surveys: ISurveyDocument[] }) 
             setError={setError}
             setSelectedPageIndex={setSelectedPageIndex}
             setFiltersApplied={setFiltersApplied}
-            dimension={dimension} 
+            dimension={dimension}
             degree={degree}
             gender={gender}
             entry={entry}
@@ -300,7 +288,6 @@ export default function Researches({ surveys }: { surveys: ISurveyDocument[] }) 
             download={!isGeneratingPDF}
             modal={!isGeneratingPDF}
             selectCharts={!isGeneratingPDF} // Alterar para false ao gerar PDF
-            saveOnPublish={saveOnPublish && isFilterClicked} // Passar true apenas quando o botão for pressionado
           />
         )}
       </div>
@@ -311,15 +298,10 @@ export default function Researches({ surveys }: { surveys: ISurveyDocument[] }) 
 export const getServerSideProps: GetServerSideProps = async () => {
   await connectToMongoDB();
 
-  // 1. Busca analytics públicos
   const publicAnalytics = await SurveyAnalytics.find({ hasPublic: true }).lean();
-  console.log('[1] Analytics públicos encontrados:', publicAnalytics.length);
-
-  // 2. Verifica IDs diretamente do MongoDB
   const rawIds = publicAnalytics.map(a => a.surveyId);
   console.log('[2] IDs crus:', rawIds);
 
-  // 3. Conversão explícita para ObjectId
   const publicSurveyIds = rawIds.map(id => {
     try {
       return new mongoose.Types.ObjectId(id.toString());
@@ -329,15 +311,9 @@ export const getServerSideProps: GetServerSideProps = async () => {
     }
   }).filter(Boolean);
 
-  console.log('[3] IDs válidos:', publicSurveyIds);
-
-  // 4. Busca surveys
   const publicSurveys = await Survey.find({
     _id: { $in: publicSurveyIds }
   }).lean();
-
-  console.log('[4] Surveys encontrados:', publicSurveys.length);
-  console.log('[5] Exemplo de survey:', publicSurveys[0]?._id);
 
   return {
     props: {

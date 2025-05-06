@@ -1,12 +1,20 @@
 import mongoose, { Document, Model } from "mongoose";
+import { content } from "pdfkit/js/page";
 
 export interface IUser {
     name: string,
     email: string,
     birthday: string | null,
+    course: string | null,
+    graduationYear: number | null,
+    description: string | null,
     role: string,
     approved: boolean,
-    image: string,
+    image: {
+        data: Buffer;
+        contentType: string;
+    } | null;
+    phone: number | null,
     cpf: string,
     emailVerified: string | null,
 }
@@ -25,13 +33,28 @@ const userSchema: mongoose.Schema = new mongoose.Schema<IUserDocument>(
         email: {
             type: String,
             required: true,
+            unique: true,
         },
         birthday: {
             type: String,
         },
+        course: {
+            type: String,
+            trim: true,
+            default: null,
+        },
+        graduationYear: {
+            type: Number,
+            default: null,
+        },
+        description: {
+            type: String,
+            maxlength: 500,
+            trim: true,
+            default: null,
+        },
         cpf: {
             type: String,
-            required: false,
         },
         role: {
             type: String,
@@ -44,12 +67,21 @@ const userSchema: mongoose.Schema = new mongoose.Schema<IUserDocument>(
             default: false,
         },
         image: {
-            type: String,
-            required: false,
+            data: {
+                type: Buffer, // Buffer para armazenar dados binários
+                required: false,
+            },
+            contentType: {
+                type: String,
+                required: false,
+            },
+        },
+        phone: {
+            type: Number,
         },
         emailVerified: {
-            type: String || null,
-            required: false,
+            type: Date,
+            default: null,
         },
     },
     {

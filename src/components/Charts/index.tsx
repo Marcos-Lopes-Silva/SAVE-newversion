@@ -1,4 +1,5 @@
-import {    PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart,
+import {
+    PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart,
     Line, AreaChart, Area, Rectangle, ScatterChart, Scatter, RadarChart, Radar, PolarGrid,
     PolarAngleAxis, PolarRadiusAxis, RadialBarChart, RadialBar
 } from "recharts";
@@ -13,7 +14,9 @@ interface ChartsProps {
 }
 
 const removeEmojis = (text: string) =>
-    text.replace(/[\uD83C-\uDBFF\uDC00-\uDFFF]+/g, "");
+    String(text)
+        .replace(/[\uD83C-\uDBFF\uDC00-\uDFFF]+/g, "") // Remove emojis
+        .replace(/:\s*$/, ""); // Remove ":" no final das palavras
 
 const Charts = ({ data, typeChart, colors }: ChartsProps) => {
     if (!data || data.length === 0) {
@@ -33,71 +36,40 @@ const Charts = ({ data, typeChart, colors }: ChartsProps) => {
     };
 
     const fontSize = useCallback(
-        (word: { value: number }) => {
-            const maxValue = Math.max(...data.map((item) => item.value));
-            const totalWords = data.length;
-            const containerWidth = 450; // Largura máxima disponível (ajuste conforme necessário)
-            const containerHeight = 450; // Altura máxima disponível (ajuste conforme necessário)
-            const maxFontSize = Math.min(containerWidth, containerHeight) * 0.2; // 20% do menor lado
-            const minFontSize = maxFontSize * 0.3; // 30% do tamanho máximo
+        (word: { text: string; value: number }): number => {
+            const values = data.map((item) => item.value);
+            const maxValue = Math.max(...values);
 
-            // Ajusta o tamanho da fonte com base na quantidade total de palavras
-            const adjustedMaxFontSize = maxFontSize / Math.sqrt(totalWords);
+            // Palavra com maior ocorrência
+            const maxWord = data.reduce((prev, curr) =>
+                curr.value > prev.value ? curr : prev
+            ).name;
+            const maxWordLength = maxWord.length;
 
-            return Math.max((word.value / maxValue) * adjustedMaxFontSize, minFontSize);
+            // Configurações do container
+            const containerWidth = 1536; // max-w-6xl em pixels
+            const containerHeight = 520; // h-[520] em pixels
+
+            // Calcula o tamanho máximo da fonte para a maior palavra
+            const maxFontSize = Math.min(
+                containerWidth / maxWordLength,
+                containerHeight * 0.8
+            ); // Limita para caber no container
+            const scale = (value: number) => value / maxValue;
+
+            // Tamanhos com limites controlados
+            const minFontSize = Math.max(maxFontSize * 0.08, 8); // Mínimo absoluto de 8px
+
+            const calculatedFontSize =
+                minFontSize + (maxFontSize - minFontSize) * scale(word.value);
+
+            // Garante que a maior palavra tenha o tamanho máximo ajustado
+            return word.value === maxValue ? maxFontSize : calculatedFontSize;
         },
         [data]
     );
 
-    const rotate = useCallback(() => 0, []);
     const fill = useCallback((_: any, i: number) => colors[i % colors.length], [colors]);
-
-    const wrapText = (text: string, maxLength: number): string[] => {
-        const words = text.split(' ');
-        const lines: string[] = [];
-        let currentLine = '';
-
-        words.forEach((word) => {
-            if (currentLine === '') {
-                if (word.length <= maxLength) {
-                    currentLine = word;
-                } else {
-                    // Quebra palavras muito longas
-                    let i = 0;
-                    while (i < word.length) {
-                        lines.push(word.substring(i, i + maxLength));
-                        i += maxLength;
-                    }
-                }
-            } else {
-                const potentialLine = `${currentLine} ${word}`;
-                if (potentialLine.length <= maxLength) {
-                    currentLine = potentialLine;
-                } else {
-                    if (word.length > maxLength) {
-                        // Adiciona a linha atual e quebra a palavra longa
-                        lines.push(currentLine);
-                        let i = 0;
-                        while (i < word.length) {
-                            lines.push(word.substring(i, i + maxLength));
-                            i += maxLength;
-                        }
-                        currentLine = '';
-                    } else {
-                        // Nova linha
-                        lines.push(currentLine);
-                        currentLine = word;
-                    }
-                }
-            }
-        });
-
-        if (currentLine !== '') {
-            lines.push(currentLine);
-        }
-
-        return lines;
-    };
 
     const chartConfigs = {
         pie: (
@@ -183,7 +155,7 @@ const Charts = ({ data, typeChart, colors }: ChartsProps) => {
                         dataKey="name"
                         fontSize="12px"
                         height={60}
-                        tickFormatter={(value) => truncateText(value, 25)}
+                        tickFormatter={(value) => truncateText(removeEmojis(value), 25)}
                         dy={10}
                     />
                     <YAxis />
@@ -206,7 +178,7 @@ const Charts = ({ data, typeChart, colors }: ChartsProps) => {
                         dataKey="name"
                         fontSize="12px"
                         height={60}
-                        tickFormatter={(value) => truncateText(value, 25)}
+                        tickFormatter={(value) => truncateText(removeEmojis(value), 25)}
                         dy={10}
                     />
                     <YAxis />
@@ -229,7 +201,7 @@ const Charts = ({ data, typeChart, colors }: ChartsProps) => {
                         dataKey="name"
                         fontSize="12px"
                         height={60}
-                        tickFormatter={(value) => truncateText(value, 25)}
+                        tickFormatter={(value) => truncateText(removeEmojis(value), 25)}
                         dy={10}
                     />
                     <YAxis />
@@ -247,7 +219,10 @@ const Charts = ({ data, typeChart, colors }: ChartsProps) => {
             <ResponsiveContainer width="100%" height={350}>
                 <RadarChart data={data}>
                     <PolarGrid />
-                    <PolarAngleAxis dataKey="name" />
+                    <PolarAngleAxis
+                        dataKey="name"
+                        tickFormatter={(value) => truncateText(removeEmojis(value), 50)}
+                    />
                     <PolarRadiusAxis />
                     <Radar
                         name="Radar"
@@ -305,25 +280,26 @@ const Charts = ({ data, typeChart, colors }: ChartsProps) => {
             <div className="flex items-center justify-center w-full h-full">
                 <ResponsiveContainer width="100%" height={450}>
                     <WordCloud
-                        data={data.map((item) => ({
-                            text: removeEmojis(item.name),
-                            value: item.value,
-                        }))}
+                        data={data
+                            .map((item) => ({
+                                text: removeEmojis(item.name),
+                                value: item.value,
+                            }))
+                            .sort((a, b) => b.value - a.value)}
                         font="Arial"
                         fontStyle="normal"
                         fontWeight="bold"
                         fontSize={fontSize}
                         spiral="archimedean"
-                        rotate={rotate}
-                        padding={4}
-                        random={() => 0.5}
+                        rotate={0}
+                        padding={2}
+                        random={() => 0.5} 
                         fill={fill}
                     />
                 </ResponsiveContainer>
             </div>
         ),
     };
-
     return chartConfigs[typeChart as keyof typeof chartConfigs] || chartConfigs.pie;
 };
 
