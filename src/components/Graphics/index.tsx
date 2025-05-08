@@ -70,9 +70,8 @@ const Graphics = ({
   };
 
   const handleDownloadChart = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    const chartContainer = event.currentTarget.closest('.chart-container');
+    const chartContainer = event.currentTarget.closest(".chart-container");
     if (!chartContainer) return;
-
     try {
       const buttons = chartContainer.querySelectorAll('.no-capture');
       buttons.forEach(button => (button as HTMLElement).style.display = 'none');
@@ -90,7 +89,7 @@ const Graphics = ({
       link.href = dataUrl;
       link.click();
     } catch (error) {
-      console.error('Erro ao baixar gráfico:', error);
+      console.error("Erro ao baixar gráfico:", error);
     }
   };
 
