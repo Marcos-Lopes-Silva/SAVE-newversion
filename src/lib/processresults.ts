@@ -1,6 +1,6 @@
 import type { ISurveyDocument, IQuestion, IOption, IPages } from "../../models/surveyModel"
 import type { SurveyResultDocument } from "../../types/survey"
-import type { ISurveyAnalytics, FilterCondition} from "../../models/surveyAnalytics"
+import type { ISurveyAnalytics, FilterCondition } from "../../models/surveyAnalytics"
 import mongoose from "mongoose"
 
 export function processResults(
@@ -9,18 +9,19 @@ export function processResults(
   filters?: FilterCondition[]
 ): ISurveyAnalytics {
   const filteredResults = filterResults(results, filters);
-  
+
   return {
     surveyId: new mongoose.Types.ObjectId(String(survey._id)),
     surveyTitle: survey.title,
     surveyDescription: survey.description,
+    author: survey.author,
     openDate: survey.openDate,
     endDate: survey.endDate,
     hasPublic: false,
     filters,
     pages: survey.pages
-      .filter(page => 
-        page.questions.some(q => 
+      .filter(page =>
+        page.questions.some(q =>
           ["radio", "checkbox", "select", "table"].includes(q.type)
         )
       )
@@ -32,14 +33,13 @@ export function processResults(
             title: question.title,
             name: question.name,
             type: question.type,
-            processedData: processQuestion(question, results),
+            processedData: processQuestion(question, filteredResults),
             isPublic: true,
             chart: question.type === "checkbox" ? "bar" : question.type === "radio" ? "bar" : question.type === "table" ? "radar" : question.type === "select" ? "pie" : undefined,
           }))
       }))
   };
 }
-
 
 function filterResults(
   results: SurveyResultDocument[],
@@ -70,7 +70,7 @@ function filterResults(
       // Para os demais tipos de pergunta
       const matchAnswer = (a: string) => {
         const answerLower = a.trim().toLowerCase();
-        return isOtherFilter 
+        return isOtherFilter
           ? answerLower.startsWith('outro:')
           : answerLower === filterAnswer;
       };
@@ -87,7 +87,7 @@ function filterResults(
 function processTableQuestion(question: IQuestion, results: SurveyResultDocument[]) {
   const tableData: Record<string, Record<string, number>> = {};
   const otherTexts: string[] = [];
-  
+
   question.rows?.forEach(row => {
     tableData[row.text] = {};
     question.options?.forEach(option => {
@@ -97,14 +97,14 @@ function processTableQuestion(question: IQuestion, results: SurveyResultDocument
 
   results.forEach(result => {
     const tableAnswers = (result.surveyResult as Record<string, Record<string, string>>)[question.name];
-    
+
     if (tableAnswers && typeof tableAnswers === 'object') {
       Object.entries(tableAnswers).forEach(([rowName, selectedOption]) => {
         const cleanRowName = rowName.trim();
         if (selectedOption.startsWith('Outro:')) {
           const optionLabel = 'Outro';
           const texto = selectedOption.split('Outro:')[1].trim();
-          
+
           if (texto) {
             otherTexts.push(`${cleanRowName}: ${texto}`);
             tableData[cleanRowName][optionLabel] = (tableData[cleanRowName][optionLabel] || 0) + 1;
@@ -124,7 +124,7 @@ function processTableQuestion(question: IQuestion, results: SurveyResultDocument
     }))
   }));
 
-  return { 
+  return {
     data,
     ...(otherTexts.length > 0 && { otherTexts })
   };
@@ -158,7 +158,7 @@ function processQuestion(question: IQuestion, results: SurveyResultDocument[]) {
 
   results.forEach(result => {
     const answer = (result.surveyResult as Record<string, unknown>)[question.name];
-    
+
     if (Array.isArray(answer)) {
       answer.forEach((value: string) => {
         if (typeof value === 'string') processarResposta(value);
@@ -168,7 +168,7 @@ function processQuestion(question: IQuestion, results: SurveyResultDocument[]) {
     }
   });
 
-  return { 
+  return {
     data,
     ...(otherTexts.length > 0 && { otherTexts })
   };

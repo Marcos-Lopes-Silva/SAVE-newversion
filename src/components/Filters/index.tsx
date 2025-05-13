@@ -1,204 +1,247 @@
 import { useState, useEffect } from "react";
-import { Select, SelectItem } from "@nextui-org/select";
+import axios from "axios";
 import { Button } from "@nextui-org/button";
-import { MdFilterAltOff } from "react-icons/md";
-import { Key } from "@react-types/shared";
-import { ISurveyDocument } from "@/models";
+import { Select, SelectItem } from "@nextui-org/select";
+
+interface QuestionFilter {
+  name: string;
+  title: string;
+  type: string;
+  options?: Array<{ label: string }>;
+  rows?: Array<{ text: string }>;
+}
+
+export interface Filter {
+  id: string;
+  question: string;
+  answer: string;
+  row?: string;
+}
 
 interface FiltersProps {
   surveyId: string;
-  setData: (data: any) => void;
-  setLoading: (loading: boolean) => void;
+  setFiltersApplied: (filters: Filter[]) => void;
   setError: (error: string | null) => void;
   setSelectedPageIndex: (index: number) => void;
-  setFiltersApplied: (applied: boolean) => void;
-  dimension: string;
-  degree: string;
-  gender: string;
-  entry: string;
-  graduation: string;
-  onFilterChange: (filterType: string, value: string) => void;
+  initialFilters: Filter[];
 }
 
 const Filters = ({
   surveyId,
-  setData,
-  setLoading,
+  setFiltersApplied,
   setError,
   setSelectedPageIndex,
-  setFiltersApplied,
-  dimension,
-  degree,
-  gender,
-  entry,
-  graduation,
-  onFilterChange
+  initialFilters,
 }: FiltersProps) => {
-  const [dimensionOptions, setDimensionOptions] = useState<string[]>([]);
-  const [dimensionInternal, setDimensionInternal] = useState(dimension);
-  const [degreeInternal, setDegreeInternal] = useState(degree);
-  const [genderInternal, setGenderInternal] = useState(gender);
-  const [entryInternal, setEntryInternal] = useState(entry);
-  const [graduationInternal, setGraduationInternal] = useState(graduation);
-  const [selectedPageIndex, setSelectedPageIndexInternal] = useState<number>(-1);
+  const [filters, setFilters] = useState<Filter[]>(initialFilters || []);
+  const [questions, setQuestions] = useState<QuestionFilter[]>([]);
+  const [pages, setPages] = useState<string[]>([]);
+  const [selectedPage, setSelectedPage] = useState<string>("Todas");
+  const [loadingFilters, setLoadingFilters] = useState(false);
+
+  const generateId = () => Date.now().toString();
 
   useEffect(() => {
-    const fetchSurvey = async () => {
-      setLoading(true);
+    const fetchQuestions = async () => {
+      setLoadingFilters(true);
       setError(null);
-
       try {
-        const response = await fetch(`/api/survey/${surveyId}`);
-        if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+        const response = await axios.get(`/api/survey/${surveyId}`);
+        const filterable = response.data.pages
+          .flatMap((p: any) => p.questions)
+          .filter((q: any) => ["radio", "checkbox", "select", "table"].includes(q.type));
+        setQuestions(filterable);
 
-        const survey: ISurveyDocument = await response.json();
-        setDimensionOptions(survey.pages.map((page: { title: string }) => page.title));
+        const dimensionTitles = response.data.pages.map((p: any) => p.title);
+        setPages(["Todas", ...dimensionTitles]);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Erro ao carregar dados.");
+        setError("Erro ao carregar perguntas.");
       } finally {
-        setLoading(false);
+        setLoadingFilters(false);
       }
     };
+    if (surveyId) fetchQuestions();
+  }, [surveyId, setError]);
 
-    fetchSurvey();
-  }, [surveyId, setLoading, setError]);
-
-  useEffect(() => {
-    setDimensionInternal(dimension);
-    setDegreeInternal(degree);
-    setGenderInternal(gender);
-    setEntryInternal(entry);
-    setGraduationInternal(graduation);
-  }, [dimension, degree, gender, entry, graduation]);
-
-  const handleDimensionChangeInternal = (key: Key) => {
-    const dimensionIndex = parseInt(key as string);
-    setSelectedPageIndexInternal(dimensionIndex);
-    setDimensionInternal(dimensionOptions[dimensionIndex]);
-    setSelectedPageIndex(dimensionIndex);
-    onFilterChange("dimension", dimensionOptions[dimensionIndex]);
+  const getType = (q: string) => questions.find((x) => x.name === q)?.type || "";
+  const getAnswers = (q: string) => {
+    const question = questions.find((x: any) => x.name === q);
+    if (!question) return [];
+    if (question.type === "table" && question.options) return question.options.map((o: any) => o.label);
+    return question.options?.map((o: any) => o.label) || [];
+  };
+  const getRows = (q: string) => {
+    const question = questions.find((x: any) => x.name === q);
+    if (question?.type === "table" && question.rows) return question.rows.map((r: any) => r.text);
+    return [];
   };
 
-  const handleApplyFilters = async () => {
-    setLoading(true);
-    setError(null);
-    setFiltersApplied(true);
+  const handleAdd = () => {
+    setFilters((prev) => [
+      ...prev,
+      { id: generateId(), question: "", answer: "", row: "" }
+    ]);
+  };
 
-    try {
-      const queryParams = new URLSearchParams({
-        dimension: dimensionInternal,
-        degree: degreeInternal,
-        gender: genderInternal,
-        entry: entryInternal,
-        graduation: graduationInternal,
-      }).toString();
-
-      const response = await fetch(`/api/survey/${surveyId}/results?${queryParams}`);
-      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
-
-      const result = await response.json();
-      setData(result);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao carregar dados.");
-    } finally {
-      setLoading(false);
+  const handleRemove = (id: string) => {
+    const element = document.getElementById(`filter-${id}`);
+    if (element) {
+      element.style.transition = "transform 0.5s ease, opacity 0.5s ease";
+      element.style.transform = "scale(0)";
+      element.style.opacity = "0";
+      setTimeout(() => {
+        setFilters((prev) => prev.filter((f) => f.id !== id));
+      }, 500);
     }
   };
 
-  const handleClearFilters = () => {
-    // Limpa os estados internos dos filtros
-    setDimensionInternal("");
-    setDegreeInternal("");
-    setGenderInternal("");
-    setEntryInternal("");
-    setGraduationInternal("");
-    setSelectedPageIndexInternal(-1);
-    setFiltersApplied(false);
-    setSelectedPageIndex(-1); 
-    
+  const handleChange = (id: string, field: keyof Filter, value: string) => {
+    setFilters((prev) =>
+      prev.map((f) => {
+        if (f.id === id) {
+          return {
+            ...f,
+            [field]: value,
+            ...(field === "question" ? { answer: "", row: "" } : {})
+          };
+        }
+        return f;
+      })
+    );
+  };
+
+  const apply = () => {
+    const valid = filters.every((f) => f.question && f.answer && (getType(f.question) !== "table" || f.row));
+    if (!valid) {
+      setError("Preencha todos os campos dos filtros antes de aplicar.");
+      return;
+    }
+    setFiltersApplied(filters);
+  };
+
+  const clearFilters = () => {
+    setFilters([]);
+    setSelectedPage("Todas");
+    setSelectedPageIndex(-1);
+    setFiltersApplied([]);
+  };
+
+  const handlePageChange = (page: string) => {
+    setSelectedPage(page);
+    setSelectedPageIndex(page === "Todas" ? -1 : pages.indexOf(page) - 1);
   };
 
   return (
-    <div className="flex justify-between items-center mt-16 mb-12 mx-auto max-w-7xl shadow-medium p-6 rounded-lg bg-white" style={{ gap: '10px' }}>
-      <Select
-        className="max-w-xs"
-        label="Dimensão"
-        placeholder="Selecione"
-        aria-label="Dimensão"
-        selectedKeys={dimensionOptions.includes(dimensionInternal) ? new Set([selectedPageIndex.toString()]) : new Set()}
-        variant="bordered"
-        onSelectionChange={(keys) => handleDimensionChangeInternal(Array.from(keys)[0] as string)}
-      >
-        {dimensionOptions.map((option, index) => (
-          <SelectItem key={index.toString()}>{option}</SelectItem>
+    <div className="p-4 lg:p-6 bg-white shadow rounded-lg space-y-4 lg:space-y-6">
+      <div className="flex flex-col lg:flex-row items-center gap-4">
+        <Select
+          className="w-full lg:w-1/3"
+          label="Dimensão"
+          selectedKeys={[selectedPage]}
+          onSelectionChange={(keys) => handlePageChange(String(Array.from(keys)[0]))}
+        >
+          {pages.map((page) => (
+            <SelectItem key={page} value={page}>
+              {page}
+            </SelectItem>
+          ))}
+        </Select>
+        {!filters.length && (
+          <Button onClick={handleAdd} className="w-full lg:w-auto" variant="solid">
+            Adicionar Filtros
+          </Button>
+        )}
+      </div>
+
+      <div className="space-y-4 lg:space-y-6">
+        {filters.map((f, idx) => (
+          <div
+            key={f.id}
+            id={`filter-${f.id}`}
+            className="border p-3 lg:p-4 rounded-lg bg-gray-50 space-y-3 lg:space-y-4"
+            style={{ transformOrigin: "center", overflow: "hidden" }}
+          >
+            <div className="flex justify-between items-center">
+              <span className="text-sm lg:text-base font-semibold">Filtro {idx + 1}</span>
+              <Button
+                color="danger"
+                variant="light"
+                size="sm"
+                onClick={() => handleRemove(f.id)}
+              >
+                Remover
+              </Button>
+            </div>
+            <Select
+              className="w-full"
+              selectedKeys={f.question ? [f.question] : []}
+              onSelectionChange={(keys) => handleChange(f.id, "question", String(Array.from(keys)[0] || ""))}
+              placeholder="Questão"
+            >
+              {questions.map((q) => (
+                <SelectItem key={q.name} value={q.name}>
+                  {q.title}
+                </SelectItem>
+              ))}
+            </Select>
+            {f.question && getType(f.question) === "table" && (
+              <Select
+                className="w-full"
+                selectedKeys={f.row ? [f.row] : []}
+                onSelectionChange={(keys) => handleChange(f.id, "row", String(Array.from(keys)[0] || ""))}
+                placeholder="Linha"
+              >
+                {getRows(f.question).map((r) => (
+                  <SelectItem key={r} value={r}>
+                    {r}
+                  </SelectItem>
+                ))}
+              </Select>
+            )}
+            {f.question && (
+              <Select
+                className="w-full"
+                selectedKeys={f.answer ? [f.answer] : []}
+                onSelectionChange={(keys) => handleChange(f.id, "answer", String(Array.from(keys)[0] || ""))}
+                placeholder="Resposta"
+              >
+                {getAnswers(f.question).map((a) => (
+                  <SelectItem key={a} value={a}>
+                    {a}
+                  </SelectItem>
+                ))}
+              </Select>
+            )}
+          </div>
         ))}
-      </Select>
-      <Select
-        className="max-w-xs"
-        label="Curso"
-        placeholder="Selecione"
-        aria-label="Curso"
-        selectedKeys={["Ciência da Computação", "Engenharia de Software"].includes(degreeInternal) ? new Set([degreeInternal]) : new Set()}
-        variant="bordered"
-        onSelectionChange={(keys) => setDegreeInternal(Array.from(keys)[0] as string)}
-      >
-        <SelectItem key="Ciência da Computação">Ciência da Computação</SelectItem>
-        <SelectItem key="Engenharia de Software">Engenharia de Software</SelectItem>
-      </Select>
+        {filters.length > 0 && (
+          <div className="flex justify-start">
+            <Button onClick={handleAdd} variant="bordered" className="text-slate-950">
+              +
+            </Button>
+          </div>
+        )}
+      </div>
 
-      <Select
-        className="max-w-xs"
-        label="Gênero"
-        placeholder="Selecione"
-        aria-label="Gênero"
-        selectedKeys={["Masculino", "Feminino"].includes(genderInternal) ? new Set([genderInternal]) : new Set()}
-        variant="bordered"
-        onSelectionChange={(keys) => setGenderInternal(Array.from(keys)[0] as string)}
-      >
-        <SelectItem key="Masculino">Masculino</SelectItem>
-        <SelectItem key="Feminino">Feminino</SelectItem>
-      </Select>
-
-      <Select
-        className="max-w-xs"
-        label="Ingresso"
-        placeholder="Selecione"
-        aria-label="Ingresso"
-        selectedKeys={["2020"].includes(entryInternal) ? new Set([entryInternal]) : new Set()}
-        variant="bordered"
-        onSelectionChange={(keys) => setEntryInternal(Array.from(keys)[0] as string)}
-      >
-        <SelectItem key="2020">2020</SelectItem>
-      </Select>
-
-      <Select
-        className="max-w-xs"
-        label="Graduação"
-        placeholder="Selecione"
-        aria-label="Graduação"
-        selectedKeys={["2020"].includes(graduationInternal) ? new Set([graduationInternal]) : new Set()}
-        variant="bordered"
-        onSelectionChange={(keys) => setGraduationInternal(Array.from(keys)[0] as string)}
-      >
-        <SelectItem key="2020">2020</SelectItem>
-      </Select>
-
-      <Button
-        variant="solid"
-        onClick={handleClearFilters}
-        style={{
-          minWidth: '90px',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          whiteSpace: 'nowrap',
-          backgroundColor: '#DC2626',
-          color: 'white'
-        }}
-      >
-        Limpar
-        <MdFilterAltOff style={{ marginLeft: '3px', color: 'white', fontSize: '1.2em', flexShrink: 0 }} />
-      </Button>
+      <div className="flex flex-col lg:flex-row justify-end gap-4">
+        <Button
+          onClick={apply}
+          variant="solid"
+          className="bg-slate-950 w-full lg:w-auto"
+          style={{ color: "white" }}
+        >
+          Aplicar Filtros
+        </Button>
+        <Button
+          onClick={clearFilters}
+          variant="solid"
+          color="danger"
+          className="w-full lg:w-auto"
+          style={{ color: "white" }}
+        >
+          Limpar Filtros
+        </Button>
+      </div>
     </div>
   );
 };

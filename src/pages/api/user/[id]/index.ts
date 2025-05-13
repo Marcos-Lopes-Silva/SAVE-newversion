@@ -1,5 +1,3 @@
-// pages/api/user/[id].ts
-
 import { NextApiRequest, NextApiResponse } from "next";
 import mongoose from "mongoose";
 import { connectToMongoDB } from "@/lib/db";

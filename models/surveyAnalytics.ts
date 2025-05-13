@@ -11,7 +11,7 @@ export interface ProcessedQuestionData {
     name?: string;
     value?: number;
     row?: string;
-    options?: Array<{ name: string; value: number }>;   
+    options?: Array<{ name: string; value: number }>;
   }>;
   otherTexts?: string[];
 }
@@ -33,6 +33,7 @@ export interface SurveyPage {
 export interface ISurveyAnalytics {
   surveyId: mongoose.Types.ObjectId;
   surveyTitle: string;
+  author: string | null,
   hasPublic: boolean;
   surveyDescription: string;
   pages: Array<SurveyPage>;
@@ -42,7 +43,7 @@ export interface ISurveyAnalytics {
 }
 
 
-export interface ISurveyAnalyticsDocument extends ISurveyAnalytics, Document {}
+export interface ISurveyAnalyticsDocument extends ISurveyAnalytics, Document { }
 
 const processedQuestionDataSchema = new Schema(
   {
@@ -56,7 +57,7 @@ const processedQuestionDataSchema = new Schema(
             name: { type: String, required: true },
             value: { type: Number, required: true }
           }
-        ]
+        ],
       },
     ],
     otherTexts: { type: [String], default: [] }
@@ -110,6 +111,11 @@ const surveyAnalyticsSchema = new Schema<ISurveyAnalytics>(
     openDate: { type: String, required: true },
     endDate: { type: String, required: true },
     hasPublic: { type: Boolean, required: true },
+    author: {
+      type: String,
+      ref: "User",
+      required: true,
+    },
   },
   { timestamps: true },
 );

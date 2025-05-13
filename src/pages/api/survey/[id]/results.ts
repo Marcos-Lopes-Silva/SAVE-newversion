@@ -60,8 +60,8 @@ export default async function handler(
           }
         }
 
-       // console.log("req.query:", req.query);
-       // console.log("Filtros processados:", filters);
+        // console.log("req.query:", req.query);
+        // console.log("Filtros processados:", filters);
 
         const survey: ISurveyDocument | null = await Survey.findById(objectId);
         if (!survey) {
@@ -84,7 +84,7 @@ export default async function handler(
         if (filters) {
           query.filters = filters;
         }
-        
+
         let savedAnalytics: ISurveyAnalytics | null = await SurveyAnalytics.findOne(query).exec();
 
         if (!savedAnalytics) {
@@ -116,20 +116,22 @@ export default async function handler(
         if (!updatedAnalytics) {
           return res.status(404).json({ message: "Pesquisa não encontrada" });
         }
-        
+
         if (questions && questions.length > 0) {
           for (const q of questions) {
             await SurveyAnalytics.updateOne(
               { surveyId: objectId, "pages.questions.name": q.name },
-              { $set: { 
-                "pages.$[].questions.$[question].isPublic": q.isPublic, 
-                "pages.$[].questions.$[question].chart": q.chart, 
-              } },
+              {
+                $set: {
+                  "pages.$[].questions.$[question].isPublic": q.isPublic,
+                  "pages.$[].questions.$[question].chart": q.chart,
+                }
+              },
               { arrayFilters: [{ "question.name": q.name }] }
             );
           }
         }
-  
+
         return res.status(200).json({ message: "Atualizado com sucesso" });
       } catch (error) {
         console.error("Erro ao atualizar:", error);
