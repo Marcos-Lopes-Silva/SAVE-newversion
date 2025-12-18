@@ -24,6 +24,7 @@ interface FiltersProps {
   setError: (error: string | null) => void;
   setSelectedPageIndex: (index: number) => void;
   initialFilters: Filter[];
+  initialPageIndex?: number;
 }
 
 const Filters = ({
@@ -32,11 +33,13 @@ const Filters = ({
   setError,
   setSelectedPageIndex,
   initialFilters,
+  initialPageIndex = -1,
 }: FiltersProps) => {
   const [filters, setFilters] = useState<Filter[]>(initialFilters || []);
   const [questions, setQuestions] = useState<QuestionFilter[]>([]);
   const [pages, setPages] = useState<string[]>([]);
   const [selectedPage, setSelectedPage] = useState<string>("Todas");
+  const [tempPageIndex, setTempPageIndex] = useState<number>(initialPageIndex);
   const [loadingFilters, setLoadingFilters] = useState(false);
 
   const generateId = () => Date.now().toString();
@@ -54,6 +57,10 @@ const Filters = ({
 
         const dimensionTitles = response.data.pages.map((p: any) => p.title);
         setPages(["Todas", ...dimensionTitles]);
+
+        // Inicializar selectedPage baseado no initialPageIndex
+        const initialPageName = initialPageIndex === -1 ? "Todas" : dimensionTitles[initialPageIndex] || "Todas";
+        setSelectedPage(initialPageName);
       } catch (err) {
         setError("Erro ao carregar perguntas.");
       } finally {
@@ -61,7 +68,7 @@ const Filters = ({
       }
     };
     if (surveyId) fetchQuestions();
-  }, [surveyId, setError]);
+  }, [surveyId, setError, initialPageIndex]);
 
   const getType = (q: string) => questions.find((x) => x.name === q)?.type || "";
   const getAnswers = (q: string) => {
@@ -116,19 +123,23 @@ const Filters = ({
       setError("Preencha todos os campos dos filtros antes de aplicar.");
       return;
     }
+    // Aplicar tanto os filtros quanto a seleção de dimensão
+    setSelectedPageIndex(tempPageIndex);
     setFiltersApplied(filters);
   };
 
   const clearFilters = () => {
     setFilters([]);
     setSelectedPage("Todas");
+    setTempPageIndex(-1);
     setSelectedPageIndex(-1);
     setFiltersApplied([]);
   };
 
   const handlePageChange = (page: string) => {
     setSelectedPage(page);
-    setSelectedPageIndex(page === "Todas" ? -1 : pages.indexOf(page) - 1);
+    // Apenas atualizar o estado temporário, não aplicar imediatamente
+    setTempPageIndex(page === "Todas" ? -1 : pages.indexOf(page) - 1);
   };
 
   return (

@@ -354,7 +354,8 @@ export default function Researches({ surveys }: { surveys: CustomISurveyDocument
             }}
             setError={setError}
             setSelectedPageIndex={setSelectedPageIndex}
-            initialFilters={filters} // Passe os filtros aplicados
+            initialFilters={filters} // Passa os filtros aplicados
+            initialPageIndex={selectedPageIndex} // Passa o índice da página atualmente selecionada
           />
         </div>
       )}
