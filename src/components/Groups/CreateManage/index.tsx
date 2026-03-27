@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  Button,
-  Input,
-  Textarea,
-  Card,
-  CardBody,
-  Divider,
-  Progress
+import { 
+    Button, 
+    Input, 
+    Textarea, 
+    Card, 
+    CardBody, 
+    Divider,
+    Progress
 } from "@nextui-org/react";
 import { FaClipboardList, FaRegTrashAlt, FaPen } from "react-icons/fa";
 import { MdGroups, MdOutlineInfo } from "react-icons/md";
@@ -54,8 +54,8 @@ export default function CreateManage() {
   const createGroupForm = useForm<ICreateGroupData>({
     resolver: zodResolver(createGroupSchema),
     defaultValues: {
-      name: "",
-      description: ""
+        name: "",
+        description: ""
     }
   });
 
@@ -130,17 +130,18 @@ export default function CreateManage() {
         {steps.map((s, i) => (
           <div key={i} className="flex items-center">
             <div className="flex flex-col items-center gap-2">
-              <div
-                className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300 ${step >= i + 1
-                  ? "border-zinc-800 bg-zinc-800 text-white shadow-lg dark:border-white dark:bg-white dark:text-black"
-                  : "border-zinc-300 bg-white text-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-600"
-                  }`}
-              >
+                <div
+                className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300 ${
+                    step >= i + 1 
+                    ? "border-zinc-800 bg-zinc-800 text-white shadow-lg dark:border-white dark:bg-white dark:text-black" 
+                    : "border-zinc-300 bg-white text-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-600"
+                }`}
+                >
                 {s.icon}
-              </div>
-              <span className={`text-xs font-bold uppercase tracking-wider ${step >= i + 1 ? "text-zinc-800 dark:text-white" : "text-zinc-300 dark:text-zinc-600"}`}>
-                {s.label}
-              </span>
+                </div>
+                <span className={`text-xs font-bold uppercase tracking-wider ${step >= i + 1 ? "text-zinc-800 dark:text-white" : "text-zinc-300 dark:text-zinc-600"}`}>
+                    {s.label}
+                </span>
             </div>
             {i < steps.length - 1 && (
               <div className="w-24 sm:w-40 h-[2px] bg-zinc-200 dark:bg-zinc-800 mx-4 -mt-6">
@@ -162,43 +163,50 @@ export default function CreateManage() {
         return (
           <Card shadow="none" className="border border-zinc-200 dark:border-zinc-800 p-8 max-w-2xl mx-auto w-full bg-transparent">
             <CardBody>
-              <form onSubmit={handleSubmit(handleCreateGroup)} className="flex flex-col gap-6">
-                <div className="flex flex-col items-center gap-4 mb-4">
-                  <div className="flex items-center justify-center w-32 h-32 shadow-xl text-5xl bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-white rounded-full border-4 border-white dark:border-zinc-700 font-bold">
-                    {firstLetter}
-                  </div>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">Avatar do Grupo</p>
-                </div>
+                <form onSubmit={handleSubmit(handleCreateGroup)} className="flex flex-col gap-6">
+                    <div className="flex flex-col items-center gap-4 mb-4">
+                        <div className="flex items-center justify-center w-32 h-32 shadow-xl text-5xl bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-white rounded-full border-4 border-white dark:border-zinc-700 font-bold">
+                            {firstLetter}
+                        </div>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">Avatar do Grupo</p>
+                    </div>
 
-                <Input
-                  label={t("admin.create.section.group_name")}
-                  placeholder="Ex: Alunos de Computação 2024"
-                  variant="bordered"
-                  {...register("name")}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    const letter = val.substring(0, 1);
-                    setFirstLetter(letter === "" ? "G" : letter.toUpperCase());
-                  }}
-                  isInvalid={!!errors.name}
-                  errorMessage={errors.name?.message}
-                />
+                    <Input
+                        label={t("admin.create.section.group_name")}
+                        placeholder="Ex: Alunos de Computação 2024"
+                        variant="bordered"
+                        {...register("name")}
+                        onChange={(e) => {
+                            const val = e.target.value;
+                            const letter = val.substring(0, 1);
+                            setFirstLetter(letter === "" ? "G" : letter.toUpperCase());
+                        }}
+                        isInvalid={!!errors.name}
+                        errorMessage={errors.name?.message}
+                        classNames={{
+                          input: "text-zinc-900 dark:text-zinc-100"
+                        }}
+                    />
 
-                <Textarea
-                  label={t("admin.create.section.description")}
-                  placeholder="Breve descrição sobre o objetivo deste grupo..."
-                  variant="bordered"
-                  {...register("description")}
-                />
+                    <Textarea
+                        label={t("admin.create.section.description")}
+                        placeholder="Breve descrição sobre o objetivo deste grupo..."
+                        variant="bordered"
+                        {...register("description")}
+                        classNames={{
+                          input: "text-zinc-900 dark:text-zinc-100"
+                        }}
+                    />
 
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="mt-4 bg-zinc-600 font-bold"
-                >
-                  {t("admin.create.section.continue")}
-                </Button>
-              </form>
+                    <Button 
+                        type="submit" 
+                        color="primary" 
+                        size="lg" 
+                        className="mt-4 font-bold"
+                    >
+                        {t("admin.create.section.continue")}
+                    </Button>
+                </form>
             </CardBody>
           </Card>
         );
@@ -220,69 +228,69 @@ export default function CreateManage() {
         return (
           <div className="flex flex-col gap-8">
             <div className="flex flex-col gap-2">
-              <h2 className="text-xl font-bold text-zinc-800 dark:text-white">Revise e confirme as informações</h2>
-              <div className="w-16 h-1 bg-zinc-800 dark:bg-white rounded-full" />
+                <h2 className="text-xl font-bold text-zinc-800 dark:text-white">Revise e confirme as informações</h2>
+                <div className="w-16 h-1 bg-zinc-800 dark:bg-white rounded-full" />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              <div className="lg:col-span-4">
-                <Card shadow="sm" className="border border-zinc-100 dark:border-zinc-800 p-4 bg-white dark:bg-zinc-900">
-                  <CardBody className="flex flex-col items-center gap-6">
-                    <div className="w-24 h-24 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center text-4xl font-bold shadow-inner dark:text-white">
-                      {firstLetter}
-                    </div>
-                    <div className="w-full text-center">
-                      <h3 className="font-bold text-xl dark:text-white">{groupData.name}</h3>
-                      <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2">{groupData.description || "Sem descrição"}</p>
-                    </div>
-                    <Divider className="dark:bg-zinc-800" />
-                    <Button
-                      variant="light"
-                      color="primary"
-                      startContent={<FaPen size={14} />}
-                      onPress={() => setStep(1)}
-                      className="w-full"
-                    >
-                      Editar Detalhes
-                    </Button>
-                  </CardBody>
-                </Card>
-              </div>
-
-              <div className="lg:col-span-8 flex flex-col gap-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="font-bold text-lg flex items-center gap-2 dark:text-white">
-                    <MdGroups size={24} /> {t("admin.create.second_section.added_participants")}
-                  </h3>
-                  <span className="bg-zinc-100 dark:bg-zinc-800 px-3 py-1 rounded-full text-sm font-bold dark:text-white">
-                    {userData.length} Participantes
-                  </span>
+                <div className="lg:col-span-4">
+                    <Card shadow="sm" className="border border-zinc-100 dark:border-zinc-800 p-4 bg-white dark:bg-zinc-900">
+                        <CardBody className="flex flex-col items-center gap-6">
+                            <div className="w-24 h-24 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center text-4xl font-bold shadow-inner dark:text-white">
+                                {firstLetter}
+                            </div>
+                            <div className="w-full text-center">
+                                <h3 className="font-bold text-xl dark:text-white">{groupData.name}</h3>
+                                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2">{groupData.description || "Sem descrição"}</p>
+                            </div>
+                            <Divider className="dark:bg-zinc-800" />
+                            <Button 
+                                variant="light" 
+                                color="primary" 
+                                startContent={<FaPen size={14}/>}
+                                onPress={() => setStep(1)}
+                                className="w-full"
+                            >
+                                Editar Detalhes
+                            </Button>
+                        </CardBody>
+                    </Card>
                 </div>
 
-                <SearchBar
-                  iconSize={18}
-                  placeholder={t("admin.groups.body.searchbar_placeholder")}
-                  setSearch={setSearch}
-                  search={search}
-                  className="w-full shadow-sm"
-                />
+                <div className="lg:col-span-8 flex flex-col gap-4">
+                    <div className="flex justify-between items-center">
+                        <h3 className="font-bold text-lg flex items-center gap-2 dark:text-white">
+                            <MdGroups size={24}/> {t("admin.create.second_section.added_participants")}
+                        </h3>
+                        <span className="bg-zinc-100 dark:bg-zinc-800 px-3 py-1 rounded-full text-sm font-bold dark:text-white">
+                            {userData.length} Participantes
+                        </span>
+                    </div>
+                    
+                    <SearchBar
+                        iconSize={18}
+                        placeholder={t("admin.groups.body.searchbar_placeholder")}
+                        setSearch={setSearch}
+                        search={search}
+                        className="w-full shadow-sm dark:bg-zinc-800 dark:border-zinc-700"
+                    />
 
-                <ParticipantsTable
-                  participants={filteredItems}
-                  isReadOnly={true}
-                />
-              </div>
+                    <ParticipantsTable 
+                        participants={filteredItems}
+                        isReadOnly={true}
+                    />
+                </div>
             </div>
 
             <Divider className="my-4 dark:bg-zinc-800" />
 
             <div className="flex justify-between items-center bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-xl border border-zinc-200 dark:border-zinc-700">
-              <Button variant="bordered" onPress={handleBackStep} className="px-10 dark:text-white dark:border-zinc-600">
+                <Button variant="bordered" onPress={handleBackStep} className="px-10 dark:text-white dark:border-zinc-600">
                 {t("admin.create.section.return")}
-              </Button>
-              <Button color="success" onPress={handleSubmitGroup} className="px-10 font-bold text-white">
-                Finalizar e Criar Grupo
-              </Button>
+                </Button>
+                <Button color="success" onPress={handleSubmitGroup} className="px-10 font-bold text-white">
+                    Finalizar e Criar Grupo
+                </Button>
             </div>
           </div>
         );
@@ -295,35 +303,39 @@ export default function CreateManage() {
   return (
     <main className="flex flex-col px-10 md:px-20 lg:px-40 py-14 gap-12 bg-zinc-50 dark:bg-zinc-950 min-h-screen">
       <header className="flex flex-col rounded-3xl shadow-2xl bg-zinc-200 dark:bg-zinc-900 px-10 md:px-20 lg:px-40 py-16 relative overflow-hidden">
-
-        <div className="flex items-center gap-4 mb-4">
-          <Button
-            isIconOnly
-            variant="flat"
-            color="default"
-            radius="full"
-            onPress={handleBackPage}
-            className="bg-white/50 dark:bg-white/10 backdrop-blur-sm shadow-sm dark:text-white"
-          >
-            <FaArrowLeft />
-          </Button>
-          <h1 className="text-3xl font-bold dark:text-white">{t("admin.create.header.title")}</h1>
+        {/* Background Decorative elements */}
+        <div className="absolute top-0 right-0 p-8 opacity-10 dark:text-white">
+            <FaClipboardList size={200} />
         </div>
-
+        
+        <div className="flex items-center gap-4 mb-4">
+            <Button 
+                isIconOnly 
+                variant="flat" 
+                color="default" 
+                radius="full" 
+                onPress={handleBackPage}
+                className="bg-white/50 dark:bg-white/10 backdrop-blur-sm shadow-sm dark:text-white"
+            >
+                <FaArrowLeft />
+            </Button>
+            <h1 className="text-3xl font-bold dark:text-white">{t("admin.create.header.title")}</h1>
+        </div>
+        
         <p className="mb-6 max-w-2xl text-zinc-600 dark:text-zinc-300 leading-relaxed font-medium">
-          {t("admin.create.header.description")}
+            {t("admin.create.header.description")}
         </p>
 
         <div className="flex items-center gap-4">
-          <div className="mb-2 rounded-2xl bg-zinc-800 dark:bg-zinc-700 w-32 h-3 shadow-sm" />
-          <div className="rounded-2xl bg-white/60 dark:bg-white/20 w-16 h-3 shadow-sm" />
+            <div className="mb-2 rounded-2xl bg-zinc-800 dark:bg-zinc-700 w-32 h-3 shadow-sm" />
+            <div className="rounded-2xl bg-white/60 dark:bg-white/20 w-16 h-3 shadow-sm" />
         </div>
       </header>
 
       <section className="flex flex-col w-full bg-white dark:bg-zinc-900 rounded-[2rem] shadow-xl p-8 md:p-12 border border-zinc-100 dark:border-zinc-800">
         {renderStepIndicator()}
         <div className="transition-all duration-300 ease-in-out">
-          {renderFormContent()}
+            {renderFormContent()}
         </div>
       </section>
     </main>
