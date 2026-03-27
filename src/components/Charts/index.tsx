@@ -48,13 +48,13 @@ const Charts = ({ data, typeChart, colors }: ChartsProps) => {
             ).name;
             const maxWordLength = maxWord.length;
 
-            const containerWidth = isDesktop ? 1536 : window.innerWidth * 0.9; 
+            const containerWidth = isDesktop ? 1536 : window.innerWidth * 0.9;
             const containerHeight = isDesktop ? 600 : 350;
 
             const maxFontSize = Math.min(
                 containerWidth / maxWordLength,
-                containerHeight * (isDesktop ? 0.9 : 1.0) 
-            ); 
+                containerHeight * (isDesktop ? 0.9 : 1.0)
+            );
             const scale = (value: number) => value / maxValue;
 
             const minFontSize = Math.max(maxFontSize * 0.15, 12);
@@ -75,17 +75,17 @@ const Charts = ({ data, typeChart, colors }: ChartsProps) => {
         const averageWordLength = totalLetters / totalWords;
 
         if (isDesktop) {
-            const availableSpace = containerWidth - 100; 
+            const availableSpace = containerWidth - 100;
             const truncateLength = Math.min(
                 Math.floor(availableSpace / (totalWords * averageWordLength * 1.5)),
-                averageWordLength * 3 
+                averageWordLength * 3
             );
             return Math.max(truncateLength, 12);
         } else {
             const availableSpace = containerWidth - 50;
             const truncateLength = Math.min(
-                Math.floor(availableSpace / (totalWords * averageWordLength * 1.2)), 
-                averageWordLength * 2.5 
+                Math.floor(availableSpace / (totalWords * averageWordLength * 1.2)),
+                averageWordLength * 2.5
             );
             return Math.max(truncateLength, 8);
         }
@@ -215,10 +215,10 @@ const Charts = ({ data, typeChart, colors }: ChartsProps) => {
                             <ResponsiveContainer width="100%" height={210}>
                                 {(() => {
                                     const totalWidth = 101;
-                                    const totalBars = data.length; 
-                                    const availableSpace = totalWidth - 10; 
-                                    const barSize = Math.max(availableSpace / (totalBars * 1.5), 5); 
-                                    const barCategoryGap = `${Math.min((availableSpace / totalBars) * 0.5, 20)}%`; 
+                                    const totalBars = data.length;
+                                    const availableSpace = totalWidth - 10;
+                                    const barSize = Math.max(availableSpace / (totalBars * 1.5), 5);
+                                    const barCategoryGap = `${Math.min((availableSpace / totalBars) * 0.5, 20)}%`;
 
                                     return (
                                         <BarChart data={data} barCategoryGap={barCategoryGap} {...commonProps} className="-ml-8">
@@ -367,7 +367,7 @@ const Charts = ({ data, typeChart, colors }: ChartsProps) => {
         scatter: (
             <div className="flex flex-col lg:flex-row items-center gap-4 lg:gap-10">
                 {isDesktop ? (
-                    <ResponsiveContainer width="100%" height={350} minWidth="1010px">   
+                    <ResponsiveContainer width="100%" height={350} minWidth="1010px">
                         <ScatterChart {...commonProps} className="-ml-5">
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis
@@ -471,10 +471,8 @@ const Charts = ({ data, typeChart, colors }: ChartsProps) => {
                                 }))}
                             >
                                 <RadialBar
-                                    minAngle={15}
                                     label={{ position: 'insideStart', fill: '#fff' }}
                                     background
-                                    clockWise
                                     dataKey="value"
                                 />
                             </RadialBarChart>
@@ -511,10 +509,8 @@ const Charts = ({ data, typeChart, colors }: ChartsProps) => {
                                 }))}
                             >
                                 <RadialBar
-                                    minAngle={15}
                                     label={{ position: 'insideStart', fill: '#fff' }}
                                     background
-                                    clockWise
                                     dataKey="value"
                                 />
                             </RadialBarChart>
@@ -553,7 +549,7 @@ const Charts = ({ data, typeChart, colors }: ChartsProps) => {
                             font="Arial"
                             fontStyle="normal"
                             fontWeight="bold"
-                            fontSize={(word) => fontSize(word, isDesktop)} 
+                            fontSize={(word) => fontSize(word, isDesktop)}
                             spiral="archimedean"
                             rotate={0}
                             padding={2}
