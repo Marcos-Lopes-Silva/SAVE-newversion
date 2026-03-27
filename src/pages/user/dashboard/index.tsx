@@ -197,9 +197,9 @@ const ValidateModel = ({ isOpen, onOpenChange, session }: ValidateModelProps) =>
         const normalizedCpf = data.cpf.replace(/\D/g, '');
 
         try {
-            const response = await api.get<{ cpf: string }>(`user/verify-cpf/${normalizedCpf}`);
+            const response = await api.get<{ member: { cpf: string } }>(`user/verify-cpf/${normalizedCpf}`);
 
-            const hashedCpf = response.cpf;
+            const hashedCpf = response.member.cpf;
 
             if (response) {
                 await api.patch(`user/${session?.user._id as string}`, { cpf: hashedCpf });
