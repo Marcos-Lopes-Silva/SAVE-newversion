@@ -12,7 +12,8 @@ export interface IUsers {
     id: string,
     name: string,
     email: string,
-    cpf?: string,
+    cpf: string,
+    cpf_search: string,
     birthDate?: string,
     rg?: string,
 }
@@ -37,7 +38,11 @@ const usersSchema: mongoose.Schema = new mongoose.Schema<IUsers>({
     },
     cpf: {
         type: String,
-        required: false,
+        required: true,
+    },
+    cpf_search: {
+        type: String,
+        required: true,
     },
     birthDate: {
         type: String,
@@ -79,6 +84,8 @@ const groupSchema: mongoose.Schema = new mongoose.Schema<IGroupDocument>(
         timestamps: false,
     }
 );
+
+groupSchema.index({ "members.cpf_search": 1 });
 
 const Group: Model<IGroupDocument> = mongoose.models.Group || mongoose.model("Group", groupSchema);
 

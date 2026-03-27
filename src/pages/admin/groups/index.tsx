@@ -10,7 +10,7 @@ import { AiOutlineExclamationCircle } from "react-icons/ai";
 import { IGroupDocument } from "../../../../models/groupModel";
 import { api } from "@/lib/api";
 import Item from "@/components/Item";
-import { Menu } from "@nextui-org/react";
+import { Menu, Pagination } from "@nextui-org/react";
 import { useRouter } from "next/router";
 import { IoMdTrash } from "react-icons/io";
 
@@ -24,10 +24,11 @@ export default function Groups(survey: ISurveyDocument[]) {
         setGroups(response);
     }
 
-    const filteredList = useMemo(() => {
-        return groups.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()))
-    }, [groups, search])
+    const PageSize = 5;
 
+    const [currentPage, setCurrentPage] = useState<number>(1);
+
+    const onPageChange = (page: number) => setCurrentPage(page);
 
     const Menu = ({ group }: { group: IGroupDocument }) => {
         const duplicateGroup = async () => {
@@ -36,7 +37,7 @@ export default function Groups(survey: ISurveyDocument[]) {
         }
 
         const showParticipants = () => {
-
+            push(`${process.env.NEXT_PUBLIC_NEXTAUTH_URL}admin/groups/${group._id}/participants`);
         }
 
         const editGroup = () => {
@@ -80,62 +81,134 @@ export default function Groups(survey: ISurveyDocument[]) {
     useEffect(() => {
         handleGroupsData();
         console.log(groups);
-    }, [])
+    }, []);
+
+    const filteredList = useMemo(() => {
+        return groups.filter((item) =>
+            item.name.toLowerCase().includes(search.toLowerCase())
+        );
+    }, [groups, search]);
+
+    const paginatedList = useMemo(() => {
+        const firstPageIndex = (currentPage - 1) * PageSize;
+        const lastPageIndex = firstPageIndex + PageSize;
+        return filteredList.slice(firstPageIndex, lastPageIndex);
+    }, [filteredList, currentPage]);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [search]);
+
     return (
-        <main>
-            <header className="px-28 py-20">
-                <div className="bg-slate-300 px-14 py-6 rounded-t-2xl shadow-2xl mb-1 flex items-center justify-between">
-                    <div className="flex items-center">
-                        <FaClipboardList className="size-6 mr-1" />
-                        <h1 className="font-bold">{t('admin.groups.header.title')}</h1>
+        <main className="flex flex-col px-40 py-14">
+            {/* HEADER PADRÃO */}
+            <header className="flex flex-col rounded-xl shadow-2xl bg-zinc-200 dark:bg-zinc-900 px-40 py-16">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <FaClipboardList className="size-6" />
+                        <h1 className="text-2xl font-medium dark:text-white">
+                            {t('admin.groups.header.title')}
+                        </h1>
                     </div>
-                    <AiOutlineExclamationCircle className="size-6" />
+                    <AiOutlineExclamationCircle className="size-6 text-zinc-500" />
                 </div>
-                <div className="shadow-xl bg-gray-50 px-14 py-6 rounded-b-2xl">
-                    <h1 className="font-bold">{t('admin.groups.header.description')}</h1>
+
+                <p className="mt-4 dark:text-white">
+                    {t('admin.groups.header.description')}
+                </p>
+
+                <div className="mt-4 flex flex-col gap-1">
+                    <div className="rounded-2xl bg-zinc-600 dark:bg-zinc-700 w-24 h-3" />
+                    <div className="ml-4 rounded-2xl bg-zinc-300 w-24 h-3" />
                 </div>
             </header>
-            <section className="px-28 mr-72">
-                <Button onClick={() => window.location.href = '/admin/groups/create'}>{t('admin.groups.placeholder.button_text')}</Button>
-                <div className="border-b-2 border-zinc-800 font-bold flex items-center justify-between">
-                    <h1 className="px-2 py-2">{t('admin.groups.body.text')}</h1>
-                    <div className="flex justify-center items-center gap-2">
-                        <h1>{filteredList.length}</h1>
+
+            {/* CONTEÚDO */}
+            <section className="flex py-20 w-full items-end flex-col px-24">
+                {/* AÇÕES */}
+                <div className="w-full flex justify-between items-center mb-6">
+                    <button
+                        onClick={() => push('/admin/groups/create')}
+                        className="bg-zinc-800 text-white px-6 py-2 rounded-lg hover:bg-zinc-700 transition"
+                    >
+                        {t('admin.groups.placeholder.button_text')}
+                    </button>
+
+                    <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+                        <span className="font-semibold">{filteredList.length}</span>
                         <MdGroups className="size-6" />
                     </div>
                 </div>
-                <div className="py-2">
-                    <SearchBar placeholder={t('admin.groups.body.searchbar_placeholder')}
-                        setSearch={setSearch}
-                        search={search}
-                        iconSize={25}
-                        className="w-full mt-1 shadow-lg"></SearchBar>
-                </div>
-                <ul>
-                    {filteredList.map((group, index) => (
-                        <li key={index} className="bg-slate-300 font-bold mb-1 gap-2 py-4 px-2 rounded-lg shadow-lg">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center">
-                                    <MdGroup className="rounded-full border-4 size-8 border-black bg-black text-white" />
-                                    {group.name}
+
+                {/* SEARCH */}
+                <SearchBar
+                    placeholder={t('admin.groups.body.searchbar_placeholder')}
+                    setSearch={setSearch}
+                    search={search}
+                    iconSize={20}
+                    className="w-full mt-1 shadow-lg mb-8"
+                />
+
+                {/* LISTA */}
+                <div className="w-full flex flex-col items-center gap-5">
+                    {paginatedList.length === 0 ? (
+                        <div className="text-zinc-500 dark:text-zinc-300">
+                            Nenhum grupo encontrado
+                        </div>
+                    ) : (
+                        paginatedList.map((group, index) => (
+                            <div
+                                key={index}
+                                className="flex justify-between items-center w-11/12 bg-white dark:bg-zinc-800 shadow-2xl rounded-3xl p-6"
+                            >
+                                {/* ESQUERDA */}
+                                <div className="flex items-center gap-4">
+                                    <div className="p-4 rounded-2xl bg-zinc-800 text-white">
+                                        <MdGroup size={20} />
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <span className="font-semibold text-lg dark:text-white">
+                                            {group.name}
+                                        </span>
+                                        <span className="text-sm text-zinc-500">
+                                            ID: {group._id as string}
+                                        </span>
+                                    </div>
                                 </div>
+
+                                {/* DIREITA */}
                                 <div className="flex items-center">
                                     <Item<IGroupDocument>
                                         icon={null}
                                         menu={
-                                            <div className="">
-                                                <Menu group={group} />
-                                            </div>
+                                            <Menu group={group} />
                                         }
-                                        key={index} className="" item={group} />
+                                        item={group}
+                                    />
                                 </div>
                             </div>
-                        </li>
-                    ))}
-                </ul>
+                        ))
+                    )}
+                    <div className="flex justify-center mt-10">
+                        <Pagination
+                            total={Math.ceil(filteredList.length / PageSize)}
+                            page={currentPage}
+                            onChange={onPageChange}
+                            showControls
+                            loop
+                            color="primary"
+                            classNames={{
+                                item: "hover:bg-zinc-700 bg-zinc-900 text-white",
+                                next: "hover:bg-zinc-700 bg-zinc-900 text-white",
+                                prev: "hover:bg-zinc-500 bg-zinc-900 text-white"
+                            }}
+                        />
+                    </div>
+                </div>
             </section>
         </main>
-    )
+    );
 }
 
 Groups.auth = {

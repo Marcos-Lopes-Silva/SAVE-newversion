@@ -1,7 +1,7 @@
 import { connectToMongoDB } from '@/lib/db';
 import { NextApiRequest, NextApiResponse } from 'next';
 import Group, { IUsers } from '../../../../models/groupModel';
-import { compareToken, hashToken } from '@/lib/crypto';
+import { compareToken, createSearchHash, hashToken } from '@/lib/crypto';
 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -12,8 +12,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             try {
                 const newUsers = await Promise.all(
                     req.body.members.map(async (user: IUsers) => {
-                        const newUser = { ...user };
-                        const memberHashed = await verifyUsersFromOthersGroups(newUser);
+                        const cpf = user.cpf?.replace(/\D/g, '') ?? '';
+
+                        const newUser = {
+                            ...user,
+                            cpf: await hashToken(cpf),
+                            cpf_search: createSearchHash(cpf)
+                        };
+
+                        const memberHashed = await verifyUsersFromOthersGroups(newUser.cpf_search);
+
                         if (memberHashed) newUser.cpf = memberHashed;
                         else if (newUser.cpf) newUser.cpf = await hashToken(newUser.cpf) ?? '';
                         return newUser;
@@ -41,23 +49,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 }
 
-const verifyUsersFromOthersGroups = async (user: IUsers) => {
-    if (!user.cpf) return null;
+const verifyUsersFromOthersGroups = async (cpf_search: string) => {
     try {
-        const groups = await Group.find({});
+        const group = await Group.findOne(
+            { "members.cpf_search": cpf_search },
+            { "members.$": 1 }
+        );
 
-        for (const group of groups) {
-            for (const member of group.members) {
+        if (!group || !group.members.length) return null;
 
-                if (!member.cpf) continue;
-                const isMatch = await compareToken(user.cpf!!, member.cpf!!);
-                if (isMatch) {
-                    return member.cpf
-                }
-            }
-        }
+        return group.members[0].cpf;
     } catch (error) {
         console.error(error);
         return null;
     }
-}
+};

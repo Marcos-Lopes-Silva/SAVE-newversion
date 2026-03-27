@@ -105,7 +105,7 @@
                 "title": "Adicione participantes ao seu grupo importando vai CSV ou por e-mail.",
                 "name": "Nome",
                 "email": "Email",
-                "cpf": "Cpf",
+                "cpf": "CPF",
                 "add_validation": "Adicionar Validação",
                 "add_participants": "Adicionar Participantes",
                 "participants_list": "Lista de Participantes",

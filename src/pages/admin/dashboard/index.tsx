@@ -89,7 +89,7 @@ export default function Dashboard({ surveys }: Props) {
     }, [filteredListP, list]);
 
     return (
-        <main className="flex flex-col px-40 py-28">
+        <main className="flex flex-col px-40 py-14">
             <header className="flex flex-col rounded-xl shadow-2xl bg-zinc-200 dark:bg-zinc-900 px-40 py-16">
                 <h1 className="mb-2 text-2xl font-medium dark:text-white">{t('admin.dashboard.title')}</h1>
                 <a className="mb-4 dark:text-white">{t('admin.dashboard.subtitle')}</a>

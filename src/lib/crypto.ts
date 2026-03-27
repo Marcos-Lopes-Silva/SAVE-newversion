@@ -1,11 +1,19 @@
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 
-export async function hashToken(token: string): Promise<string> {
-  const saltRounds = 10;
-  return await bcrypt.hash(token, saltRounds);
+const SALT_ROUNDS = 10;
+
+export async function hashToken(value: string) {
+  return await bcrypt.hash(value, SALT_ROUNDS);
 }
 
-export async function compareToken(token: string, hash: string): Promise<boolean> {
-  return await bcrypt.compare(token, hash);
+export function createSearchHash(value: string) {
+  return crypto
+    .createHash("sha256")
+    .update(value)
+    .digest("hex");
+}
+
+export async function compareToken(value: string, hash: string) {
+  return await bcrypt.compare(value, hash);
 }

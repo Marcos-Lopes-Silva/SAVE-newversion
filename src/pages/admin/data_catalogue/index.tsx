@@ -78,70 +78,57 @@ export default function Catalogue({ survey }: Props) {
     }
 
     return (
-        <main className="flex flex-col px-32">
-            <header className="flex flex-col bg-slate-100 m-12 shadow-lg shadow-slate-300 rounded-3xl p-32 py-12">
-                <div className="flex gap-4 mt-5">
-                    <Image src={ImageHeader} className="w-10 -mt-24" alt="imageHeader" />
-                    <div className="flex flex-col">
-                        <h1 className="font-semibold text-3xl mb-3">
-                            {t('admin.data_catalogue.visualize_data')}
-                        </h1>
-                        <div className="flex">
-                            <p className="font-semibold text-lg pl-1 mb-3">
-                                {t('admin.data_catalogue.informations')}
-                            </p>
-                        </div>
-                    </div>
-                </div>
+        <main className="flex flex-col px-40 py-28">
+            <header className="flex flex-col rounded-xl shadow-2xl bg-zinc-200 dark:bg-zinc-900 px-40 py-16">
+                <h1 className="mb-2 text-2xl font-medium dark:text-white">
+                    {t('admin.data_catalogue.visualize_data')}
+                </h1>
+                <a className="mb-4 dark:text-white">
+                    {t('admin.data_catalogue.informations')}
+                </a>
+                <div className="mb-2 rounded-2xl bg-zinc-600 dark:bg-zinc-700 w-24 h-3" />
+                <div className="ml-4 rounded-2xl bg-zinc-300 w-24 h-3" />
             </header>
-            <section className="flex-col m-10">
+            <section className="flex flex-col py-20 w-full px-24">
                 {recentSurvey && recentSurvey.length > 0 ? (
                     <>
-                        <label className="font-semibold text-sm px-2 border-b-2 border-slate-300">
+                        <label className="text-xl font-semibold mb-4 dark:text-white">
                             {t('admin.data_catalogue.recently_open')}
                         </label>
                         <div className="h-72 w-full pl-2 overflow-x-auto">
                             <ul className="flex gap-4">
                                 {recentSurvey.map((survey) => survey.status == "finished" && (
-                                    <Card key={survey._id as string} className="mt-5 shadow-lg shadow-slate-300 rounded-3xl w-1/3 min-w-[375px]">
-                                        <div className="flex flex-col border-t-slate-200 border-t-8 rounded-3xl py-8 w-full">
-                                            <div className="flex ml-10 gap-5">
+                                    <Card key={survey._id as string} className="mt-5 shadow-lg shadow-zinc-800 rounded-3xl w-1/3 min-w-[375px] transition-all duration-300 hover:scale-105 hover:shadow-xl dark:bg-zinc-800">
+                                        <div className="flex flex-col rounded-3xl py-8 w-full">
+                                            <div className="flex ml-10 gap-5 items-center">
                                                 <FaFileInvoice
-                                                    size={58}
-                                                    style={{
-                                                        color: "white",
-                                                        backgroundColor: "rgb(15 23 42)",
-                                                        padding: "15px",
-                                                        borderTopRightRadius: "0.4rem",
-                                                        borderBottomLeftRadius: "0.4rem",
-                                                        borderBottomRightRadius: "1rem",
-                                                        borderTopLeftRadius: "1rem"
-                                                    }}
+                                                    size={20}
+                                                    className="p-7 dark:bg-zinc-950 bg-zinc-800 flex items-center justify-center rounded-2xl text-white"
                                                 />
-                                                <label className="font-semibold text-sm ml-2">
+                                                <label className="font-medium text-lg ml-2 dark:text-white">
                                                     {survey.title}
                                                 </label>
                                             </div>
                                             <div className="flex flex-col mt-3.5 ml-32">
                                                 <button
-                                                    className="text-sm bg-slate-900 text-white rounded-3xl w-20 py-0.5 shadow-slate-400 hover:shadow-md"
+                                                    className="dark:bg-white bg-zinc-800 dark:text-black text-white rounded-3xl w-24 py-1 shadow-md hover:shadow-lg transition-all duration-300"
                                                     onClick={() => openSurvey(survey._id as string)}>
                                                     {t('admin.data_catalogue.view_button')}
                                                 </button>
                                             </div>
-                                            <div className="flex mt-5 -mb-2">
-                                                <div className="flex ml-10 w-32">
+                                            <div className="flex mt-5 -mb-2 items-center">
+                                                <div className="flex ml-10 w-32 items-center gap-2">
                                                     <GiBackwardTime size={20} />
-                                                    <p className="text-sm ml-1 font-semibold">
+                                                    <p className="text-zinc-500 dark:text-white text-sm">
                                                         {lastSurveyCalendar ? timeAgoInHours(lastSurveyCalendar) : "Não disponível"}
                                                     </p>
                                                 </div>
-                                                <div className="flex gap-2 ml-24">
+                                                <div className="flex gap-2 ml-24 items-center">
                                                     {(verifiedPublic(survey._id as string)) ? (
                                                         <BiSolidLockOpen size={20} />
                                                     ) : <BiSolidLock size={20} />}
                                                     <HiUserGroup size={20} />
-                                                    <p className="mt-0.5 text-sm font-bold">{survey.users}</p>
+                                                    <p className="text-zinc-500 dark:text-white text-sm">{survey.users}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -151,42 +138,43 @@ export default function Catalogue({ survey }: Props) {
                         </div>
                     </>
                 ) : null}
-                <div className="flex flex-col mt-8 pl-2 gap-12">
-                    <label className="font-semibold text-sm">
-                        {t('admin.data_catalogue.reports')} <br />
+                <div className="flex flex-col mt-8 pl-2 gap-2">
+                    <h2 className="text-xl font-semibold dark:text-white">
+                        {t('admin.data_catalogue.reports')}
+                    </h2>
+                    <p className="text-sm text-zinc-500 dark:text-white">
                         {t('admin.data_catalogue.click_reports')}
-                    </label>
+                    </p>
                 </div>
                 <ul className="flex flex-col gap-14">
+                    {survey.length === 0 && (
+                        <div className="flex flex-col items-center gap-4 mt-20">
+                            <p className="text-zinc-500 dark:text-white text-sm">
+                                Não existem relatórios disponíveis. Aplique um novo questionário para gerar relatórios e visualizá-los aqui.
+                            </p>
+                        </div>
+                    )}
                     {survey.map((survey, index) => survey.status == "finished" && (
-                        <li key={index} className="flex mt-5 border-t-slate-200 border-t-8 shadow-lg shadow-slate-200 rounded-3xl py-8">
-                            <div className="flex ml-14 gap-5">
+                        <li key={index} className="flex mt-5 shadow-lg shadow-zinc-800 rounded-3xl py-8 transition-all duration-300 hover:scale-105 hover:shadow-xl dark:bg-zinc-800">
+                            <div className="flex ml-14 gap-5 items-center">
                                 <FaFileInvoice
-                                    size={58}
-                                    style={{
-                                        color: "white",
-                                        backgroundColor: "rgb(15 23 42)",
-                                        padding: "15px",
-                                        borderTopRightRadius: "0.4rem",
-                                        borderBottomLeftRadius: "0.4rem",
-                                        borderBottomRightRadius: "1rem",
-                                        borderTopLeftRadius: "1rem"
-                                    }}
+                                    size={20}
+                                    className="p-7 dark:bg-zinc-950 bg-zinc-800 flex items-center justify-center rounded-2xl text-white"
                                 />
-                                <label className="font-semibold text-sm break-all">
+                                <label className="font-medium text-lg break-all dark:text-white">
                                     {survey.title}
                                 </label>
                             </div>
-                            <div className="flex mt-20 -ml-12 gap-1.5">
+                            <div className="flex mt-20 -ml-12 gap-1.5 items-center">
                                 {(verifiedPublic(survey._id as string)) ? (
-                                    <BiSolidLockOpen size={20} />
-                                ) : <BiSolidLock size={20} />}
-                                <HiUserGroup size={20} />
-                                <p className="mt-0.5 text-sm font-bold">{survey.users}</p>
+                                    <BiSolidLockOpen size={20} className="text-zinc-500 dark:text-white" />
+                                ) : <BiSolidLock size={20} className="text-zinc-500 dark:text-white" />}
+                                <HiUserGroup size={20} className="text-zinc-500 dark:text-white" />
+                                <p className="text-sm text-zinc-500 dark:text-white">{survey.users}</p>
                             </div>
                             <div className="flex items-center ml-auto">
                                 <button
-                                    className="text-sm text-white w-24 py-1 rounded-3xl mr-10 bg-slate-900 border-slate-300 shadow-sm shadow-slate-400 hover:shadow-md"
+                                    className="dark:bg-white bg-zinc-800 dark:text-black text-white rounded-3xl w-24 py-1 mr-10 shadow-md hover:shadow-lg transition-all duration-300"
                                     onClick={() => openSurvey(survey._id as string)}>
                                     {t('admin.data_catalogue.view_button')}
                                 </button>
@@ -206,7 +194,9 @@ export default function Catalogue({ survey }: Props) {
                         dotsJump={3}
                         classNames={{
                             wrapper: "mt-20 gap-3 justify-end",
-                            item: "w-8 text-small text-slate-900 rounded-3xl bg-slate-100 shadow-sm shadow-slate-400 hover:shadow-md",
+                            item: "w-8 text-small hover:bg-zinc-700 bg-zinc-900 text-white rounded-3xl",
+                            next: "hover:bg-zinc-700 bg-zinc-900 text-white",
+                            prev: "hover:bg-zinc-500 bg-zinc-900 text-white",
                         }}
                     />
                 ) : null}

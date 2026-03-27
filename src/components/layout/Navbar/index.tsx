@@ -83,20 +83,6 @@ export default function NavbarLayout() {
     },
   ];
 
-  const handleLanguageChange = (code: string) => {
-    i18n.changeLanguage(code);
-  };
-
-  const languages = [
-    {
-      title: "English",
-      value: "en",
-    },
-    {
-      title: "Português",
-      value: "pt-BR",
-    },
-  ];
 
   const navItems = status !== 'authenticated' ? logout : (session?.user && session.user.role === 'admin' ? (session.user.verified) === true ? admin : user : user);
 
@@ -122,20 +108,6 @@ export default function NavbarLayout() {
       </NavbarContent>
 
       <NavbarContent justify="end">
-        <NavbarItem className="hidden sm:flex">
-          <Select
-            placeholder={t('language')}
-            className="min-w-40"
-            defaultSelectedKeys={languages.find(lang => lang.value === i18n.language)?.title}
-            onChange={(e) => handleLanguageChange(e.target.value)}
-          >
-            {languages.map((language) => (
-              <SelectItem key={language.value} className="dark:text-white" value={language.value}>
-                {language.title}
-              </SelectItem>
-            ))}
-          </Select>
-        </NavbarItem>
 
         <NavbarItem>
           <MdSunny size={25} className={`cursor-pointer text-white hidden dark:block`} onClick={() => setTheme('light')} />
@@ -174,23 +146,6 @@ export default function NavbarLayout() {
             </Link>
           </NavbarMenuItem>
         ))}
-        <NavbarMenuItem>
-          <Select
-            placeholder={t('language')}
-            className="min-w-full"
-            defaultSelectedKeys={[languages.find(lang => lang.value === i18n.language)?.value || '']}
-            onChange={(e) => {
-              handleLanguageChange(e.target.value);
-              onOpenChange();
-            }}
-          >
-            {languages.map((language) => (
-              <SelectItem key={language.value} value={language.value}>
-                {language.title}
-              </SelectItem>
-            ))}
-          </Select>
-        </NavbarMenuItem>
       </NavbarMenu>
     </Navbar>
   );
