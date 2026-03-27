@@ -2,7 +2,6 @@ import { IQuestionProp } from ".";
 import { Controller, useFormContext } from "react-hook-form";
 import { Form } from "@/components/Form";
 import { LuAsterisk } from "react-icons/lu";
-import { Datepicker } from "flowbite-react";
 import { I18nProvider } from "@react-aria/i18n";
 import { DatePicker } from "@nextui-org/react";
 
