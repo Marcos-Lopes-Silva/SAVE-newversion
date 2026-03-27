@@ -17,8 +17,7 @@ export default {
     ]
   },
   trailingSlash: false,
-  reactStrictMode: true,
-  cache: 'no-store'
+  reactStrictMode: true
 }
 
 
