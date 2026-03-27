@@ -46,21 +46,21 @@ export default function Groups(survey: ISurveyDocument[]) {
 
         return (
             <div className="flex gap-1 font-bold flex-col text-tiny items-start">
-                <div className="flex items-center gap-1">
-                    <MdOutlineRemoveRedEye className="size-4" />
-                    <Button className="py-2" variant="tertiary" onClick={showParticipants}>{t('admin.groups.dropdown.view_participants')}</Button>
+                <div className="flex bg-opacity-hover items-center gap-1">
+                    <MdOutlineRemoveRedEye className="size-4 dark:text-white" />
+                    <Button className="py-1 dark:text-white" variant="tertiary" onClick={showParticipants}>{t('admin.groups.dropdown.view_participants')}</Button>
                 </div>
                 <div className="flex items-center gap-1">
-                    <FaPen className="size-3" />
-                    <Button className="px-1 py-1 pr-24" variant="tertiary" onClick={editGroup}>{t('admin.groups.dropdown.edit')}</Button>
+                    <FaPen className="size-3 dark:text-white" />
+                    <Button className="px-1 py-1 pr-24 dark:text-white" variant="tertiary" onClick={editGroup}>{t('admin.groups.dropdown.edit')}</Button>
                 </div>
                 <div className="flex items-center gap-1">
-                    <MdOutlineFilterNone className="size-3" />
-                    <Button className="px-1 py-1 pr-20" variant="tertiary" onClick={duplicateGroup}>{t('admin.groups.dropdown.duplicate')}</Button>
+                    <MdOutlineFilterNone className="size-3 dark:text-white" />
+                    <Button className="px-1 py-1 pr-20 dark:text-white" variant="tertiary" onClick={duplicateGroup}>{t('admin.groups.dropdown.duplicate')}</Button>
                 </div>
                 <div className="flex items-center gap-1">
-                    <IoMdTrash />
-                    <Button className="px-1 py-1 pr-24" variant="tertiary" onClick={() => deleteGroup(group._id as string)}>{t('admin.groups.dropdown.delete')}</Button>
+                    <IoMdTrash className="size-4 dark:text-white" />
+                    <Button className="px-1 py-1 pr-24 dark:text-white" variant="tertiary" onClick={() => deleteGroup(group._id as string)}>{t('admin.groups.dropdown.delete')}</Button>
                 </div>
             </div>
         )
@@ -105,7 +105,6 @@ export default function Groups(survey: ISurveyDocument[]) {
             <header className="flex flex-col rounded-xl shadow-2xl bg-zinc-200 dark:bg-zinc-900 px-40 py-16">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <FaClipboardList className="size-6" />
                         <h1 className="text-2xl font-medium dark:text-white">
                             {t('admin.groups.header.title')}
                         </h1>

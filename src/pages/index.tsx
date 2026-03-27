@@ -36,7 +36,7 @@ export default function Login() {
                 <p className="font-semibold text-gray-500">
                     {t('login.difficult')}
                 </p>
-                <Button onClick={() => push('about')} className="max-w-32">{t('login.find_out_more')}</Button>
+                <Button onClick={() => push('about')} className="max-w-32 dark:text-white">{t('login.find_out_more')}</Button>
                 <Image src={loginImage} alt="Survey" />
             </section>
             <section className="flex flex-col gap-5 max-w-2xl">
@@ -75,8 +75,8 @@ export default function Login() {
                 </div>
                 <div className="flex flex-col gap-4">
                     <Button onClick={() => login('google')}><FcGoogle size={20} />{t('login.google')}</Button>
-                    <Button onClick={() => login('github')}><FaGithub size={20} />{t('login.github')}</Button>
-                    <Button onClick={() => login('facebook')}><FaFacebook size={20} />{t('login.facebook')}</Button>
+                    {/* <Button onClick={() => login('github')}><FaGithub size={20} />{t('login.github')}</Button>
+                    <Button onClick={() => login('facebook')}><FaFacebook size={20} />{t('login.facebook')}</Button> */}
                 </div>
             </section>
         </main>

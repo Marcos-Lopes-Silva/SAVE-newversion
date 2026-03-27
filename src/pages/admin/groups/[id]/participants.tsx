@@ -119,7 +119,7 @@ export default function GroupUsers({ id, group }: { id: string; group: IGroup })
             <header className="flex flex-col rounded-xl shadow-2xl bg-zinc-200 dark:bg-zinc-900 px-40 py-16">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <MdGroups className="size-6" />
+                        {/* <MdGroups className="size-8 dark:text-white" /> */}
                         <h1 className="text-2xl font-medium dark:text-white">
                             Participantes do Grupo
                         </h1>
@@ -162,16 +162,16 @@ export default function GroupUsers({ id, group }: { id: string; group: IGroup })
                             className="flex justify-between w-11/12 bg-white dark:bg-zinc-800 shadow-2xl rounded-3xl p-6"
                         >
                             <div>
-                                <h1 className="font-semibold">{user.name}</h1>
-                                <p className="text-sm text-zinc-500">{user.email}</p>
+                                <h1 className="font-semibold dark:text-white">{user.name}</h1>
+                                <p className="text-sm text-zinc-500 dark:text-zinc-400">{user.email}</p>
                             </div>
 
                             <div className="flex gap-3">
-                                <button onClick={() => handleEdit(user)}>
-                                    <FaPen />
+                                <button onClick={() => handleEdit(user)} className="hover:dark:bg-zinc-700 hover:bg-zinc-300 p-3 transition-colors rounded-full">
+                                    <FaPen className="dark:text-white" />
                                 </button>
-                                <button onClick={() => handleDelete(user)}>
-                                    <IoMdTrash />
+                                <button onClick={() => handleDelete(user)} className="hover:dark:bg-zinc-700 hover:bg-zinc-300 p-3 transition-colors rounded-full">
+                                    <IoMdTrash className="dark:text-white" />
                                 </button>
                             </div>
                         </div>

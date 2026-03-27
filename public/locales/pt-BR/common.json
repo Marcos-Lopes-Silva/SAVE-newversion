@@ -98,8 +98,8 @@
                 "title": "Comece Aqui: Preencha os detalhes iniciais do seu grupo.",
                 "group_name": "Nome do grupo:",
                 "description": "Descrição:",
-                "continue": "continue",
-                "return": "voltar"
+                "continue": "Continuar",
+                "return": "Voltar"
             },
             "second_section": {
                 "title": "Adicione participantes ao seu grupo importando vai CSV ou por e-mail.",
