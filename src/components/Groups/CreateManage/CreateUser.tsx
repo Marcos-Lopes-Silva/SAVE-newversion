@@ -1,24 +1,26 @@
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { t } from "i18next";
-import { Modal, ModalContent, ModalHeader, ModalBody } from "@nextui-org/react";
 import {
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Input,
+  Checkbox,
+  Card,
+  CardBody,
+  Divider,
+  Badge
 } from "@nextui-org/react";
-import Button from "@/components/layout/Button";
-import { MdGroups } from "react-icons/md";
+import { MdGroups, MdPersonAdd, MdFileUpload } from "react-icons/md";
 import { ImportModal } from "../Modal";
 import SearchBar from "@/components/layout/SearchBar";
-import { Form } from "@/components/Form";
-import { CiMail } from "react-icons/ci";
-import { FaPen, FaRegTrashAlt } from "react-icons/fa";
+import { ParticipantsTable } from "./ParticipantsTable";
 
 interface ICreateUserData {
   name: string;
@@ -32,18 +34,18 @@ interface Props {
   isModalOpen: boolean;
   openModal: () => void;
   closeModal: () => void;
-  file: File | null;
-  progress: number;
-  handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleBackStep: () => void;
   handleNextStep: (users: ICreateUserData[]) => void;
   setUserData: React.Dispatch<React.SetStateAction<ICreateUserData[]>>;
+  users: ICreateUserData[];
 }
 
 const registerUserSchema = z.object({
   name: z.string().min(4).max(120),
   email: z.string().email().min(4).max(120),
-  cpf: z.string().max(11).regex(/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/).optional(),
+  cpf: z.string().optional().refine(val => !val || /^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/.test(val), {
+    message: "CPF inválido"
+  }),
 });
 
 export const UserRegistration = ({
@@ -52,332 +54,248 @@ export const UserRegistration = ({
   isModalOpen,
   openModal,
   closeModal,
-  file,
-  progress,
-  handleFileChange,
   handleBackStep,
   handleNextStep,
   setUserData,
+  users,
 }: Props) => {
-  const [showOptions, setShowOptions] = useState(false);
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
-  const [filterValue, setFilterValue] = useState<string>("");
-  const [users, setUsers] = useState<ICreateUserData[]>(JSON.parse(localStorage.getItem("users") || "[]"));
+  const [showValidation, setShowValidation] = useState(false);
   const [editingUserIndex, setEditingUserIndex] = useState<number | null>(null);
-  const [modalData, setModalData] = useState<ICreateUserData | null>(null);
 
   const filteredItems = useMemo(() => {
-    if (!filterValue) return users;
+    if (!search) return users;
     return users.filter((user) =>
-      user.name.toLowerCase().includes(filterValue.toLowerCase())
+      user.name.toLowerCase().includes(search.toLowerCase()) ||
+      user.email.toLowerCase().includes(search.toLowerCase())
     );
-  }, [filterValue, users]);
-
-  useEffect(() => {
-    setFilterValue(search);
-  }, [search]);
+  }, [search, users]);
 
   const registerUserForm = useForm<ICreateUserData>({
     resolver: zodResolver(registerUserSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      cpf: ""
+    }
   });
 
-  const { handleSubmit } = registerUserForm;
+  const editUserForm = useForm<ICreateUserData>({
+    resolver: zodResolver(registerUserSchema),
+  });
 
-  function createUser(data: ICreateUserData) {
-    setUsers((prevUsers) => {
-      const updatedUsers = [...prevUsers, data];
-      localStorage.setItem("users", JSON.stringify(updatedUsers));
-      return updatedUsers;
+  const createUser = (data: ICreateUserData) => {
+    const updatedUsers = [...users, data];
+    setUserData(updatedUsers);
+    localStorage.setItem("users", JSON.stringify(updatedUsers));
+    registerUserForm.reset({
+      name: "",
+      email: "",
+      cpf: ""
     });
-  }
-  
-  useEffect(() => {
-    const storedUsers = localStorage.getItem("users");
-    if (storedUsers) {
-      setUsers(JSON.parse(storedUsers));
-    }
-  }, []);
-
-  const sendUserData = () => {
-    localStorage.setItem("users", JSON.stringify(users));
-    handleNextStep(users);
-  };
-
-  const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, checked } = event.target;
-    if (checked) {
-      setSelectedOptions([...selectedOptions, id]);
-    } else {
-      setSelectedOptions(selectedOptions.filter((option) => option !== id));
-    }
   };
 
   const handleImportData = (data: any[]) => {
-    const formattedData: ICreateUserData[] = data.map((user: any) => ({
-      name: user.name,
-      email: user.email,
-      cpf: user.cpf ? user.cpf : undefined,
-    }));
-    setUsers((prevUsers) => [...prevUsers, ...formattedData]);
+    setUserData((prevUsers) => {
+      const newUsers = [...prevUsers, ...data];
+      localStorage.setItem("users", JSON.stringify(newUsers));
+      return newUsers;
+    });
   };
 
   const handleEditUser = (index: number) => {
     setEditingUserIndex(index);
-    setModalData(users[index]);
+    editUserForm.reset(users[index]);
   };
 
   const handleSaveUser = (data: ICreateUserData) => {
     if (editingUserIndex !== null) {
-      setUsers((prevUsers) => {
+      setUserData((prevUsers) => {
         const updatedUsers = [...prevUsers];
         updatedUsers[editingUserIndex] = data;
+        localStorage.setItem("users", JSON.stringify(updatedUsers));
         return updatedUsers;
       });
       setEditingUserIndex(null);
-      setModalData(null);
     }
   };
 
   const handleDeleteUser = (index: number) => {
     const userToDelete = filteredItems[index];
-    setUsers((prevUsers) => prevUsers.filter((user) => user !== userToDelete));
+    setUserData((prevUsers) => {
+      const updatedUsers = prevUsers.filter((user) => user !== userToDelete);
+      localStorage.setItem("users", JSON.stringify(updatedUsers));
+      return updatedUsers;
+    });
   };
 
   return (
-    <>
-      <div className="px-6 py-6">
-        <h1>{t("admin.create.second_section.title")}</h1>
-        <div className="py-6">
-          <div className="border-2 p-6 rounded-lg shadow-md">
-            <FormProvider {...registerUserForm}>
-              <form onSubmit={handleSubmit(createUser)}>
-                <div>
-                  <Form.Field>
-                    <Form.Label htmlFor="name" className="px-1">
-                      {t("admin.create.second_section.name")}
-                    </Form.Label>
-                    <Form.Input
-                      type="text"
-                      id="name"
-                      className="px-0 mb-4"
-                      placeholder="Nome do participante"
-                      {...registerUserForm.register("name")}
-                    />
-                    <Form.ErrorMessage field="name" />
-                  </Form.Field>
-                </div>
-                <div className="py-2">
-                  <Form.Field>
-                    <Form.Label htmlFor="email" className="px-1 py-2">
-                      {t("admin.create.second_section.email")}
-                    </Form.Label>
-                    <Form.Input
-                      type="email"
-                      id="email"
-                      className="px-0 mb-6"
-                      placeholder="Email do participante"
-                      {...registerUserForm.register("email")}
-                    />
-                    <Form.ErrorMessage field="email" />
-                  </Form.Field>
-                </div>
-                <div className="flex justify-between">
+    <div className="flex flex-col gap-8">
+      {/* Header section style like dashboard but within the step */}
+      <div className="flex flex-col gap-2">
+        <h2 className="text-xl font-bold text-zinc-800 dark:text-white">{t("admin.create.second_section.title")}</h2>
+        <div className="w-16 h-1 bg-zinc-800 dark:bg-white rounded-full" />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Left Side: Form */}
+        <div className="lg:col-span-5">
+          <Card shadow="sm" className="p-4 border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/50">
+            <CardBody className="gap-4">
+              <h3 className="font-bold text-lg mb-2 flex items-center gap-2 dark:text-white">
+                <MdPersonAdd /> {t("admin.create.second_section.add_participants")}
+              </h3>
+              <FormProvider {...registerUserForm}>
+                <form onSubmit={registerUserForm.handleSubmit(createUser)} className="flex flex-col gap-4">
+                  <Input
+                    label={t("admin.create.second_section.name")}
+                    placeholder="Nome completo"
+                    variant="bordered"
+                    {...registerUserForm.register("name")}
+                    isInvalid={!!registerUserForm.formState.errors.name}
+                    errorMessage={registerUserForm.formState.errors.name?.message}
+                    classNames={{
+                      label: "dark:text-zinc-400",
+                      input: "dark:text-white"
+                    }}
+                  />
+                  <Input
+                    type="email"
+                    label={t("admin.create.second_section.email")}
+                    placeholder="exemplo@email.com"
+                    variant="bordered"
+                    {...registerUserForm.register("email")}
+                    isInvalid={!!registerUserForm.formState.errors.email}
+                    errorMessage={registerUserForm.formState.errors.email?.message}
+                    classNames={{
+                      label: "dark:text-zinc-400",
+                      input: "dark:text-white"
+                    }}
+                  />
+                  <Input
+                    label={t("admin.create.second_section.cpf")}
+                    placeholder="000.000.000-00"
+                    variant="bordered"
+                    {...registerUserForm.register("cpf")}
+                    isInvalid={!!registerUserForm.formState.errors.cpf}
+                    errorMessage={registerUserForm.formState.errors.cpf?.message}
+                    classNames={{
+                      label: "dark:text-zinc-400",
+                      input: "dark:text-white"
+                    }}
+                  />
+
                   <Button
-                    type="button"
-                    variant="primary"
-                    onClick={() => setShowOptions(!showOptions)}
+                    type="submit"
+                    color="primary"
+                    className="mt-2 font-bold"
+                    startContent={<MdPersonAdd size={20} />}
                   >
-                    {t("admin.create.second_section.add_validation")}
-                  </Button>
-                  <Button type="submit" variant="primary">
                     {t("admin.create.second_section.add_participants")}
                   </Button>
-                </div>
-
-                {showOptions && (
-                  <div className="flex items-center py-4 px-1">
-                    <Form.Field>
-                      <Form.Label htmlFor="cpf">
-                        <Form.Input
-                          type="checkbox"
-                          name="cpf"
-                          onChange={handleOptionChange}
-                        />
-                        {t("admin.create.second_section.cpf")}
-                      </Form.Label>
-                    </Form.Field>
-                  </div>
-                )}
-
-                {selectedOptions.includes("cpf") && (
-                  <div className="px-1">
-                    <Form.Field>
-                      <Form.Label htmlFor="cpf" className="px-1">
-                        {t("admin.create.second_section.cpf")}
-                      </Form.Label>
-                      <Form.Input
-                        id="cpf"
-                        className="px-0 mb-6"
-                        placeholder="CPF do participante"
-                        {...registerUserForm.register("cpf")}
-                      />
-                      <Form.ErrorMessage field="cpf" />
-                    </Form.Field>
-                  </div>
-                )}
-              </form>
-            </FormProvider>
-          </div>
+                </form>
+              </FormProvider>
+            </CardBody>
+          </Card>
         </div>
 
-        <div className="py-2 mb-2">
-          <h1 className="mb-2">
-            {t("admin.create.second_section.participants_list")}
-          </h1>
-          <Button variant="primary" onClick={openModal}>
-            {t("admin.create.second_section.import_participants")}
-          </Button>
-          <ImportModal
-            isOpen={isModalOpen}
-            onClose={closeModal}
-            file={file}
-            progress={progress}
-            onFileChange={handleFileChange}
-            onImportData={handleImportData}
+        {/* Right Side: List and Import */}
+        <div className="lg:col-span-7 flex flex-col gap-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <h3 className="font-bold text-lg dark:text-white">{t("admin.create.second_section.participants_list")}</h3>
+              <Badge color="primary" content={users.length} variant="flat" size="lg">
+                <div className="p-1 dark:text-white"><MdGroups size={24} /></div>
+              </Badge>
+            </div>
+            <Button
+              variant="flat"
+              color="primary"
+              onPress={openModal}
+              startContent={<MdFileUpload size={20} />}
+            >
+              {t("admin.create.second_section.import_participants")}
+            </Button>
+          </div>
+
+          <SearchBar
+            iconSize={18}
+            placeholder={t("admin.groups.body.searchbar_placeholder")}
+            setSearch={setSearch}
+            search={search}
+            className="w-full shadow-sm"
+          />
+
+          <ParticipantsTable
+            participants={filteredItems}
+            onEdit={handleEditUser}
+            onDelete={handleDeleteUser}
           />
         </div>
+      </div>
 
-        <div className="border-b-2 border-zinc-800 font-bold flex items-center justify-between">
-          <h1 className="px-2 py-2">
-            {t("admin.create.second_section.added_participants")}
-          </h1>
-          <div className="flex justify-center items-center gap-2">
-            <h1>{filteredItems.length}</h1>
-            <MdGroups className="size-6" />
-          </div>
-        </div>
+      <Divider className="my-4 dark:bg-zinc-800" />
 
-        <SearchBar
-          placeholder={t("admin.groups.body.searchbar_placeholder")}
-          setSearch={setSearch}
-          search={search}
-          iconSize={25}
-          className="w-full mt-1 shadow-lg"
-        ></SearchBar>
-
-        <div className="flex">
-          <Table aria-label="ParticipantsTable" className="mt-4">
-            <TableHeader>
-              <TableColumn className="text-left text-black">
-                {t("admin.create.second_section.name")}
-              </TableColumn>
-              <TableColumn className="text-left flex items-center gap-2 text-black">
-                <CiMail size={16} color="black" />
-                {t("admin.create.second_section.email")}
-              </TableColumn>
-              <TableColumn className="text-black px-10">Options</TableColumn>
-            </TableHeader>
-            <TableBody>
-              {filteredItems.map((user, index) => (
-                <TableRow key={index}>
-                  <TableCell className="flex items-center mt-1 gap-3">
-                  <div className="w-8 h-8 flex items-center justify-center rounded-full bg-black text-white">
-                    {user.name.charAt(0).toUpperCase()}
-                  </div>
-                    {user.name}
-                  </TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell className="flex gap-2">
-                    <Button variant="secondary" onClick={() => handleEditUser(index)}><FaPen/></Button>
-                    <Button variant="secondary" onClick={() => handleDeleteUser(index)}><FaRegTrashAlt/></Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        <div className="flex justify-center gap-2 mt-4">
-        <Button onClick={handleBackStep}>
+      <div className="flex justify-between items-center bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-xl border border-zinc-200 dark:border-zinc-700">
+        <Button variant="bordered" onPress={handleBackStep} className="px-10 dark:text-white dark:border-zinc-600">
           {t("admin.create.section.return")}
         </Button>
-        <Button onClick={sendUserData}>{t("admin.create.section.continue")}</Button>
-      </div>
+        <Button color="primary" onPress={() => handleNextStep(users)} className="px-10 font-bold">
+          {t("admin.create.section.continue")}
+        </Button>
       </div>
 
+      <ImportModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onImportData={handleImportData}
+      />
+
+      {/* Edit User Modal */}
       <Modal
         isOpen={editingUserIndex !== null}
-        onOpenChange={() => {
-          setEditingUserIndex(null);
-          setModalData(null);
-        }}
+        onOpenChange={() => setEditingUserIndex(null)}
+        size="lg"
       >
         <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>Editar Participante</ModalHeader>
-              <ModalBody>
-                <FormProvider {...registerUserForm}>
-                  <form onSubmit={handleSubmit(handleSaveUser)}>
-                    <div>
-                      <Form.Field>
-                        <Form.Label htmlFor="name" className="px-1">
-                          {t("admin.create.second_section.name")}
-                        </Form.Label>
-                        <Form.Input
-                          type="text"
-                          id="name"
-                          className="px-0 mb-4"
-                          placeholder="Nome do participante"
-                          {...registerUserForm.register("name")}
-                          defaultValue={modalData?.name}
-                        />
-                        <Form.ErrorMessage field="name" />
-                      </Form.Field>
-                    </div>
-                    <div className="py-2">
-                      <Form.Field>
-                        <Form.Label htmlFor="email" className="px-1 py-2">
-                          {t("admin.create.second_section.email")}
-                        </Form.Label>
-                        <Form.Input
-                          type="email"
-                          id="email"
-                          className="px-0 mb-6"
-                          placeholder="Email do participante"
-                          {...registerUserForm.register("email")}
-                          defaultValue={modalData?.email}
-                        />
-                        <Form.ErrorMessage field="email" />
-                      </Form.Field>
-                    </div>
-                    <div className="py-2">
-                      <Form.Field>
-                        <Form.Label htmlFor="cpf" className="px-1 py-2">
-                          {t("admin.create.second_section.cpf")}
-                        </Form.Label>
-                        <Form.Input
-                          type="cpf"
-                          id="cpf"
-                          className="px-0 mb-6"
-                          placeholder="cpf do participante"
-                          {...registerUserForm.register("cpf")}
-                          defaultValue={modalData?.cpf}
-                        />
-                        <Form.ErrorMessage field="cpf" />
-                      </Form.Field>
-                    </div>
-                    <div className="flex justify-between">
-                      <Button type="submit" variant="primary">
-                        {t("admin.create.second_section.add_participants")}
-                      </Button>
-                    </div>
-                  </form>
-                </FormProvider>
-              </ModalBody>
-            </>
-          )}
+          <ModalHeader className="flex flex-col gap-1">Editar Participante</ModalHeader>
+          <ModalBody>
+            <FormProvider {...editUserForm}>
+              <form onSubmit={editUserForm.handleSubmit(handleSaveUser)} className="flex flex-col gap-4 py-4">
+                <Input
+                  label={t("admin.create.second_section.name")}
+                  variant="bordered"
+                  {...editUserForm.register("name")}
+                  isInvalid={!!editUserForm.formState.errors.name}
+                  errorMessage={editUserForm.formState.errors.name?.message}
+                />
+                <Input
+                  type="email"
+                  label={t("admin.create.second_section.email")}
+                  variant="bordered"
+                  {...editUserForm.register("email")}
+                  isInvalid={!!editUserForm.formState.errors.email}
+                  errorMessage={editUserForm.formState.errors.email?.message}
+                />
+                <Input
+                  label={t("admin.create.second_section.cpf")}
+                  variant="bordered"
+                  {...editUserForm.register("cpf")}
+                  isInvalid={!!editUserForm.formState.errors.cpf}
+                  errorMessage={editUserForm.formState.errors.cpf?.message}
+                />
+                <ModalFooter className="px-0 pt-6">
+                  <Button variant="light" onPress={() => setEditingUserIndex(null)}>
+                    Cancelar
+                  </Button>
+                  <Button color="primary" type="submit">
+                    Salvar Alterações
+                  </Button>
+                </ModalFooter>
+              </form>
+            </FormProvider>
+          </ModalBody>
         </ModalContent>
       </Modal>
-    </>
+    </div>
   );
 };
