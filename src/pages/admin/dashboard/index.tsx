@@ -155,14 +155,15 @@ const Menu = ({ survey, deleteSurvey }: IMenu) => {
 
     return survey.status === 'draft' ?
         <div className="flex gap-5 flex-col py-5 px-4">
-            <Button className="dark:bg-white bg-zinc-800 dark:text-black text-white" onClick={editSurvey}><MdEdit size={20} className="dark:text-black text-white" />{t('admin.dashboard.edit')}</Button>
+            <Button className="dark:bg-zinc-800 bg-zinc-800 dark:text-black text-white" onClick={editSurvey}><MdEdit size={20} className="dark:text-black text-white" />{t('admin.dashboard.edit')}</Button>
             <Button className="dark:bg-white bg-zinc-800 dark:text-black text-white" onClick={duplicateSurvey}><MdContentCopy size={20} className="dark:text-black text-white" />{t('admin.dashboard.duplicate')}</Button>
             <Button className="dark:bg-white bg-zinc-800 dark:text-black text-white" onClick={() => deleteSurvey(survey._id as string)}><MdDelete size={20} className="dark:text-black text-white" />{t('admin.dashboard.delete')}</Button>
         </div>
         :
         <div className="flex gap-5 flex-col">
-            <Button className="dark:bg-white bg-zinc-800 dark:text-black text-white"><MdInsights size={20} className="dark:text-black text-white" /> {t('admin.dashboard.results')}</Button>
-            <Button className="dark:bg-white bg-zinc-800 dark:text-black text-white" onClick={() => deleteSurvey(survey._id as string)}>{t('admin.dashboard.delete')}</Button>
+            <Button className="dark:bg-zinc-800 bg-zinc-800 dark:text-white text-white" onClick={() => push(`/admin/survey/${survey._id}/respondents`)}><MdPeople size={20} className="dark:text-white" /> {t('admin.dashboard.view_respondents')}</Button>
+            <Button className="dark:bg-zinc-800 bg-zinc-800 dark:text-white text-white"><MdInsights size={20} className="dark:text-white" /> {t('admin.dashboard.results')}</Button>
+            <Button className="dark:bg-zinc-800 bg-zinc-800 dark:text-white text-white" onClick={() => deleteSurvey(survey._id as string)}>{t('admin.dashboard.delete')}</Button>
         </div>
 }
 

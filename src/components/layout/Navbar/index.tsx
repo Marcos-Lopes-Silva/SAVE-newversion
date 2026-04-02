@@ -45,7 +45,7 @@ export default function NavbarLayout() {
     },
     {
       title: t("navbar.logout.research"),
-      href: "/research",
+      href: "/researches",
     },
   ];
 
@@ -75,7 +75,7 @@ export default function NavbarLayout() {
     },
     {
       title: t("navbar.user.report"),
-      href: "/research",
+      href: "/researches",
     },
     {
       title: t("navbar.user.about"),

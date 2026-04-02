@@ -93,7 +93,7 @@ export default function Access() {
 
                         <Form.Field>
                             <Form.Label htmlFor="phone">{t('access.label.phone')}</Form.Label>
-                            <Form.Input name="phone" type="phone" placeholder={t('access.placeholder.phone')} />
+                            <Form.MaskedInput mask='(99) 99999-9999' maskChar='' variant='underlined' control={control} name="phone" type="phone" placeholder={t('access.placeholder.phone')} />
                             <Form.ErrorMessage field="phone" />
                         </Form.Field>
 

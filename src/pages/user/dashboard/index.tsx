@@ -99,6 +99,11 @@ export default function Dashboard() {
                         {t('user.dashboard.click')}
                     </label>
                     <ul className="flex flex-col items-center gap-2 sm:gap-7 w-full">
+                        {filteredListP.length === 0 ? (
+                            <div className="flex flex-col items-center gap-4 mt-10">
+                                <p className="text-zinc-500 dark:text-white/90">Não há questionários disponíveis.</p>
+                            </div>
+                        ) : (null)}
                         {filteredListP.map((survey, index) => survey.status === "active" && (
                             <Item<ISurveyDocument>
                                 icon={
