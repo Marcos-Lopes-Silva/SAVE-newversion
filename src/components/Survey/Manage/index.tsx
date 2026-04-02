@@ -161,7 +161,7 @@ export default function Manage({ survey }: Props) {
             {viewSurvey ? (
                 <section className="w-full">
                     <Button className="fixed bottom-5 left-5 hover:transition-opacity opacity-100 hover:opacity-90 duration-1000 bg-gradient-to-br from-zinc-800 to-zinc-950 text-white px-4 py-2 rounded-lg " onClick={showSurvey}><BiX size={34} /></Button>
-                    <SurveyBody responses={{}} survey={data as ISurveyDocument} />
+                    <SurveyBody responses={{}} survey={data as ISurveyDocument} term={false} />
                 </section>
             ) :
                 (
