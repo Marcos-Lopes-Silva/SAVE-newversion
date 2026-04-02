@@ -242,12 +242,12 @@ export default function Researches({ surveys }: { surveys: CustomISurveyDocument
 
   return (
     <main>
-      <header className="flex flex-col lg:flex-row bg-slate-100 shadow-lg rounded-t-3xl gap-4 lg:gap-10 p-6 lg:px-32 lg:py-6 lg:max-w-7xl mx-auto mt-6 lg:mt-10 relative ml-5 lg:ml-auto mr-5 lg:mr-auto">
+      <header className="flex flex-col lg:flex-row bg-zinc-400 dark:bg-zinc-800 shadow-lg rounded-t-3xl gap-4 lg:gap-10 p-6 lg:px-32 lg:py-6 lg:max-w-7xl mx-auto mt-6 lg:mt-10 relative ml-5 lg:ml-auto mr-5 lg:mr-auto">
         <div className="flex flex-col items-center lg:items-start gap-2 lg:gap-4 place-content-center text-center lg:text-left">
-          <h1 className="font-semibold text-lg lg:text-2xl mt-2 lg:mt-5">
+          <h1 className="font-semibold text-lg lg:text-2xl dark:text-white mt-2 lg:mt-5">
             Pesquisas
           </h1>
-          <p className="text-sm lg:text-md">
+          <p className="text-sm lg:text-md dark:text-white">
             Explore as pesquisas e conduza análises personalizadas, selecionando a dimensão desejada
             para visualizar os dados com precisão.
           </p>
@@ -338,7 +338,7 @@ export default function Researches({ surveys }: { surveys: CustomISurveyDocument
       </div>
 
       {!selectedSurveyId && (
-        <div className="text-center text-gray-500 p-4 lg:p-12">
+        <div className="text-center text-gray-500 dark:text-white/75 p-4 lg:p-12">
           <p>Selecione um dos questionários disponíveis para começar a visualizar os gráficos.
             <br />Utilize os filtros personalizados para análises mais detalhadas dos resultados obtidos.</p>
         </div>
