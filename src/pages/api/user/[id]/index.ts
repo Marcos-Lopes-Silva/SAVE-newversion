@@ -28,11 +28,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     case "PATCH":
       try {
-        const { name, email, phone, birthday, course, graduationYear } = req.body;
+        const { name, email, phone, birthday, course, graduationYear, cpf } = req.body;
 
         const updateData: any = {
           name,
           email,
+          cpf,
           phone: phone ? parseInt(phone, 10) : null,
           birthday,
           course: course?.trim() || "",

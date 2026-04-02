@@ -21,7 +21,7 @@ export function Select({ question }: IQuestionProp) {
                         <input type="hidden" onChange={(e) => setSearch(e.target.value)} value={search} ref={ref} />
                         <NextUiSelect
                             label="Selecione uma opção"
-                            className="max-w-sm"
+                            className="max-w-sm dark:text-white"
                             onBlur={onBlur}
                             selectedKey={value}
                             onSelectionChange={onChange}

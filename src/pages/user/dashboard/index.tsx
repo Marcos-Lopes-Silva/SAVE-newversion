@@ -27,12 +27,20 @@ interface Props {
 
 const PageSize = 8;
 
-export default function Dashboard({ surveys }: Props) {
+export default function Dashboard() {
     const { push } = useRouter();
     const { data: session } = useSession();
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [recentSurvey, setRecentSurvey] = useState<ISurveyDocument | null>(null);
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const [surveys, setSurveys] = useState<ISurveyDocument[]>([]);
+
+    useEffect(() => {
+        if (!session?.user?.cpf) return;
+
+        api.get<ISurveyDocument[]>(`user/survey?cpf=${session.user.cpf}`)
+            .then(setSurveys);
+    }, [session?.user?.cpf]);
 
     const openSurvey = (id: string) => {
         if (typeof window !== 'undefined') {
@@ -68,24 +76,24 @@ export default function Dashboard({ surveys }: Props) {
 
     return (
         <main className="flex px-2 flex-col sm:py-5 items-center sm:px-5 justify-center gap-16">
-            <header className="flex flex-col bg-zinc-100 shadow-lg rounded-3xl gap-4 p-8 lg:px-36 lg:py-12">
-                <h1 className={"hidden sm:block font-semibold text-xl mt-5 text-left lg:py-1"}>
+            <header className="flex flex-col bg-zinc-100 dark:bg-zinc-800 shadow-lg rounded-3xl gap-4 p-8 lg:px-36 lg:py-12">
+                <h1 className={"hidden dark:text-white sm:block font-semibold text-xl mt-5 text-left lg:py-1"}>
                     {t('user.dashboard.welcome_name')}
                     {session?.user.name}
                 </h1>
 
-                <h1 className={"block sm:hidden font-semibold text-lg sm:text-xl mt-5 text-left lg:py-1"}>
+                <h1 className={"block sm:hidden dark:text-white font-semibold text-lg sm:text-xl mt-5 text-left lg:py-1"}>
                     {t('user.dashboard.welcome_name')}
                     {session?.user.name?.split(' ')[0]}
                 </h1>
 
-                <p className="text-sm sm:text-md lg:ml-0 text-justify">
+                <p className="text-sm dark:text-white sm:text-md lg:ml-0 text-justify">
                     {t('user.dashboard.welcome_user')}
                 </p>
             </header>
             <section className="flex flex-col w-full items-center lg:px-20">
                 <div className="flex flex-col gap-8 lg:w-4/5 lg:px-28 w-full ">
-                    <label className="text-xs sm:text-sm">
+                    <label className="text-xs dark:text-white sm:text-sm">
                         {t('user.dashboard.avaliable')}
                         <br />
                         {t('user.dashboard.click')}
@@ -118,6 +126,7 @@ export default function Dashboard({ surveys }: Props) {
                         onChange={onPageChange}
                         showControls
                         loop
+                        className="self-center"
                         color="primary"
                         classNames={{
                             item: "hover:bg-zinc-700 bg-zinc-900 text-white",
@@ -182,8 +191,6 @@ const cpfSchema = z.object({
 type CPF = z.infer<typeof cpfSchema>;
 
 const ValidateModel = ({ isOpen, onOpenChange, session }: ValidateModelProps) => {
-
-
 
     const updateCPF = async (data: CPF) => {
         console.log(data);

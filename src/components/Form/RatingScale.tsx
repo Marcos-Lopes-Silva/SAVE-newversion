@@ -19,7 +19,7 @@ export function RatingScale({ name, options }: RatingScaleProps) {
                         value={String(value.value)}
                         className="mr-2"
                     />
-                    <span className="text-lg">
+                    <span className="text-lg dark:text-white">
                         {value.label}
                     </span>
                 </label>

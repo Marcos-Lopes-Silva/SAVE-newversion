@@ -10,9 +10,9 @@ export function DateQuestion({ question }: IQuestionProp) {
     const { control } = useFormContext();
 
     const normalizeDate = (value?: string) => {
-        if (!value) return "2024-09-01"; // Data padrão
-        if (value.includes("T")) return value.split("T")[0]; // Já está em formato ISO
-        const parts = value.split(/[/\s:]/); // Quebra pelo "/" ou espaço
+        if (!value) return "2024-09-01";
+        if (value.includes("T")) return value.split("T")[0];
+        const parts = value.split(/[/\s:]/);
         if (parts.length >= 3) {
             // Converte para YYYY-MM-DD
             const [day, month, year] = parts.map(Number);
@@ -22,6 +22,10 @@ export function DateQuestion({ question }: IQuestionProp) {
     };
 
     const handleChangeDate = (e: CalendarDate | CalendarDateTime | ZonedDateTime, onChange: (...event: any[]) => void) => {
+        if (e === null) {
+            onChange("");
+            return;
+        }
         const value = e.toString();
         const date = new Date(value);
         onChange(date.toISOString());
