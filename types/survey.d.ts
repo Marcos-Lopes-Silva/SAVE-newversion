@@ -1,6 +1,6 @@
 import { Document } from "mongoose";
 import { ISurveyDocument } from "../models/surveyModel";
-import { ISurveyResult } from "../models/surveyResults";
+import { ISurveyResult } from "../models/surveyResultModel";
 
 export interface ProcessedQuestionData {
   type: string;

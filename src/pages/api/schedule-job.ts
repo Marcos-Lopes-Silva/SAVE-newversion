@@ -3,7 +3,7 @@ import { connectToMongoDB } from "@/lib/db";
 import { NextApiRequest, NextApiResponse } from "next";
 import SurveyAnalytics from "../../../models/surveyAnalytics";
 import Survey from "../../../models/surveyModel";
-import SurveyResult from "../../../models/surveyResults";
+import SurveyResult from "../../../models/surveyResultModel";
 import { processResults } from "../../lib/processresults"; // Movemos a função para um arquivo separado
 import { SurveyResultDocument } from "../../../types/survey";
 import mongoose from "mongoose";

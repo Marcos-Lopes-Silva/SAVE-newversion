@@ -15,13 +15,14 @@ import { Button, ButtonGroup, Modal, ModalBody, ModalContent, ModalFooter, Modal
 import { RiSideBarFill } from "react-icons/ri";
 import { api } from "@/lib/api";
 import { toast } from "react-toastify";
-import { ISurveyResult } from "../../../../models/surveyResults";
+import { ISurveyResult } from "../../../../models/surveyResultModel";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 
 interface Props {
     survey: ISurveyDocument;
     responses: Object;
+    term: boolean;
 }
 
 const createSurveySchema = (survey: ISurvey) => {
@@ -171,7 +172,7 @@ const createSurveySchema = (survey: ISurvey) => {
     return schema;
 };
 
-export default function SurveyBody({ survey, responses }: Props) {
+export default function SurveyBody({ survey, responses, term }: Props) {
 
     const [showSidebar, setShowSidebar] = useState<boolean>(true);
     const [showProgress, setShowProgress] = useState<boolean>(true);
@@ -183,6 +184,7 @@ export default function SurveyBody({ survey, responses }: Props) {
     const questionRefs = useRef<(HTMLDivElement | null)[]>([]);
     const [loaded, setLoaded] = useState<boolean>(false);
     const { data: session } = useSession();
+    const [acceptedTerm, setAcceptedTerm] = useState<boolean>(!survey.term);
 
     const createSurveyForm = useForm<Record<string, any>>({
         defaultValues: responses,
@@ -223,6 +225,8 @@ export default function SurveyBody({ survey, responses }: Props) {
             surveyId: survey._id as string,
             userId: session?.user._id as string,
             surveyResult: data,
+            termsAccepted: acceptedTerm,
+            isComplete: true
         }
         try {
             await api.post("/user/survey/submit", surveyResult);
@@ -241,6 +245,11 @@ export default function SurveyBody({ survey, responses }: Props) {
     }
 
     useEffect(() => {
+
+        if (term) {
+            setAcceptedTerm(term);
+        }
+
         if (Object.keys(errors).length > 0) {
             const firstError = Object.keys(errors)[0];
 
@@ -302,12 +311,91 @@ export default function SurveyBody({ survey, responses }: Props) {
         handleSubmit(submitSurvey)();
     }
 
+    const saveProgress = useCallback(async (data: any, page: number, termsAccepted: boolean) => {
+        if (!session?.user?._id) return;
+
+        try {
+            await api.post("/user/survey/save-progress", {
+                surveyId: survey._id,
+                userId: session.user._id,
+                surveyResult: data,
+                currentPage: page,
+                termsAccepted: termsAccepted
+            });
+        } catch (error) {
+            console.error("Error saving progress:", error);
+        }
+    }, [survey._id, session?.user?._id]);
+
+    useEffect(() => {
+        if (!acceptedTerm || !loaded) return;
+
+        const subscription = watch((value) => {
+            const timer = setTimeout(() => {
+                saveProgress(value, currentPage, true);
+            }, 2000);
+            return () => clearTimeout(timer);
+        });
+        return () => subscription.unsubscribe();
+    }, [watch, acceptedTerm, currentPage, saveProgress, loaded]);
+
     const handleInitialPage = () => {
         onOpenChange2();
         router.push('/user/dashboard');
     }
 
-    return loaded && (
+    if (!loaded) return null;
+
+    if (!acceptedTerm && survey.term) {
+        return (
+            <main className="w-full min-h-screen flex flex-col items-center bg-zinc-50 dark:bg-zinc-950 p-6">
+                <div className="w-full max-w-4xl bg-white dark:bg-zinc-900 rounded-2xl shadow-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 flex flex-col">
+                    <div className="p-8 border-b border-zinc-200 dark:border-zinc-800">
+                        <h1 className="text-xl font-bold text-zinc-800 dark:text-white mb-2">
+                            Termo de Consentimento Livre e Esclarecido
+                        </h1>
+                        <p className="text-zinc-500 dark:text-zinc-400 text-sm">
+                            Para prosseguir com o questionário "{survey.title}", você deve ler e aceitar os termos abaixo.
+                        </p>
+                    </div>
+
+                    <div className="flex-grow p-1 h-[600px] bg-zinc-100 dark:bg-zinc-800">
+                        <iframe
+                            src={`data:application/pdf;base64,${survey.term}`}
+                            className="w-full h-full rounded-lg"
+                            title="Termo de Consentimento"
+                        />
+                    </div>
+
+                    <div className="p-8 border-t border-zinc-200 dark:border-zinc-800 flex flex-col sm:flex-row gap-4 justify-between items-center">
+                        <Button
+                            variant="flat"
+                            color="danger"
+                            size="lg"
+                            className="w-full sm:w-auto font-semibold"
+                            onClick={() => router.push('/user/dashboard')}
+                        >
+                            Não aceito, voltar
+                        </Button>
+                        <Button
+                            color="success"
+                            size="lg"
+                            className="w-full sm:w-auto bg-gradient-to-r from-lime-500 to-emerald-600 text-white font-bold px-12"
+                            onClick={() => {
+                                setAcceptedTerm(true);
+                                saveProgress(watch(), currentPage, true);
+                                window.scrollTo(0, 0);
+                            }}
+                        >
+                            Eu aceito os termos
+                        </Button>
+                    </div>
+                </div>
+            </main>
+        );
+    }
+
+    return (
         <main className="w-full min-h-screen flex flex-col items-center bg-zinc-50 dark:bg-zinc-950">
             {/* HEADER MODERNO */}
             <header className="w-full sticky top-0 z-50 backdrop-blur bg-white/70 dark:bg-zinc-900/70 border-b border-zinc-200 dark:border-zinc-800">

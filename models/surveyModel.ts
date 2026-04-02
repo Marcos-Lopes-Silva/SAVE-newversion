@@ -48,6 +48,7 @@ export interface ISurvey {
   responses: number,
   users: number,
   completeMessage: string,
+  term?: any,
 }
 
 export interface ISurveyDocument extends ISurvey, Document {
@@ -133,6 +134,9 @@ const surveySchema: mongoose.Schema = new mongoose.Schema<ISurveyDocument>(
     completeMessage: {
       type: String,
       default: "",
+    },
+    term: {
+      type: Buffer,
     },
   }, {
   timestamps: true,

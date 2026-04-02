@@ -1,17 +1,13 @@
-import mongoose from "mongoose";
-import { Model } from "mongoose";
-import { ObjectId } from "mongoose";
-
-export interface ISurveyResultData {
-    [key: string]: string | number | boolean | string[] | number[] | boolean[] | null
-}
+import mongoose, { Document, Model, Schema } from "mongoose";
 
 export interface ISurveyResult {
-    surveyId: ObjectId,
-    userId: ObjectId,
+    surveyId: mongoose.Types.ObjectId | string,
+    userId: mongoose.Types.ObjectId | string,
     currentPage: number,
-    surveyResult: ISurveyResultData[],
-    timeSpent: number,
+    surveyResult: Record<string, any>,
+    timeSpent?: number,
+    isComplete?: boolean,
+    termsAccepted?: boolean,
 }
 
 export interface ISurveyResultDocument extends ISurveyResult, Document {
@@ -19,23 +15,16 @@ export interface ISurveyResultDocument extends ISurveyResult, Document {
     updatedAt: Date,
 }
 
-const surveyResultDataSchema: mongoose.Schema = new mongoose.Schema<ISurveyResultData>(
-    {
-
-    },
-    {
-        _id: false,
-    }
-)
-
-const surveyResultSchema: mongoose.Schema = new mongoose.Schema<ISurveyResultDocument>(
+const surveyResultSchema: Schema = new Schema<ISurveyResultDocument>(
     {
         surveyId: {
-            type: mongoose.Types.ObjectId,
+            type: Schema.Types.ObjectId,
+            ref: "Survey",
             required: true,
         },
         userId: {
-            type: mongoose.Types.ObjectId,
+            type: Schema.Types.ObjectId,
+            ref: "User",
             required: true,
         },
         currentPage: {
@@ -43,13 +32,21 @@ const surveyResultSchema: mongoose.Schema = new mongoose.Schema<ISurveyResultDoc
             required: true,
         },
         surveyResult: {
-            type: [surveyResultDataSchema],
+            type: Schema.Types.Mixed,
             required: true,
         },
         timeSpent: {
             type: Number,
-            required: true,
-        }
+            default: 0
+        },
+        isComplete: {
+            type: Boolean,
+            default: false,
+        },
+        termsAccepted: {
+            type: Boolean,
+            default: false,
+        },
     },
     {
         timestamps: true,

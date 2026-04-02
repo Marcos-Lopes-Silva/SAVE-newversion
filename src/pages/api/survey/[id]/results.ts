@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { connectToMongoDB } from "@/lib/db";
 import Survey from "../../../../../models/surveyModel";
-import SurveyResult from "../../../../../models/surveyResults";
+import SurveyResult from "../../../../../models/surveyResultModel";
 import SurveyAnalytics, { ISurveyAnalytics, FilterCondition } from "../../../../../models/surveyAnalytics";
 import { ISurveyDocument, IQuestion } from "../../../../../models/surveyModel";
 import { SurveyResultDocument } from "../../../../../types/survey";

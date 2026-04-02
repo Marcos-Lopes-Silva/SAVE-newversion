@@ -163,8 +163,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const SurveyResult = (await import("../../../../../models/surveyResultModel")).default;
     const User = (await import("../../../../../models/userModel")).default;
 
-    const results = await SurveyResult.find({ surveyId: id }).select('userId createdAt').lean();
-    const uniqueUserIds = Array.from(new Set(results.map(r => r.userId.toString())));
+    const results = await SurveyResult.find({ surveyId: id, isComplete: true }).select('userId createdAt').lean();
+    const uniqueUserIds = results.map(r => r.userId.toString());
     const users = await User.find({ _id: { $in: uniqueUserIds } }).select('name email').lean();
 
     const latestResultsMap = new Map();
