@@ -6,19 +6,24 @@ import { useState } from "react";
 import { Input } from "@nextui-org/react";
 
 export function Checkbox({ question }: IQuestionProp) {
-    const { setValue, getValues } = useFormContext();
+    const { setValue, watch } = useFormContext();
+    const watchedValue = watch(question.name);
+
+    const isOtherOptionValue = (val: string) => 
+        ["outro", "outra", "outro:", "outros", "other"].includes(val.toLowerCase()) || 
+        val.toLowerCase().startsWith("outro:");
 
     const handleCheckboxChange = (name: string, value: string, checked: boolean, isOtherOption: boolean) => {
-        const currentValues = getValues(name) || [];
+        const currentValues = Array.isArray(watchedValue) ? watchedValue : [];
 
         if (isOtherOption) {
             const newValues = checked
                 ? [...currentValues, value]
-                : currentValues.filter((v: string) => !v.includes("Outro:"));
+                : currentValues.filter((v: string) => !isOtherOptionValue(v));
 
             const cleanedNewValues = new Set(newValues);
 
-            setValue(name, Array.from(cleanedNewValues));
+            setValue(name, Array.from(cleanedNewValues), { shouldValidate: true, shouldDirty: true });
         } else {
             const newValues = checked
                 ? [...currentValues, value]
@@ -26,31 +31,27 @@ export function Checkbox({ question }: IQuestionProp) {
 
             const cleanedNewValues = new Set(newValues);
 
-            setValue(name, Array.from(cleanedNewValues));
+            setValue(name, Array.from(cleanedNewValues), { shouldValidate: true, shouldDirty: true });
         }
     };
 
     const handleCheckboxOtherChange = (name: string, value: string) => {
-        const currentValues = getValues(name) || [];
+        const currentValues = Array.isArray(watchedValue) ? watchedValue : [];
 
-        const existingOther = currentValues.find((v: string) =>
-            v.toLowerCase().startsWith("outro:")
-        );
+        const existingOther = currentValues.find((v: string) => isOtherOptionValue(v));
 
         let newValues;
 
         if (existingOther) {
             newValues = currentValues.map((v: string) =>
-                v.toLowerCase().startsWith("outro:") ? `Outro: ${value}` : v
+                isOtherOptionValue(v) ? `Outro: ${value}` : v
             );
         } else {
             newValues = [...currentValues, `Outro: ${value}`];
         }
 
         const cleanedNewValues = new Set(newValues);
-        console.log(Array.from(cleanedNewValues));
-        console.log(newValues);
-        setValue(name, Array.from(cleanedNewValues));
+        setValue(name, Array.from(cleanedNewValues), { shouldValidate: true, shouldDirty: true });
     };
 
     return (
@@ -62,26 +63,26 @@ export function Checkbox({ question }: IQuestionProp) {
             {question.options &&
                 question.options.map((option, index) => {
                     const checkboxId = `${question.name}-${index}`;
-                    const watchedValue = getValues(question.name);
                     const isOtherOption = ["outro", "outra", "outro:", "outros", "other"].includes(
                         option.value.toLowerCase());
-                    const isOtherSelected = watchedValue ? watchedValue.find((v: string) => v.toLowerCase().startsWith(`outro:`)) : false;
+                    const otherEntry = Array.isArray(watchedValue) ? watchedValue.find((v: string) => isOtherOptionValue(v)) : null;
+                    const isOtherSelected = !!otherEntry;
 
                     return (
-                        <>
-                            <Form.Field key={index} className="flex items-center gap-3">
+                        <div key={index} className="flex flex-col gap-3">
+                            <Form.Field className="flex items-center gap-3">
                                 <Input
                                     id={checkboxId}
                                     className="w-10 h-10 flex-shrink-0"
                                     type="checkbox"
                                     value={option.value}
-                                    checked={isOtherOption ? isOtherSelected : getValues(question.name)?.includes(option.value)}
+                                    checked={isOtherOption ? isOtherSelected : Array.isArray(watchedValue) && watchedValue?.includes(option.value)}
                                     name={question.name}
                                     onChange={(e) =>
                                         handleCheckboxChange(question.name, option.value, e.target.checked, isOtherOption)
                                     }
                                 />
-                                <Form.Label htmlFor={checkboxId} className="flex-1 font-bold text-sm">{option.label}</Form.Label>
+                                <Form.Label htmlFor={checkboxId} className="flex-1 font-bold text-sm dark:text-white">{option.label}</Form.Label>
                             </Form.Field>
 
                             {
@@ -93,12 +94,14 @@ export function Checkbox({ question }: IQuestionProp) {
                                         <Input
                                             id={`${question.name}`}
                                             variant="underlined"
+                                            className="dark:text-white"
                                             placeholder="Digite aqui..."
+                                            value={otherEntry?.toLowerCase().startsWith("outro:") ? otherEntry.split(":")[1].trim() : ""}
                                             onChange={(e) => handleCheckboxOtherChange(question.name, e.target.value)}
                                         />
                                     </Form.Field>
                                 )}
-                        </>
+                        </div>
                     );
                 })}
             <Form.ErrorMessage field={question.name} />
