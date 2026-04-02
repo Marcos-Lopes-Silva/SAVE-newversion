@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import { connectToMongoDB } from "@/lib/db"
-import SurveyResult from "../../../../../models/surveyResults"
+import SurveyResult from "../../../../../models/surveyResultModel"
 import { Parser } from '@json2csv/plainjs'
 import mongoose from "mongoose"
 
