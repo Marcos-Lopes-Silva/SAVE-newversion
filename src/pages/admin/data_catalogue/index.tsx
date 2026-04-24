@@ -1,7 +1,6 @@
 import { api } from "@/lib/api";
 import { t } from "i18next";
 import { useEffect, useState } from 'react';
-import { getSession } from "next-auth/react";
 import { ISurveyDocument } from "../../../../models/surveyModel";
 import { useRouter } from "next/router";
 import { GetServerSideProps } from "next";
@@ -25,7 +24,6 @@ export default function Catalogue({ survey }: Props) {
     const { push } = useRouter();
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [lastSurveyCalendar, setLastSurveyCalendar] = useState<string | null>(null);
-    const [recentSurvey, setRecentSurvey] = useState<ISurveyDocument[] | null>([]);
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
@@ -36,7 +34,7 @@ export default function Catalogue({ survey }: Props) {
 
     const openSurvey = (id: string) => {
         if (typeof window !== 'undefined') {
-            const surveysList: string[] = JSON.parse(localStorage.getItem("last_surveys_list")!!);
+            const surveysList: string[] = JSON.parse(localStorage.getItem("last_surveys_list") || "[]");
 
             const verifiedSurveysIds = surveysList.filter(s => s !== id);
             verifiedSurveysIds.push(id);
@@ -60,7 +58,6 @@ export default function Catalogue({ survey }: Props) {
                 try {
                     const surveyPromises = storedSurveyIds.map((id: string) => api.get<ISurveyDocument>(`survey/${id}`));
                     const surveys = await Promise.all(surveyPromises);
-                    setRecentSurvey(surveys.map(response => response.data));
                 } catch (error) {
                     console.error("Erro ao buscar surveys:", error);
                 }
@@ -90,54 +87,7 @@ export default function Catalogue({ survey }: Props) {
                 <div className="ml-4 rounded-2xl bg-zinc-300 w-24 h-3" />
             </header>
             <section className="flex flex-col py-20 w-full px-24">
-                {recentSurvey && recentSurvey.length > 0 ? (
-                    <>
-                        <label className="text-xl font-semibold mb-4 dark:text-white">
-                            {t('admin.data_catalogue.recently_open')}
-                        </label>
-                        <div className="h-72 w-full pl-2 overflow-x-auto">
-                            <ul className="flex gap-4">
-                                {recentSurvey.map((survey) => survey.status == "finished" && (
-                                    <Card key={survey._id as string} className="mt-5 shadow-lg shadow-zinc-800 rounded-3xl w-1/3 min-w-[375px] transition-all duration-300 hover:scale-105 hover:shadow-xl dark:bg-zinc-800">
-                                        <div className="flex flex-col rounded-3xl py-8 w-full">
-                                            <div className="flex ml-10 gap-5 items-center">
-                                                <FaFileInvoice
-                                                    size={20}
-                                                    className="p-7 dark:bg-zinc-950 bg-zinc-800 flex items-center justify-center rounded-2xl text-white"
-                                                />
-                                                <label className="font-medium text-lg ml-2 dark:text-white">
-                                                    {survey.title}
-                                                </label>
-                                            </div>
-                                            <div className="flex flex-col mt-3.5 ml-32">
-                                                <button
-                                                    className="dark:bg-white bg-zinc-800 dark:text-black text-white rounded-3xl w-24 py-1 shadow-md hover:shadow-lg transition-all duration-300"
-                                                    onClick={() => openSurvey(survey._id as string)}>
-                                                    {t('admin.data_catalogue.view_button')}
-                                                </button>
-                                            </div>
-                                            <div className="flex mt-5 -mb-2 items-center">
-                                                <div className="flex ml-10 w-32 items-center gap-2">
-                                                    <GiBackwardTime size={20} />
-                                                    <p className="text-zinc-500 dark:text-white text-sm">
-                                                        {lastSurveyCalendar ? timeAgoInHours(lastSurveyCalendar) : "Não disponível"}
-                                                    </p>
-                                                </div>
-                                                <div className="flex gap-2 ml-24 items-center">
-                                                    {(verifiedPublic(survey._id as string)) ? (
-                                                        <BiSolidLockOpen size={20} />
-                                                    ) : <BiSolidLock size={20} />}
-                                                    <HiUserGroup size={20} />
-                                                    <p className="text-zinc-500 dark:text-white text-sm">{survey.users}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </Card>
-                                ))}
-                            </ul>
-                        </div>
-                    </>
-                ) : null}
+                
                 <div className="flex flex-col mt-8 pl-2 gap-2">
                     <h2 className="text-xl font-semibold dark:text-white">
                         {t('admin.data_catalogue.reports')}
@@ -154,7 +104,7 @@ export default function Catalogue({ survey }: Props) {
                             </p>
                         </div>
                     )}
-                    {survey.map((survey, index) => survey.status == "finished" && (
+                    {survey.map((survey, index) => (
                         <li key={index} className="flex mt-5 shadow-lg shadow-zinc-800 rounded-3xl py-8 transition-all duration-300 hover:scale-105 hover:shadow-xl dark:bg-zinc-800">
                             <div className="flex ml-14 gap-5 items-center">
                                 <FaFileInvoice
@@ -205,11 +155,10 @@ export default function Catalogue({ survey }: Props) {
     );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getServerSideProps: GetServerSideProps = async () => {
     await connectToMongoDB();
 
-    const session = await getSession(context);
-    const surveys = await api.get(`user/survey?userId=${session?.user?._id}`);
+    const surveys = await api.get('survey');
     console.log("Surveys:", surveys);
     return {
         props: {

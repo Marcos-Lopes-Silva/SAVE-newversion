@@ -43,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const survey = await Survey.findById(sId);
     if (survey) {
-      const allResults = await SurveyResult.find({ surveyId: sId });
+      const allResults = await SurveyResult.find({ surveyId: sId, isComplete: true });
       const analyticsData = processResults(survey, allResults);
       analyticsData.surveyId = sId;
       

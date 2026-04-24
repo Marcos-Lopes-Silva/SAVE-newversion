@@ -1,5 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import SurveyResult from "../../../../../models/surveyResultModel";
+import SurveyAnalytics from "../../../../../models/surveyAnalytics";
+import Survey from "../../../../../models/surveyModel";
+import { processResults } from "../../../../lib/processresults";
 import mongoose from "mongoose";
 import { connectToMongoDB } from "@/lib/db";
 
@@ -31,6 +34,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
       { upsert: true, new: true }
     );
+
+    // Update Analytics in real-time
+    const survey = await Survey.findById(sId);
+    if (survey) {
+      const allResults = await SurveyResult.find({ surveyId: sId, isComplete: true });
+      const analyticsData = processResults(survey, allResults);
+      analyticsData.surveyId = sId;
+
+      await SurveyAnalytics.findOneAndUpdate(
+        { surveyId: sId },
+        analyticsData,
+        { upsert: true, new: true }
+      );
+
+      await Survey.findByIdAndUpdate(sId, { responses: allResults.length });
+    }
 
     return res.status(200).json(result);
   } catch (error) {

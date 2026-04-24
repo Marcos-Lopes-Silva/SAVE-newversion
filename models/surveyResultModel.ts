@@ -1,8 +1,8 @@
 import mongoose, { Document, Model, Schema } from "mongoose";
 
 export interface ISurveyResult {
-    surveyId: mongoose.Types.ObjectId | string,
-    userId: mongoose.Types.ObjectId | string,
+    surveyId: any,
+    userId: any,
     currentPage: number,
     surveyResult: Record<string, any>,
     timeSpent?: number,
@@ -18,13 +18,13 @@ export interface ISurveyResultDocument extends ISurveyResult, Document {
 const surveyResultSchema: Schema = new Schema<ISurveyResultDocument>(
     {
         surveyId: {
-            type: Schema.Types.ObjectId,
-            ref: "Survey",
+            type: String,
+            // ref: "Survey",
             required: true,
         },
         userId: {
-            type: Schema.Types.ObjectId,
-            ref: "User",
+            type: String,
+            // ref: "User",
             required: true,
         },
         currentPage: {
