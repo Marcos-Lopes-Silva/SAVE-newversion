@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const survey = await Survey.findById(id);
 
     if (!survey) return res.status(404).json({ message: 'Survey not found' });
-    if (survey.author.toString() !== session.user._id.toString()) {
+    if (survey.author.toString() !== session.user._id?.toString()) {
         return res.status(403).json({ message: 'Only the author can share this survey' });
     }
 
