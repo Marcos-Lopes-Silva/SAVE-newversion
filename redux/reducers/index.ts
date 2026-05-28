@@ -4,7 +4,7 @@ import { IPages, ISurvey, ISurveyDocument } from "../../models/surveyModel";
 const initialState: ISurvey = {
     title: "",
     description: "",
-    author: null,
+    author: "",
     pages: [],
     openDate: new Date().toISOString(),
     endDate: new Date().toISOString(),
@@ -18,8 +18,8 @@ const surveySlice = createSlice({
     name: 'survey',
     initialState,
     reducers: {
-        clear: (state) => {
-            state = initialState;
+        clear: () => {
+            return initialState;
         },
         save: (state, action: PayloadAction<ISurvey>) => {
             return action.payload;
@@ -47,7 +47,7 @@ const surveySlice = createSlice({
             state.status = action.payload;
         },
         updateAuthor(state, action: PayloadAction<string | null>) {
-            state.author = action.payload;
+            state.author = action.payload ?? "";
         },
     }
 });
