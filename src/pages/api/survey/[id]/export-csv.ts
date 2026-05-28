@@ -15,29 +15,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const objectId = new mongoose.Types.ObjectId(id as string)
     
-    // Buscar todos os resultados brutos
-    const results = await SurveyResult.find({ surveyId: objectId })
+    const results = await SurveyResult.find({ surveyId: objectId, isComplete: true })
     
     if (results.length === 0) {
       return res.status(404).json({ message: "Nenhum resultado encontrado" })
     }
 
-    // Função para achatar objetos aninhados e remover campos sensíveis
+    const formatValue = (value: any): any => {
+      if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(value)) {
+        return new Date(value).toLocaleDateString('pt-BR')
+      }
+      return value
+    }
+
     const flattenObject = (obj: Record<string, any>, prefix = '') => {
       return Object.keys(obj).reduce((acc, key) => {
-        // Remover campos de identificação em qualquer nível
         const lowerKey = key.toLowerCase()
         if (['userid', '_id', 'nome'].includes(lowerKey)) return acc
 
         const prefixedKey = prefix ? `${prefix}.${key}` : key
         const value = obj[key]
-        
+
         if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
           Object.assign(acc, flattenObject(value, prefixedKey))
         } else {
-          acc[prefixedKey] = Array.isArray(value) ? value.join('; ') : value
+          acc[prefixedKey] = Array.isArray(value) ? value.map(formatValue).join('; ') : formatValue(value)
         }
-        
+
         return acc
       }, {} as Record<string, any>)
     }

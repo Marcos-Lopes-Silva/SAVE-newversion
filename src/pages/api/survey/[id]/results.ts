@@ -9,6 +9,8 @@ import { processResults } from "../../../../lib/processresults";
 import { Types } from "mongoose";
 import mongoose from "mongoose";
 
+import { getSession } from "next-auth/react";
+
 interface AnalyticsQuery {
   surveyId: mongoose.Types.ObjectId;
   filters?: FilterCondition[];
@@ -19,12 +21,22 @@ export default async function handler(
   res: NextApiResponse<ISurveyAnalytics | { message: string }>
 ) {
   await connectToMongoDB();
+  const session = await getSession({ req });
   const { id } = req.query;
 
   switch (req.method) {
     case "GET":
       try {
         const objectId = new Types.ObjectId(String(id));
+        
+        const survey: ISurveyDocument | null = await Survey.findById(objectId);
+        if (!survey) {
+          return res.status(404).json({ message: "Pesquisa não encontrada" });
+        }
+
+        const isAuthor = session?.user?._id && survey.author.toString() === session.user._id.toString();
+        const isShared = session?.user?._id && survey.sharedWith?.some((uid: any) => uid.toString() === session.user._id.toString());
+        const isStaff = isAuthor || isShared;
 
         const filterQuestionParam = req.query.filterQuestion || req.query['filterQuestion[]'];
         const filterAnswerParam = req.query.filterAnswer || req.query['filterAnswer[]'];
@@ -60,14 +72,6 @@ export default async function handler(
           }
         }
 
-        // console.log("req.query:", req.query);
-        // console.log("Filtros processados:", filters);
-
-        const survey: ISurveyDocument | null = await Survey.findById(objectId);
-        if (!survey) {
-          return res.status(404).json({ message: "Pesquisa não encontrada" });
-        }
-
         if (filters) {
           const questionNotFound = filters.find(filter =>
             !survey.pages.some(page =>
@@ -79,19 +83,53 @@ export default async function handler(
           }
         }
 
-        // Consulta se já existe um analytics salvo com esses filtros
         let query: AnalyticsQuery = { surveyId: objectId };
         if (filters) {
           query.filters = filters;
         }
 
-        let savedAnalytics: ISurveyAnalytics | null = await SurveyAnalytics.findOne(query).exec();
+        const surveyResults: SurveyResultDocument[] = await SurveyResult.find({ surveyId: objectId, isComplete: true }).exec();
+        const processedData = processResults(survey, surveyResults, filters);
+        processedData.surveyId = objectId;
 
-        if (!savedAnalytics) {
-          const surveyResults: SurveyResultDocument[] = await SurveyResult.find({ surveyId: objectId }).exec();
-          const processedData = processResults(survey, surveyResults, filters);
-          processedData.surveyId = objectId;
+        const existing = await SurveyAnalytics.findOne(query).exec();
+
+        let savedAnalytics: ISurveyAnalytics | null;
+
+        if (!existing) {
           savedAnalytics = await SurveyAnalytics.create(processedData);
+        } else {
+          const updatedPages = processedData.pages.map(newPage => {
+            const existingPage = existing.pages.find(p => p.title === newPage.title);
+            return {
+              ...newPage,
+              questions: newPage.questions.map(newQ => {
+                const existingQ = existingPage?.questions.find(q => q.name === newQ.name);
+                return existingQ
+                  ? { ...newQ, isPublic: existingQ.isPublic, chart: existingQ.chart }
+                  : newQ;
+              }),
+            };
+          });
+
+          savedAnalytics = await SurveyAnalytics.findOneAndUpdate(
+            query,
+            { $set: { pages: updatedPages, hasPublic: existing.hasPublic } },
+            { new: true }
+          ).exec();
+        }
+
+        // Permission Check: If not staff, only allow if hasPublic is true
+        if (!isStaff) {
+          if (!savedAnalytics.hasPublic) {
+            return res.status(403).json({ message: "Acesso negado aos resultados privados" });
+          }
+          
+          // Filter out questions that are not public
+          savedAnalytics.pages = savedAnalytics.pages.map(page => ({
+            ...page,
+            questions: page.questions.filter(q => q.isPublic)
+          })).filter(page => page.questions.length > 0);
         }
 
         return res.status(200).json(savedAnalytics);

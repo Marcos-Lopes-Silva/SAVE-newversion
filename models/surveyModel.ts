@@ -40,7 +40,7 @@ export interface IPages {
 export interface ISurvey {
   title: string | "",
   description: string | "",
-  author: string | null,
+  author: string,
   pages: Array<IPages>,
   openDate: string,
   endDate: string,
@@ -49,6 +49,7 @@ export interface ISurvey {
   users: number,
   completeMessage: string,
   term?: any,
+  sharedWith?: string[] | ObjectId[],
 }
 
 export interface ISurveyDocument extends ISurvey, Document {
@@ -138,6 +139,10 @@ const surveySchema: mongoose.Schema = new mongoose.Schema<ISurveyDocument>(
     term: {
       type: Buffer,
     },
+    sharedWith: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    }],
   }, {
   timestamps: true,
 }

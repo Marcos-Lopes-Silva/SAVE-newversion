@@ -8,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     switch (req.method) {
         case "GET":
             try {
-                const surveyQuestion = await SurveyQuestions.find({});
+                const surveyQuestion = await SurveyQuestions.findOne({});
                 return res.status(200).json(surveyQuestion);
             } catch (error) {
                 console.error(error);

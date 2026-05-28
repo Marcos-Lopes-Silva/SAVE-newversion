@@ -143,6 +143,9 @@
                 "finish": "Finish",
                 "preview": "Preview",
                 "add_page": "Add Page",
+                "page": {
+                    "delete": "Remove Page"
+                },
                 "config": {
                     "title": "Configuration",
                     "required": "Required",

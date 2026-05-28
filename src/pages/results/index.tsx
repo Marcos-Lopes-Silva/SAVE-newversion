@@ -27,8 +27,8 @@ interface CustomISurveyDocument extends mongoose.Document {
     updatedAt: string;
 }
 
-export default function TestSurveyResults({ surveys }: { surveys: CustomISurveyDocument[] }) {
-    const [selectedSurveyId, setSelectedSurveyId] = useState<string | null>(null);
+export default function TestSurveyResults({ surveys, initialSurveyId }: { surveys: CustomISurveyDocument[], initialSurveyId?: string }) {
+    const [selectedSurveyId, setSelectedSurveyId] = useState<string | null>(initialSurveyId || null);
     const [selectedSurvey, setSelectedSurvey] = useState<(CustomISurveyDocument & { _id: string }) | null>(null);
     const [data, setData] = useState<ISurveyAnalytics | null>(null as ISurveyAnalytics | null);
     const [loading, setLoading] = useState(false);
@@ -38,6 +38,15 @@ export default function TestSurveyResults({ surveys }: { surveys: CustomISurveyD
     const [filters, setFilters] = useState<Filter[]>([]);
     const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
     const [downloadProgress, setDownloadProgress] = useState<number>(0);
+
+    useEffect(() => {
+        if (initialSurveyId && surveys.length > 0) {
+            const survey = surveys.find(s => s._id === initialSurveyId);
+            if (survey) {
+                setSelectedSurvey(survey);
+            }
+        }
+    }, [initialSurveyId, surveys]);
 
     useEffect(() => {
         const loadAnalytics = async () => {
@@ -406,38 +415,47 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
         await connectToMongoDB();
         const userId = session.user._id;
-        const userAnalytics = await SurveyAnalytics.find({ author: userId }).lean();
-        const validSurveyIds = userAnalytics
+        const { id } = context.query;
 
-            .map(a => {
-                try {
-                    return new mongoose.Types.ObjectId(a.surveyId.toString());
-                } catch (error) {
-                    console.error("ID inválido:", a.surveyId);
-                    return null;
-                }
-            })
-            .filter(Boolean);
+        // Find surveys authored by user OR shared with user
+        const accessibleSurveys = await Survey.find({
+            $or: [
+                { author: userId },
+                { sharedWith: userId }
+            ]
+        }).select('_id title description updatedAt').lean();
 
-        const userSurveys = await Survey.find({
-            _id: { $in: validSurveyIds }
-        }).lean();
+        const accessibleSurveyIds = accessibleSurveys.map(s => s._id.toString());
 
-        const formattedSurveys = userSurveys.map(survey => ({
+        // Only show surveys that actually have analytics data
+        const analytics = await SurveyAnalytics.find({
+            surveyId: { $in: accessibleSurveyIds.map(id => new mongoose.Types.ObjectId(id)) }
+        }).select('surveyId').lean();
+
+        const surveyIdsWithAnalytics = analytics.map(a => a.surveyId.toString());
+
+        const filteredSurveys = accessibleSurveys.filter(s => 
+            surveyIdsWithAnalytics.includes(s._id.toString())
+        );
+
+        const formattedSurveys = filteredSurveys.map(survey => ({
             ...survey,
+            _id: survey._id.toString(),
             updatedAt: survey.updatedAt ? new Date(survey.updatedAt).toISOString() : null
         }));
 
         return {
             props: {
-                surveys: JSON.parse(JSON.stringify(formattedSurveys))
+                surveys: JSON.parse(JSON.stringify(formattedSurveys)),
+                initialSurveyId: id || null
             }
         };
     } catch (error) {
         console.error("Erro no servidor:", error);
         return {
             props: {
-                surveys: []
+                surveys: [],
+                initialSurveyId: null
             }
         };
     }

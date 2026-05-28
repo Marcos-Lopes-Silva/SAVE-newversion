@@ -160,17 +160,35 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         }
     }
 
+    const isAuthor = survey.author?.toString() === session?.user?._id?.toString();
+    const isShared = survey.sharedWith?.some((uid: any) => uid.toString() === session?.user?._id?.toString());
+
+    if (!isAuthor && !isShared) {
+        return {
+            redirect: {
+                destination: '/admin/dashboard',
+                permanent: false,
+            }
+        }
+    }
+
     const SurveyResult = (await import("../../../../../models/surveyResultModel")).default;
     const User = (await import("../../../../../models/userModel")).default;
-
-    const results = await SurveyResult.find({ surveyId: id, isComplete: true }).select('userId createdAt').lean();
-    const uniqueUserIds = results.map(r => r.userId.toString());
+    const mongoose = (await import("mongoose")).default;
+    const results = await SurveyResult.find({ 
+        surveyId: new mongoose.Types.ObjectId(id as string),
+        isComplete: true
+    }).lean();
+    const rawUserIds = results.map(r => r.userId?.toString()).filter(Boolean);
+    const uniqueUserIds = Array.from(new Set(rawUserIds));
+    
     const users = await User.find({ _id: { $in: uniqueUserIds } }).select('name email').lean();
 
     const latestResultsMap = new Map();
 
     results.forEach(r => {
-        const userId = r.userId.toString();
+        const userId = (r.userId)?.toString();
+        if (!userId) return;
 
         if (
             !latestResultsMap.has(userId) ||
@@ -180,16 +198,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         }
     });
 
-    const respondents = uniqueUserIds.map(userId => {
-        const user = users.find(u => u._id.toString() === userId);
-        const result = latestResultsMap.get(userId);
+    // Filtra e mapeia os respondentes garantindo que cada usuário apareça apenas uma vez
+    const respondents = users.map(user => {
+        const userIdStr = user._id.toString();
+        const result = latestResultsMap.get(userIdStr) || latestResultsMap.get(user.email);
+
+        if (!result) return null;
 
         return {
-            name: user?.name || 'Unknown',
-            email: user?.email || 'Unknown',
-            respondedAt: result?.createdAt.toISOString()
+            name: user.name || 'Unknown',
+            email: user.email || 'Unknown',
+            respondedAt: result.createdAt instanceof Date ? result.createdAt.toISOString() : new Date(result.createdAt).toISOString()
         };
-    });
+    }).filter(Boolean);
 
     return {
         props: {
