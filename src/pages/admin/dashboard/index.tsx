@@ -345,7 +345,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
         props: {
             surveys: JSON.parse(JSON.stringify(surveys)),
-            userId: session?.user._id as string
+            userId: session?.user._id ?? null
         }
     }
 }

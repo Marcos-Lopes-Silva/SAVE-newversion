@@ -144,6 +144,9 @@
                 "finish": "Finalizar",
                 "preview": "Visualizar",
                 "add_page": "Adicionar Página",
+                "page": {
+                    "delete": "Remover Página"
+                },
                 "config": {
                     "title": "Configurações",
                     "required": "Obrigatório",
