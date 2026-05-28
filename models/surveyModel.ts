@@ -1,4 +1,4 @@
-import mongoose, { Document, Model, ObjectId } from "mongoose";
+import mongoose, { Document, Model } from "mongoose";
 import { IUser, IUserDocument } from "./userModel";
 import { string } from "zod";
 
@@ -49,7 +49,7 @@ export interface ISurvey {
   users: number,
   completeMessage: string,
   term?: any,
-  sharedWith?: string[] | ObjectId[],
+  sharedWith?: string[] | mongoose.Types.ObjectId[],
 }
 
 export interface ISurveyDocument extends ISurvey, Document {

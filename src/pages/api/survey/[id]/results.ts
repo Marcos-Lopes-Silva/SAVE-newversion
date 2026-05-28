@@ -34,8 +34,9 @@ export default async function handler(
           return res.status(404).json({ message: "Pesquisa não encontrada" });
         }
 
-        const isAuthor = session?.user?._id && survey.author.toString() === session.user._id.toString();
-        const isShared = session?.user?._id && survey.sharedWith?.some((uid: any) => uid.toString() === session.user._id.toString());
+        const userId = session?.user?._id;
+        const isAuthor = userId && survey.author.toString() === userId.toString();
+        const isShared = userId && survey.sharedWith?.some((uid: any) => uid.toString() === userId.toString());
         const isStaff = isAuthor || isShared;
 
         const filterQuestionParam = req.query.filterQuestion || req.query['filterQuestion[]'];
@@ -121,6 +122,10 @@ export default async function handler(
 
         // Permission Check: If not staff, only allow if hasPublic is true
         if (!isStaff) {
+          if (savedAnalytics === null) {
+            return res.status(404).json({ message: "Resultados não encontrados" });
+          }
+
           if (!savedAnalytics.hasPublic) {
             return res.status(403).json({ message: "Acesso negado aos resultados privados" });
           }
@@ -132,7 +137,7 @@ export default async function handler(
           })).filter(page => page.questions.length > 0);
         }
 
-        return res.status(200).json(savedAnalytics);
+        return res.status(200).json(savedAnalytics || {message: "Resultados não encontrados"} );
       } catch (error) {
         console.error("Erro completo:", error);
         return res.status(500).json({ message: "Internal server error" });
