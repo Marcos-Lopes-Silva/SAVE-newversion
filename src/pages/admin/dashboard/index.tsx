@@ -207,7 +207,7 @@ const ShareModal = ({ isOpen, onOpenChange, survey }: IShareModalProps) => {
 
     const fetchSharedUsers = async () => {
         try {
-            const response = await api.get(`/admin/survey/share?id=${survey._id}`);
+            const response = await api.get<any>(`/admin/survey/share?id=${survey._id}`);
             setSelectedUsers(response.data.map((u: any) => u._id));
         } catch (error) {
             console.error(error);
@@ -222,7 +222,7 @@ const ShareModal = ({ isOpen, onOpenChange, survey }: IShareModalProps) => {
         }
         setLoading(true);
         try {
-            const response = await api.get(`/admin/users?role=admin&search=${term}`);
+            const response = await api.get<any>(`/admin/users?role=admin&search=${term}`);
             setUsers(response.data);
         } catch (error) {
             console.error(error);
